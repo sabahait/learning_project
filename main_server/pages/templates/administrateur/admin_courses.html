@@ -1,0 +1,2306 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Cours - LearnHub</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+    <style>
+        
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+    :root{
+    --primary-blue: #4A90E2;
+    --secondary-purple: #9B51E0;
+    --accent-teal: #2D9CDB;
+    --light-blue: #E3F2FD;
+    --text-dark: #1A1A2E;
+    --text-light: #6B7280;
+    --bg-white: #ffffff;
+    --bg-light: #F8FAFC;
+    --border-color: #E5E7EB;
+    --gradient-blue: linear-gradient(135deg, #4A90E2, #2D9CDB);
+    --gradient-purple: linear-gradient(135deg, #9B51E0, #6A0DAD);
+
+    --color-primary: var(--primary-blue);
+    --color-danger: #ff7782;
+    --color-success: var(--accent-teal);
+    --color-warning: #ffbb55;
+    --color-white: var(--bg-white);
+    --color-info-dark: var(--text-light);
+    --color-info-light: var(--border-color);
+    --color-dark: var(--text-dark);
+    --color-light: var(--light-blue);
+    --color-primary-variant: #111e88;
+    --color-dark-variant: #677483;
+    --color-background: var(--bg-light);
+
+    --card-border-radius: 1.5rem;
+    --border-radius-1: 0.4rem;
+    --border-radius-2: 0.8rem;
+    --border-radius-3: 1.2rem;
+
+    --card-padding: 1.4rem;
+    --padding-1: 1rem;
+
+    --box-shadow: 0 1.5rem 2.5rem var(--color-light);
+}
+
+/* Dark theme */
+.dark-theme-variables{
+    --color-background: #181a1e;
+    --color-white: #202528;
+    --color-dark: #edeffd;
+    --color-dark-variant: #a3bdcc;
+    --color-light: rgba(0, 0, 0, 0.4);
+    --box-shadow: 0 1.5rem 2.5rem var(--color-light);
+}
+
+    *{
+        margin: 0;
+        padding: 0;
+        outline: 0;
+        appearance: none;
+        border: 0;
+        text-decoration: none;
+        list-style: none;
+        box-sizing: border-box;
+    }
+    html{
+        font-size: 14px;
+    }
+    body{
+        width: 100vw;
+        height: 100vh;
+        font-family: poppins, sans-serif;
+        font-size: 0.85rem;
+        background: var(--color-background);
+        user-select: none;
+        overflow: hidden;
+        color: var(--color-dark);
+    }
+    .container
+    {
+        display: grid;
+        width: 100%; /* Modifié de 98% à 100% */
+        margin: 0 auto;
+        gap: 1.8rem;
+        grid-template-columns: 14rem auto;
+        height: 100vh;
+        overflow: hidden;
+    }
+    a{
+        color: var(--color-dark);
+    }
+    img{
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    h1{
+        font-weight: 800;
+        font-size: 1.6rem;
+    }
+    h2{
+        font-size: 1.2rem;
+    }
+    h3{
+        font-size: 0.9rem;
+    }
+    h4{
+        font-size: 0.8rem;
+    }
+    h5{
+        font-size: 0.75rem;
+    }
+    small{
+        font-size: 0.72rem;
+    }
+    .profile-photo{
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+    .text-muted{
+        color: var(--color-info-dark);
+
+    }
+    b{
+        color: var(--color-dark)
+    }
+    .primary{
+        color: var(--color-primary);
+    }
+    .danger{
+        color: var(--color-danger);
+    }
+    .success{
+        color: var(--color-success);
+    }
+    .warning{
+        color: var(--color-warning);
+    }
+    aside{
+        height: 100vh;
+        background: var(--color-white);
+        border-radius: var(--border-radius-2);
+        overflow: hidden;
+        margin-left: 0; /* Supprimé le décalage négatif */
+        padding-left: 0; /* Supprimé le padding */
+        width: 100%; /* Largeur normale */
+        box-shadow: var(--box-shadow);
+    }
+    aside .top{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1.4rem;
+        padding: 0 1.2rem; /* Padding normal */
+    }
+    aside .logo .logo-icon {
+        font-size: 2.2rem;
+        background: var(--gradient-blue);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    aside .logo .logo-text {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+        font-family: 'Poppins', sans-serif;
+        letter-spacing: -0.5px;
+    }
+    
+    aside .logo .logo-text span {
+        color: var(--gradient-purple);
+    }
+    aside .close{
+        display: none;
+    }
+    /* sidebar*/
+    aside .sidebar{
+        display: flex;
+        flex-direction: column;
+        height: 86vh;
+        position: relative;
+        top: 2.8rem;
+        padding: 0 0.5rem; /* Padding réduit */
+        width: 100%;
+        gap: 0.5rem; /* Réduit l'espace entre les liens */
+    }
+    aside h3{
+        font-weight: 500;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0;
+    }
+    aside .sidebar a{
+        display: flex;
+        color: var(--color-info-dark);
+        margin-left: 0;
+        gap: 1rem;
+        align-items: center;
+        position: relative;
+        height: 3.2rem; /* Hauteur réduite */
+        transition: all 300ms ease;
+        padding: 0 1rem; /* Padding réduit */
+        border-radius: var(--border-radius-1);
+        width: 100%;
+    }
+    aside .sidebar a span{
+        font-size: 1.8rem; /* Taille d'icône réduite */
+        transition: all 300ms ease;
+        min-width: 2rem;
+    }
+    aside .sidebar a:last-child{
+        position: absolute;
+        bottom: 0.5rem; /* Réduit de 1.8rem à 0.5rem */
+        width: calc(100% - 1rem);
+        left: 0.5rem;
+        margin-top: 0; /* Supprime la marge */
+    }
+    aside .sidebar a.active{
+        background: var(--color-light);
+        color: var(--color-primary);
+        margin-left: 0;
+    }
+    aside .sidebar a.active:before{
+        content: '';
+        width: 6px;
+        height: 50%;
+        background: var(--color-primary);
+        position: absolute;
+        left: 0;
+        border-radius: 0 var(--border-radius-1) var(--border-radius-1) 0;
+    }
+    aside .sidebar a.active span{
+        color: var(--color-primary);
+        margin-left: 0;
+    }
+    aside .sidebar a:hover{
+        color: var(--color-primary);
+        background: var(--color-light);
+    }
+    aside .sidebar a:hover span{
+        margin-left: 0.5rem;
+    }
+    aside .sidebar .message-count{
+        background: var(--color-danger);
+        color: var(--color-white);
+        padding: 2px 8px;
+        font-size: 11px;
+        border-radius: var(--border-radius-1);
+        margin-left: auto;
+    }
+    /*main*/
+    main{
+        margin-top: 1.2rem;
+        padding-right: 0.5rem;
+        padding-left: 0;
+        overflow-y: auto;
+        height: calc(100vh - 2rem);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* En-tête de page */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-grow: 1;
+    }
+    
+    .page-title h1 {
+        margin: 0;
+        font-size: 1.6rem;
+    }
+    
+    .page-title span {
+        color: var(--color-primary);
+        font-size: 2rem;
+    }
+    
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .theme-toggler{
+        background: var(--color-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 1.4rem;
+        width: 3.8rem;
+        cursor: pointer;
+        border-radius: var(--border-radius-1);
+    }
+    
+    .theme-toggler span{
+        font-size: 1rem;
+        width: 50%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .theme-toggler span.active{
+        background: var(--color-primary);
+        color: white;
+        border-radius: var(--border-radius-1);
+    }
+    
+    /* Boutons */
+    .btn {
+        padding: 0.8rem 1.8rem;
+        border-radius: var(--border-radius-1);
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 300ms ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: var(--color-primary);
+        color: var(--color-white);
+    }
+    
+    .btn-primary:hover {
+        background: var(--color-primary-variant);
+    }
+    
+    .btn-secondary {
+        background: var(--color-info-light);
+        color: var(--color-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--color-info-dark);
+        color: var(--color-white);
+    }
+    
+    .btn-danger {
+        background: var(--color-danger);
+        color: var(--color-white);
+    }
+    
+    .btn-danger:hover {
+        background: #ff5a6c;
+    }
+    
+    .btn-success {
+        background: var(--color-success);
+        color: var(--color-white);
+    }
+    
+    .btn-success:hover {
+        background: #2ddfa3;
+    }
+    
+    .btn-warning {
+        background: var(--color-warning);
+        color: var(--color-white);
+    }
+    
+    .btn-warning:hover {
+        background: #ffaa33;
+    }
+    
+    .btn-small {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        background: transparent; /* Transparent par défaut */
+    }
+    
+    .btn-icon {
+        padding: 0.4rem;
+        background: transparent;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    /* Boutons d'action spécifiques */
+    .btn-edit {
+        color: var(--color-warning);
+    }
+    
+    .btn-edit:hover {
+        background: rgba(155, 89, 182, 0.1); /* Fond très léger au survol */
+    }
+    
+    .btn-delete {
+        color: var(--color-danger);
+    }
+    
+    .btn-delete:hover {
+        background: rgba(83, 7, 13, 0.1); /* Fond très léger au survol */
+    }
+    
+    /* Conteneur principal */
+    .content-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem; /* Réduit de 2rem */
+        overflow-y: auto;
+        padding-bottom: 1rem;
+    }
+    
+    /* Section de cours */
+    .courses-section {
+        background: var(--color-white);
+        border-radius: var(--card-border-radius);
+        padding: 1.2rem; /* Réduit de 1.4rem */
+        box-shadow: var(--box-shadow);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem; /* Réduit de 1.5rem */
+        padding-bottom: 0.8rem; /* Réduit de 1rem */
+        border-bottom: 1px solid var(--color-light);
+        gap: 1rem;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.2rem; /* Réduit de 1.3rem */
+        color: var(--color-dark);
+        flex-shrink: 0;
+    }
+    
+    .section-title span {
+        color: var(--color-primary);
+    }
+    
+    .section-count {
+        background: var(--color-primary);
+        color: var(--color-white);
+        padding: 0.2rem 0.8rem;
+        border-radius: var(--border-radius-1);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+    
+    /* Barre de recherche compacte */
+    .search-container {
+        display: flex;
+        align-items: center;
+        background: var(--color-info-light);
+        border-radius: var(--border-radius-1);
+        padding: 0.5rem 0.8rem;
+        width: 200px; /* Longueur réduite */
+        border: 1px solid transparent;
+        transition: all 300ms ease;
+    }
+    
+    .search-container:focus-within {
+        border-color: var(--color-primary);
+        background: var(--color-white);
+        box-shadow: 0 0 0 2px rgba(115, 128, 236, 0.1);
+    }
+    
+    .search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--color-dark);
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.3rem;
+        width: 100%;
+    }
+    
+    .search-input::placeholder {
+        color: var(--color-info-dark);
+    }
+    
+    .search-button {
+        background: transparent;
+        color: var(--color-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.3rem;
+        border-radius: var(--border-radius-1);
+        transition: all 300ms ease;
+        margin-left: 0.3rem;
+    }
+    
+    .search-button:hover {
+        background: var(--color-light);
+    }
+    
+    .section-actions {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    
+    .view-all-btn {
+        background: var(--color-info-light);
+        color: var(--color-dark);
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    .view-all-btn:hover {
+        background: var(--color-info-dark);
+        color: var(--color-white);
+    }
+    
+    /* Section footer avec bouton Voir plus */
+    .section-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--color-light);
+    }
+    
+    /* Grid de cours */
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.2rem; /* Réduit de 1.5rem */
+        margin-top: 1rem;
+    }
+    
+    .course-card {
+        background: var(--color-light);
+        border-radius: var(--border-radius-2);
+        overflow: hidden;
+        transition: all 300ms ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 2rem var(--color-light);
+    }
+    
+    .course-image {
+        height: 140px; /* Réduit de 150px */
+        background: var(--color-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .course-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 300ms ease;
+    }
+    
+    .course-card:hover .course-image img {
+        transform: scale(1.05);
+    }
+    
+    .course-image.pdf {
+        background: linear-gradient(135deg, var(--color-danger), #ff9aa2);
+    }
+    
+    .course-image.video {
+        background: linear-gradient(135deg, var(--color-success), #7be8ca);
+    }
+    
+    .course-image-icon {
+        color: var(--color-white);
+        font-size: 4rem;
+        opacity: 0.8;
+    }
+    
+    .course-price {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: var(--color-white);
+        color: var(--color-dark);
+        padding: 0.3rem 0.8rem;
+        border-radius: var(--border-radius-1);
+        font-weight: 600;
+        font-size: 0.85rem; /* Réduit */
+        box-shadow: var(--box-shadow);
+        z-index: 1;
+    }
+    
+    .course-type-badge {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        background: var(--color-primary);
+        color: var(--color-white);
+        padding: 0.3rem 0.8rem;
+        border-radius: var(--border-radius-1);
+        font-size: 0.75rem; /* Réduit */
+        font-weight: 500;
+        z-index: 1;
+    }
+    
+    .play-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--color-success);
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        cursor: pointer;
+        opacity: 0;
+        transition: all 300ms ease;
+        z-index: 2;
+    }
+    
+    .course-card:hover .play-button {
+        opacity: 1;
+    }
+    
+    .course-info {
+        padding: 1rem; /* Réduit de 1.2rem */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .course-title {
+        font-size: 1rem; /* Réduit de 1.1rem */
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--color-dark);
+        line-height: 1.3;
+    }
+    
+    .course-description {
+        color: var(--color-info-dark);
+        font-size: 0.8rem; /* Réduit de 0.85rem */
+        margin-bottom: 0.8rem; /* Réduit de 1rem */
+        flex-grow: 1;
+        line-height: 1.4;
+    }
+    
+    .course-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem; /* Réduit de 0.8rem */
+        color: var(--color-info-dark);
+        margin-bottom: 0.8rem; /* Réduit de 1rem */
+    }
+    
+    .course-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .course-actions {
+        display: flex;
+        gap: 0.3rem; /* Réduit de 0.5rem */
+        margin-top: auto;
+        justify-content: flex-end; /* Aligner à droite */
+    }
+    
+    /* Modal pour ajouter/modifier un cours */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background: var(--color-white);
+        padding: 1.2rem; /* Réduit de 1.4rem */
+        border-radius: var(--card-border-radius);
+        max-width: 700px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem; /* Réduit de 1.5rem */
+    }
+    
+    .modal-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--color-dark);
+    }
+    
+    .close-modal {
+        background: transparent;
+        color: var(--color-danger);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    .close-modal:hover {
+        background: var(--color-light);
+    }
+    
+    /* Formulaire */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--color-dark);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: var(--color-info-light);
+        border-radius: var(--border-radius-1);
+        color: var(--color-dark);
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: all 300ms ease;
+        border: 1px solid transparent;
+    }
+    
+    .form-input:focus {
+        border-color: var(--color-primary);
+        background: var(--color-white);
+    }
+    
+    .form-select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: var(--color-info-light);
+        border-radius: var(--border-radius-1);
+        color: var(--color-dark);
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: all 300ms ease;
+        border: 1px solid transparent;
+        cursor: pointer;
+    }
+    
+    .form-select:focus {
+        border-color: var(--color-primary);
+        background: var(--color-white);
+    }
+    
+    .form-textarea {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: var(--color-info-light);
+        border-radius: var(--border-radius-1);
+        color: var(--color-dark);
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: all 300ms ease;
+        border: 1px solid transparent;
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-textarea:focus {
+        border-color: var(--color-primary);
+        background: var(--color-white);
+    }
+    
+    .file-upload {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+    
+    .file-upload-input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: var(--color-info-light);
+        border-radius: var(--border-radius-1);
+        color: var(--color-dark);
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border: 1px dashed var(--color-info-dark);
+        text-align: center;
+    }
+    
+    .file-upload-input:hover {
+        background: var(--color-light);
+    }
+    
+    .file-name {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--color-info-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.2rem; /* Réduit de 1.5rem */
+        padding-top: 1.2rem; /* Réduit de 1.5rem */
+        border-top: 1px solid var(--color-light);
+    }
+    
+    /* Modal vidéo */
+    .video-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 1100;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .video-container {
+        width: 90%;
+        max-width: 900px;
+        background: var(--color-white);
+        border-radius: var(--border-radius-2);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .video-player {
+        width: 100%;
+        height: 500px;
+        background: #000;
+    }
+    
+    .video-info {
+        padding: 1.5rem;
+    }
+    
+    .video-info h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        color: var(--color-dark);
+    }
+    
+    .video-info p {
+        color: var(--color-info-dark);
+        margin-bottom: 1rem;
+    }
+    
+    .video-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: var(--color-white);
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 2;
+    }
+    
+    /*menu button*/
+    #menu-btn {
+        display: none;
+    }
+    
+    /*media queries*/
+    @media screen and (max-width: 1200px){
+        .container{
+            width: 96%;
+            grid-template-columns: 7rem auto;
+            gap: 1.2rem;
+        }
+        aside{
+            margin-left: 0;
+            padding-left: 0;
+            width: 100%;
+        }
+        aside .logo h2{
+            display: none;
+        }
+        aside .sidebar h3{
+            display: none;
+        }
+        aside .sidebar a{
+            width: 5rem;
+            margin-left: 0;
+            padding: 0 0.8rem;
+            justify-content: center;
+        }
+        aside .sidebar a span{
+            font-size: 1.6rem;
+            margin: 0;
+        }
+        aside .sidebar a:last-child{
+            position: relative;
+            margin-top: 1.5rem;
+            width: 100%;
+            left: 0;
+        }
+        .courses-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .video-player {
+            height: 400px;
+        }
+        .search-container {
+            width: 180px;
+        }
+    }
+    
+    @media screen and (max-width: 992px){
+        .courses-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        .video-player {
+            height: 350px;
+        }
+        .search-container {
+            width: 160px;
+        }
+    }
+    
+    @media screen and (max-width : 768px){
+        body {
+            overflow: auto;
+        }
+        
+        .container{
+            width: 100%;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding: 0.5rem;
+            height: auto;
+            overflow: visible;
+        }
+        
+        aside{
+            position: fixed;
+            left: -100%;
+            background: var(--color-white);
+            width: 18rem;
+            z-index: 3;
+            box-shadow: 1rem 2rem 3rem var(--color-light);
+            height: 100vh;
+            padding-right: var(--card-padding);
+            display: none;
+            animation: showMenu 400ms ease forwards;
+            margin-left: 0;
+            padding-left: 0;
+        }
+        
+        @keyframes showMenu{
+            to{
+                left: 0;
+            }
+        }
+        
+        aside .logo{
+            margin-left: 1rem;
+        }
+        
+        aside .logo h2{
+            display: inline;
+            font-size: 1.4rem;
+        }
+        
+        aside .sidebar h3{
+            display: inline;
+            font-size: 1rem;
+        }
+        
+        aside .sidebar a{
+            width: 100%;
+            height: 3.5rem;
+            margin-left: 0;
+            padding: 0 1.2rem;
+            justify-content: flex-start;
+        }
+        
+        aside .sidebar a span{
+            font-size: 1.8rem;
+        }
+        
+        aside .sidebar a:last-child{
+            position: absolute;
+            bottom: 1rem; /* Réduit de 4rem */
+            width: calc(100% - 2rem);
+            left: 1rem;
+        }
+        
+        aside .close{
+           display: inline-block;
+           cursor: pointer;
+        }
+        
+        main{
+            margin-left: 0;
+            padding: 0 0.5rem;
+            margin-top: 5rem;
+            height: auto;
+            overflow: visible;
+        }
+        
+        #menu-btn {
+            display: inline-block;
+            background: transparent;
+            cursor: pointer;
+            color: var(--color-dark);
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 2;
+        }
+        
+        #menu-btn span {
+            font-size: 1.8rem;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .header-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .courses-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .video-player {
+            height: 250px;
+        }
+        
+        .section-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+        
+        .header-right {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 0.8rem;
+        }
+        
+        .search-container {
+            width: 100%;
+        }
+    }
+    
+    @media screen and (max-width: 480px) {
+        .page-title {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .course-actions {
+            flex-direction: row; /* Toujours en ligne sur mobile */
+            justify-content: flex-end;
+        }
+        
+        .form-footer {
+            flex-direction: column;
+        }
+        
+        .video-player {
+            height: 200px;
+        }
+        
+        .section-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .search-container {
+            padding: 0.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+        }
+        
+        .search-container {
+            width: 100%;
+        }
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+    <aside>
+        <div class="top">
+            <div class="logo">
+                 <div class="logo-icon">🎓</div>
+                <div class="logo-text">Learn<span>Hub</span></div>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+        <div class="sidebar">
+            <a href="{% url 'administrateur_dashboard' %}">
+                <span class="material-symbols-outlined">grid_view</span>
+                <h3>Accueil</h3>
+            </a>
+            <a href="{% url 'administrateur_users' %}">
+                <span class="material-symbols-outlined">person_outline</span>
+                <h3>Utilisateurs</h3>
+            </a>
+           <a href="{% url 'administrateur_courses' %}" class="active">
+            <span class="material-symbols-outlined">menu_book</span>
+                <h3>Cours</h3>
+            </a>
+            <a href="#">
+                <span class="material-symbols-outlined">mail_outline</span>
+                <h3>Messages</h3>
+                <span class="message-count" style="background-color: #ff7782;">26</span>
+
+            </a>
+          
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <div class="nav-item" onclick="document.getElementById('logout-form').submit();" 
+         style="cursor: pointer;">
+        <span class="material-symbols-outlined">logout</span>
+        Déconnexion
+    </div>
+</form>
+        </div>
+    </aside>
+
+    <main>
+        <button id="menu-btn">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+
+        <div class="page-header">
+            <div class="page-title">
+           
+                <h1>Gestion des Cours</h1>
+            </div>
+            <div class="header-actions">
+                <div class="theme-toggler">
+                    <span class="material-symbols-outlined active">light_mode</span>
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="content-container">
+            <!-- Section des PDF -->
+            <div class="courses-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="material-symbols-outlined">picture_as_pdf</span>
+                        <h2>Cours PDF</h2>
+                       
+                    </div>
+                    
+                    <div class="header-right">
+                        <!-- Barre de recherche compacte -->
+                        <div class="search-container">
+                            <input type="text" class="search-input" id="pdfSearchInput" placeholder="Rechercher...">
+                            <button class="search-button" id="pdfSearchButton">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                        </div>
+                        
+                        <div class="section-actions">
+                            <button class="btn btn-primary" id="addPdfBtn">
+                                <span class="material-symbols-outlined">add</span>
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="courses-grid" id="pdfCoursesGrid">
+                    <!-- Les PDF seront ajoutés dynamiquement -->
+                </div>
+                
+                <!-- Footer avec bouton Voir plus -->
+                <div class="section-footer">
+                    <button class="btn view-all-btn" id="viewMorePdfBtn">
+                        View all →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section des Vidéos -->
+            <div class="courses-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="material-symbols-outlined">play_circle</span>
+                        <h2>Cours Vidéo</h2>
+                       
+                    </div>
+                    
+                    <div class="header-right">
+                        <!-- Barre de recherche compacte -->
+                        <div class="search-container">
+                            <input type="text" class="search-input" id="videoSearchInput" placeholder="Rechercher...">
+                            <button class="search-button" id="videoSearchButton">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                        </div>
+                        
+                        <div class="section-actions">
+                            <button class="btn btn-primary" id="addVideoBtn">
+                                <span class="material-symbols-outlined">add</span>
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="courses-grid" id="videoCoursesGrid">
+                    <!-- Les vidéos seront ajoutés dynamiquement -->
+                </div>
+                
+                <!-- Footer avec bouton Voir plus -->
+                <div class="section-footer">
+                    <button class="btn view-all-btn" id="viewMoreVideoBtn">
+                        <span class="material-symbols-outlined">visibility</span>
+                         View all →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal pour ajouter/modifier un PDF -->
+<div id="pdfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined" id="pdfModalIcon">picture_as_pdf</span> <span id="pdfModalTitle">Ajouter un PDF</span></h2>
+            <button class="close-modal" id="closePdfModal">&times;</button>
+        </div>
+        <form id="pdfForm">
+            <input type="hidden" id="pdfId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="pdfTitle">Titre du PDF *</label>
+                    <input type="text" id="pdfTitle" class="form-input" placeholder="Ex: Introduction à Python" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pdfPrice">Prix (€) *</label>
+                    <input type="number" id="pdfPrice" class="form-input" placeholder="Ex: 29.99" min="0" step="0.01" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="pdfCategory">Catégorie *</label>
+                    <select id="pdfCategory" class="form-select" required>
+                        <option value="">Sélectionnez une catégorie</option>
+                        <option value="programmation">Programmation</option>
+                        <option value="design">Design</option>
+                        <option value="business">Business</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="mathematiques">Mathématiques</option>
+                        <option value="langues">Langues</option>
+                        <option value="science">Science</option>
+                        <option value="histoire">Histoire</option>
+                        <option value="art">Art</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pdfPages">Nombre de pages *</label>
+                    <input type="number" id="pdfPages" class="form-input" placeholder="Ex: 45" min="1" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="pdfDescription">Description *</label>
+                <textarea id="pdfDescription" class="form-textarea" placeholder="Décrivez le contenu du PDF..." rows="3" required></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="pdfCover">Photo de couverture *</label>
+                    <div class="file-upload">
+                        <input type="file" id="pdfCover" class="file-upload-input" accept="image/*">
+                        <div class="file-name" id="pdfCoverName">Aucune image sélectionnée</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pdfFile">Fichier PDF *</label>
+                    <div class="file-upload">
+                        <input type="file" id="pdfFile" class="file-upload-input" accept=".pdf">
+                        <div class="file-name" id="pdfFileName">Aucun fichier sélectionné</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="pdfAuthor">Auteur</label>
+                    <input type="text" id="pdfAuthor" class="form-input" placeholder="Ex: John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pdfLevel">Niveau</label>
+                    <select id="pdfLevel" class="form-select">
+                        <option value="">Sélectionnez un niveau</option>
+                        <option value="debutant">Débutant</option>
+                        <option value="intermediaire">Intermédiaire</option>
+                        <option value="avance">Avancé</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelPdfBtn">Annuler</button>
+                <button type="submit" class="btn btn-primary" id="submitPdfBtn">Ajouter le PDF</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal pour ajouter/modifier une vidéo -->
+<div id="videoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="material-symbols-outlined" id="videoModalIcon">play_circle</span> <span id="videoModalTitle">Ajouter une vidéo</span></h2>
+            <button class="close-modal" id="closeVideoModal">&times;</button>
+        </div>
+        <form id="videoForm">
+            <input type="hidden" id="videoId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="videoTitle">Titre de la vidéo *</label>
+                    <input type="text" id="videoTitle" class="form-input" placeholder="Ex: Apprendre HTML & CSS" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="videoPrice">Prix (€) *</label>
+                    <input type="number" id="videoPrice" class="form-input" placeholder="Ex: 49.99" min="0" step="0.01" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="videoCategory">Catégorie *</label>
+                    <select id="videoCategory" class="form-select" required>
+                        <option value="">Sélectionnez une catégorie</option>
+                        <option value="programmation">Programmation</option>
+                        <option value="design">Design</option>
+                        <option value="business">Business</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="mathematiques">Mathématiques</option>
+                        <option value="langues">Langues</option>
+                        <option value="science">Science</option>
+                        <option value="histoire">Histoire</option>
+                        <option value="art">Art</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="videoDuration">Durée *</label>
+                    <input type="text" id="videoDuration" class="form-input" placeholder="Ex: 2h30" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="videoDescription">Description *</label>
+                <textarea id="videoDescription" class="form-textarea" placeholder="Décrivez le contenu de la vidéo..." rows="3" required></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="videoUrl">Lien YouTube *</label>
+                    <input type="url" id="videoUrl" class="form-input" placeholder="Ex: https://www.youtube.com/watch?v=VIDEO_ID" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="videoThumbnail">Miniature (optionnel)</label>
+                    <div class="file-upload">
+                        <input type="file" id="videoThumbnail" class="file-upload-input" accept="image/*">
+                        <div class="file-name" id="videoThumbnailName">Aucune image sélectionnée</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="videoAuthor">Auteur</label>
+                    <input type="text" id="videoAuthor" class="form-input" placeholder="Ex: John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="videoLevel">Niveau</label>
+                    <select id="videoLevel" class="form-select">
+                        <option value="">Sélectionnez un niveau</option>
+                        <option value="debutant">Débutant</option>
+                        <option value="intermediaire">Intermédiaire</option>
+                        <option value="avance">Avancé</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-footer">
+                <button type="button" class="btn btn-secondary" id="cancelVideoBtn">Annuler</button>
+                <button type="submit" class="btn btn-primary" id="submitVideoBtn">Ajouter la vidéo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de lecture vidéo -->
+<div id="videoPlayerModal" class="video-modal">
+    <div class="video-container">
+        <div class="video-close" id="closeVideoPlayer">&times;</div>
+        <div class="video-player" id="youtubePlayer">
+            <!-- Le lecteur YouTube sera inséré ici -->
+        </div>
+        <div class="video-info" id="videoPlayerInfo">
+            <!-- Les informations de la vidéo seront insérées ici -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Images variées pour les cours (plus d'images)
+    const courseImages = {
+        'programmation': [
+            'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1516116216624-53e697fedbea?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'design': [
+            'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1558655146-364adaf1fcc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1561070791-4c9b95a9e2a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1561070791-9aa6c6c1f5e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1545235617-9465d2a55698?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1561070791-6a9d68bc2f3c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'business': [
+            'https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'marketing': [
+            'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'mathematiques': [
+            'https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1596495577886-d920f1fb7238?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1509228468518-180dd4864904?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'langues': [
+            'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1456513080510-3447c7c8d0b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1528712306091-ed0761a120d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1456513080510-3447c7c8d0b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'science': [
+            'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1564325724739-bae0bd08762c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'histoire': [
+            'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1528164344705-47542687000d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ],
+        'art': [
+            'https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+        ]
+    };
+
+    // Données des cours avec images variées
+    let courses = [
+        {
+            id: 1,
+            title: "Introduction à Python",
+            description: "Apprenez les bases de la programmation avec Python. Cours complet pour débutants.",
+            type: "pdf",
+            price: 29.99,
+            category: "programmation",
+            duration: "45 pages",
+            author: "Jean Dupont",
+            level: "debutant",
+            date: "2024-01-15",
+            image: courseImages.programmation[0],
+            downloadUrl: "#"
+        },
+        {
+            id: 2,
+            title: "HTML & CSS pour débutants",
+            description: "Maîtrisez les bases du développement web avec HTML et CSS.",
+            type: "video",
+            price: 49.99,
+            category: "programmation",
+            duration: "3h15",
+            author: "FreeCodeCamp",
+            level: "debutant",
+            date: "2024-02-20",
+            image: courseImages.programmation[1],
+            videoUrl: "https://www.youtube.com/watch?v=qz0aGYrrlhU",
+            youtubeId: "qz0aGYrrlhU"
+        },
+        {
+            id: 3,
+            title: "Design UI/UX moderne",
+            description: "Créer des interfaces utilisateur attractives et intuitives.",
+            type: "pdf",
+            price: 39.99,
+            category: "design",
+            duration: "68 pages",
+            author: "Pierre Legrand",
+            level: "intermediaire",
+            date: "2024-03-10",
+            image: courseImages.design[0],
+            downloadUrl: "#"
+        },
+        {
+            id: 4,
+            title: "JavaScript complet pour débutants",
+            description: "Apprenez JavaScript de A à Z avec des projets pratiques.",
+            type: "video",
+            price: 59.99,
+            category: "programmation",
+            duration: "6h30",
+            author: "SuperSimpleDev",
+            level: "debutant",
+            date: "2024-03-25",
+            image: courseImages.programmation[2],
+            videoUrl: "https://www.youtube.com/watch?v=SBmSRK3feww",
+            youtubeId: "SBmSRK3feww"
+        },
+        {
+            id: 5,
+            title: "JavaScript ES6+",
+            description: "Les nouvelles fonctionnalités de JavaScript pour le développement moderne.",
+            type: "pdf",
+            price: 34.99,
+            category: "programmation",
+            duration: "52 pages",
+            author: "Thomas Moreau",
+            level: "intermediaire",
+            date: "2024-04-05",
+            image: courseImages.programmation[3],
+            downloadUrl: "#"
+        },
+        {
+            id: 6,
+            title: "React.js - Cours complet",
+            description: "Introduction à la bibliothèque React pour créer des applications web.",
+            type: "video",
+            price: 44.99,
+            category: "programmation",
+            duration: "10h45",
+            author: "Laith Academy",
+            level: "intermediaire",
+            date: "2024-04-10",
+            image: courseImages.programmation[4],
+            videoUrl: "https://www.youtube.com/watch?v=bMknfKXIFA8",
+            youtubeId: "bMknfKXIFA8"
+        },
+        {
+            id: 7,
+            title: "Algorithmes et structures de données",
+            description: "Fondamentaux des algorithmes pour la préparation aux entretiens techniques.",
+            type: "pdf",
+            price: 49.99,
+            category: "programmation",
+            duration: "85 pages",
+            author: "Luc Petit",
+            level: "avance",
+            date: "2024-04-15",
+            image: courseImages.programmation[5],
+            downloadUrl: "#"
+        },
+        {
+            id: 8,
+            title: "Photoshop pour designers",
+            description: "Techniques avancées de retouche photo et création graphique.",
+            type: "video",
+            price: 39.99,
+            category: "design",
+            duration: "4h30",
+            author: "Adobe Creative Cloud",
+            level: "intermediaire",
+            date: "2024-04-20",
+            image: courseImages.design[1],
+            videoUrl: "https://www.youtube.com/watch?v=IyR_uYsRdPs",
+            youtubeId: "IyR_uYsRdPs"
+        }
+    ];
+
+    let currentEditingCourse = null;
+    let currentPlayingVideo = null;
+    let pdfSearchTerm = '';
+    let videoSearchTerm = '';
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCourses();
+        setupEventListeners();
+        updateCounts();
+    });
+
+    // Charger les cours
+    function loadCourses() {
+        const pdfCourses = courses.filter(c => c.type === 'pdf');
+        const videoCourses = courses.filter(c => c.type === 'video');
+        
+        loadPdfCourses(pdfCourses);
+        loadVideoCourses(videoCourses);
+    }
+
+    // Charger les PDF
+    function loadPdfCourses(pdfList) {
+        const pdfGrid = document.getElementById('pdfCoursesGrid');
+        pdfGrid.innerHTML = '';
+
+        // Filtrer par terme de recherche
+        let filteredPdfs = pdfList;
+        if (pdfSearchTerm) {
+            const searchTerm = pdfSearchTerm.toLowerCase();
+            filteredPdfs = pdfList.filter(pdf => 
+                pdf.title.toLowerCase().includes(searchTerm) ||
+                pdf.description.toLowerCase().includes(searchTerm) ||
+                pdf.author?.toLowerCase().includes(searchTerm) ||
+                pdf.category.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (filteredPdfs.length === 0) {
+            pdfGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--color-info-dark);">
+                    <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">picture_as_pdf</span>
+                    <p>${pdfSearchTerm ? 'Aucun résultat trouvé' : 'Aucun PDF disponible'}</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">${pdfSearchTerm ? 'Essayez une autre recherche' : 'Ajoutez votre premier PDF pour commencer'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        filteredPdfs.forEach(course => {
+            const courseCard = createCourseCard(course);
+            pdfGrid.appendChild(courseCard);
+        });
+    }
+
+    // Charger les vidéos
+    function loadVideoCourses(videoList) {
+        const videoGrid = document.getElementById('videoCoursesGrid');
+        videoGrid.innerHTML = '';
+
+        // Filtrer par terme de recherche
+        let filteredVideos = videoList;
+        if (videoSearchTerm) {
+            const searchTerm = videoSearchTerm.toLowerCase();
+            filteredVideos = videoList.filter(video => 
+                video.title.toLowerCase().includes(searchTerm) ||
+                video.description.toLowerCase().includes(searchTerm) ||
+                video.author?.toLowerCase().includes(searchTerm) ||
+                video.category.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (filteredVideos.length === 0) {
+            videoGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--color-info-dark);">
+                    <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">play_circle</span>
+                    <p>${videoSearchTerm ? 'Aucun résultat trouvé' : 'Aucune vidéo disponible'}</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">${videoSearchTerm ? 'Essayez une autre recherche' : 'Ajoutez votre première vidéo pour commencer'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        filteredVideos.forEach(course => {
+            const courseCard = createCourseCard(course);
+            videoGrid.appendChild(courseCard);
+        });
+    }
+
+    // Créer une carte de cours
+    function createCourseCard(course) {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        card.dataset.id = course.id;
+
+        const typeClass = course.type === 'pdf' ? 'pdf' : 'video';
+        const typeText = course.type === 'pdf' ? 'PDF' : 'VIDÉO';
+
+        // Sélectionner une image aléatoire basée sur la catégorie
+        const categoryImages = courseImages[course.category] || courseImages['programmation'];
+        const randomIndex = Math.floor(Math.random() * categoryImages.length);
+        const courseImage = course.image || categoryImages[randomIndex];
+
+        card.innerHTML = `
+            <div class="course-image ${typeClass}">
+                <img src="${courseImage}" alt="${course.title}" onerror="this.src='https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+                <span class="course-price">${course.price.toFixed(2)} €</span>
+                <span class="course-type-badge">${typeText}</span>
+                ${course.type === 'video' ? `
+                    <div class="play-button" onclick="playVideo(${course.id})">
+                        <span class="material-symbols-outlined">play_arrow</span>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="course-info">
+                <h3 class="course-title">${course.title}</h3>
+                <p class="course-description">${course.description}</p>
+                <div class="course-details">
+                    <span class="course-detail">
+                        <span class="material-symbols-outlined" style="font-size: 0.9rem;">category</span>
+                        ${course.category}
+                    </span>
+                    <span class="course-detail">
+                        <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
+                        ${course.duration}
+                    </span>
+                </div>
+                ${course.author ? `
+                    <div class="course-details">
+                        <span class="course-detail">
+                            <span class="material-symbols-outlined" style="font-size: 0.9rem;">person</span>
+                            ${course.author}
+                        </span>
+                        ${course.level ? `
+                            <span class="course-detail">
+                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">school</span>
+                                ${course.level}
+                            </span>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                <div class="course-actions">
+                    <button class="btn btn-icon btn-edit" onclick="editCourse(${course.id})" title="Modifier">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button class="btn btn-icon btn-delete" onclick="deleteCourse(${course.id})" title="Supprimer">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // Mettre à jour les compteurs
+    function updateCounts() {
+        const pdfCount = courses.filter(c => c.type === 'pdf').length;
+        const videoCount = courses.filter(c => c.type === 'video').length;
+        
+        document.getElementById('pdfCount').textContent = pdfCount;
+        document.getElementById('videoCount').textContent = videoCount;
+    }
+
+    // Rechercher des PDF
+    function searchPdf() {
+        pdfSearchTerm = document.getElementById('pdfSearchInput').value;
+        const pdfCourses = courses.filter(c => c.type === 'pdf');
+        loadPdfCourses(pdfCourses);
+    }
+
+    // Rechercher des vidéos
+    function searchVideo() {
+        videoSearchTerm = document.getElementById('videoSearchInput').value;
+        const videoCourses = courses.filter(c => c.type === 'video');
+        loadVideoCourses(videoCourses);
+    }
+
+    // Télécharger un PDF
+    function downloadCourse(courseId) {
+        const course = courses.find(c => c.id === courseId);
+        if (!course) return;
+
+        // Simuler le téléchargement
+        alert(`Téléchargement de "${course.title}"...\n\nFichier PDF: ${course.title}.pdf\nTaille: ${course.duration}\nPrix: ${course.price.toFixed(2)} €`);
+        
+        // En production, vous redirigeriez vers le fichier réel
+        // window.location.href = course.downloadUrl;
+    }
+
+    // Jouer une vidéo
+    function playVideo(courseId) {
+        const course = courses.find(c => c.id === courseId);
+        if (!course || course.type !== 'video') return;
+
+        currentPlayingVideo = course;
+        
+        // Extraire l'ID YouTube de l'URL
+        let youtubeId = course.youtubeId;
+        if (!youtubeId && course.videoUrl) {
+            const urlParams = new URLSearchParams(new URL(course.videoUrl).search);
+            youtubeId = urlParams.get('v');
+        }
+        
+        if (!youtubeId) {
+            alert('ID YouTube non trouvé pour cette vidéo');
+            return;
+        }
+
+        // Ouvrir le modal vidéo
+        openVideoModal(course, youtubeId);
+    }
+
+    // Ouvrir le modal vidéo
+    function openVideoModal(course, youtubeId) {
+        const modal = document.getElementById('videoPlayerModal');
+        const playerContainer = document.getElementById('youtubePlayer');
+        const videoInfo = document.getElementById('videoPlayerInfo');
+        
+        // Ajouter le lecteur YouTube
+        playerContainer.innerHTML = `
+            <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        `;
+        
+        // Ajouter les informations de la vidéo
+        videoInfo.innerHTML = `
+            <h3>${course.title}</h3>
+            <p>${course.description}</p>
+            <div style="display: flex; justify-content: space-between; color: var(--color-info-dark); font-size: 0.9rem;">
+                <span><strong>Prix:</strong> ${course.price.toFixed(2)} €</span>
+                <span><strong>Durée:</strong> ${course.duration}</span>
+                <span><strong>Niveau:</strong> ${course.level}</span>
+            </div>
+        `;
+        
+        // Afficher le modal
+        modal.style.display = 'flex';
+    }
+
+    // Fermer le modal vidéo
+    function closeVideoModal() {
+        const modal = document.getElementById('videoPlayerModal');
+        const playerContainer = document.getElementById('youtubePlayer');
+        
+        // Arrêter la vidéo
+        playerContainer.innerHTML = '';
+        
+        // Fermer le modal
+        modal.style.display = 'none';
+        currentPlayingVideo = null;
+    }
+
+    // Voir plus de PDF
+    function viewMorePdf() {
+        alert('Fonctionnalité "Voir plus de PDF" - En développement');
+        // Ici vous pourriez charger plus de PDF depuis une base de données
+        // ou rediriger vers une page dédiée
+    }
+
+    // Voir plus de vidéos
+    function viewMoreVideo() {
+        alert('Fonctionnalité "Voir plus de vidéos" - En développement');
+        // Ici vous pourriez charger plus de vidéos depuis une base de données
+        // ou rediriger vers une page dédiée
+    }
+
+    // Modifier un cours
+    function editCourse(courseId) {
+        const course = courses.find(c => c.id === courseId);
+        if (!course) return;
+
+        currentEditingCourse = course;
+
+        if (course.type === 'pdf') {
+            // Remplir le formulaire PDF
+            document.getElementById('pdfId').value = course.id;
+            document.getElementById('pdfTitle').value = course.title;
+            document.getElementById('pdfPrice').value = course.price;
+            document.getElementById('pdfCategory').value = course.category;
+            document.getElementById('pdfPages').value = course.duration.replace(' pages', '');
+            document.getElementById('pdfDescription').value = course.description;
+            document.getElementById('pdfAuthor').value = course.author || '';
+            document.getElementById('pdfLevel').value = course.level || '';
+            
+            // Changer le texte du modal
+            document.getElementById('pdfModalTitle').textContent = 'Modifier le PDF';
+            document.getElementById('submitPdfBtn').textContent = 'Modifier le PDF';
+            
+            // Ouvrir le modal
+            openModal('pdfModal');
+        } else {
+            // Remplir le formulaire vidéo
+            document.getElementById('videoId').value = course.id;
+            document.getElementById('videoTitle').value = course.title;
+            document.getElementById('videoPrice').value = course.price;
+            document.getElementById('videoCategory').value = course.category;
+            document.getElementById('videoDuration').value = course.duration;
+            document.getElementById('videoDescription').value = course.description;
+            document.getElementById('videoUrl').value = course.videoUrl || '';
+            document.getElementById('videoAuthor').value = course.author || '';
+            document.getElementById('videoLevel').value = course.level || '';
+            
+            // Changer le texte du modal
+            document.getElementById('videoModalTitle').textContent = 'Modifier la vidéo';
+            document.getElementById('submitVideoBtn').textContent = 'Modifier la vidéo';
+            
+            // Ouvrir le modal
+            openModal('videoModal');
+        }
+    }
+
+    // Supprimer un cours
+    function deleteCourse(courseId) {
+        const course = courses.find(c => c.id === courseId);
+        if (!course) return;
+
+        if (confirm(`Supprimer définitivement le cours "${course.title}" ?`)) {
+            courses = courses.filter(c => c.id !== courseId);
+            loadCourses();
+            updateCounts();
+            alert('Cours supprimé avec succès');
+        }
+    }
+
+    // Ajouter ou modifier un PDF
+    document.getElementById('pdfForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const id = document.getElementById('pdfId').value;
+        const title = document.getElementById('pdfTitle').value;
+        const price = parseFloat(document.getElementById('pdfPrice').value);
+        const category = document.getElementById('pdfCategory').value;
+        const pages = document.getElementById('pdfPages').value;
+        const description = document.getElementById('pdfDescription').value;
+        const author = document.getElementById('pdfAuthor').value;
+        const level = document.getElementById('pdfLevel').value;
+
+        // Sélectionner une image aléatoire basée sur la catégorie
+        const categoryImages = courseImages[category] || courseImages['programmation'];
+        const randomIndex = Math.floor(Math.random() * categoryImages.length);
+        const courseImage = categoryImages[randomIndex];
+
+        if (id) {
+            // Modifier un PDF existant
+            const courseIndex = courses.findIndex(c => c.id === parseInt(id));
+            if (courseIndex !== -1) {
+                courses[courseIndex].title = title;
+                courses[courseIndex].price = price;
+                courses[courseIndex].category = category;
+                courses[courseIndex].duration = pages + " pages";
+                courses[courseIndex].description = description;
+                courses[courseIndex].author = author;
+                courses[courseIndex].level = level;
+                courses[courseIndex].image = courseImage;
+                courses[courseIndex].date = new Date().toISOString().split('T')[0];
+            }
+        } else {
+            // Créer un nouveau PDF
+            const newCourse = {
+                id: courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1,
+                title,
+                description,
+                type: "pdf",
+                price,
+                category,
+                duration: pages + " pages",
+                author,
+                level,
+                date: new Date().toISOString().split('T')[0],
+                image: courseImage,
+                downloadUrl: "#"
+            };
+
+            courses.push(newCourse);
+        }
+        
+        // Réinitialiser le formulaire
+        resetPdfForm();
+        
+        // Recharger les cours
+        loadCourses();
+        updateCounts();
+        
+        // Fermer le modal
+        closeModal('pdfModal');
+        
+        alert(id ? 'PDF modifié avec succès !' : 'PDF ajouté avec succès !');
+    });
+
+    // Ajouter ou modifier une vidéo
+    document.getElementById('videoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const id = document.getElementById('videoId').value;
+        const title = document.getElementById('videoTitle').value;
+        const price = parseFloat(document.getElementById('videoPrice').value);
+        const category = document.getElementById('videoCategory').value;
+        const duration = document.getElementById('videoDuration').value;
+        const description = document.getElementById('videoDescription').value;
+        const videoUrl = document.getElementById('videoUrl').value;
+        const author = document.getElementById('videoAuthor').value;
+        const level = document.getElementById('videoLevel').value;
+
+        // Extraire l'ID YouTube de l'URL
+        let youtubeId = '';
+        try {
+            const urlObj = new URL(videoUrl);
+            if (urlObj.hostname.includes('youtube.com')) {
+                youtubeId = new URLSearchParams(urlObj.search).get('v');
+            } else if (urlObj.hostname.includes('youtu.be')) {
+                youtubeId = urlObj.pathname.substring(1);
+            }
+        } catch (e) {
+            alert('URL YouTube invalide');
+            return;
+        }
+
+        if (!youtubeId) {
+            alert('Veuillez entrer une URL YouTube valide');
+            return;
+        }
+
+        // Sélectionner une image aléatoire basée sur la catégorie
+        const categoryImages = courseImages[category] || courseImages['programmation'];
+        const randomIndex = Math.floor(Math.random() * categoryImages.length);
+        const courseImage = categoryImages[randomIndex];
+
+        if (id) {
+            // Modifier une vidéo existante
+            const courseIndex = courses.findIndex(c => c.id === parseInt(id));
+            if (courseIndex !== -1) {
+                courses[courseIndex].title = title;
+                courses[courseIndex].price = price;
+                courses[courseIndex].category = category;
+                courses[courseIndex].duration = duration;
+                courses[courseIndex].description = description;
+                courses[courseIndex].videoUrl = videoUrl;
+                courses[courseIndex].youtubeId = youtubeId;
+                courses[courseIndex].author = author;
+                courses[courseIndex].level = level;
+                courses[courseIndex].image = courseImage;
+                courses[courseIndex].date = new Date().toISOString().split('T')[0];
+            }
+        } else {
+            // Créer une nouvelle vidéo
+            const newCourse = {
+                id: courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1,
+                title,
+                description,
+                type: "video",
+                price,
+                category,
+                duration,
+                author,
+                level,
+                date: new Date().toISOString().split('T')[0],
+                image: courseImage,
+                videoUrl: videoUrl,
+                youtubeId: youtubeId
+            };
+
+            courses.push(newCourse);
+        }
+        
+        // Réinitialiser le formulaire
+        resetVideoForm();
+        
+        // Recharger les cours
+        loadCourses();
+        updateCounts();
+        
+        // Fermer le modal
+        closeModal('videoModal');
+        
+        alert(id ? 'Vidéo modifiée avec succès !' : 'Vidéo ajoutée avec succès !');
+    });
+
+    // Réinitialiser le formulaire PDF
+    function resetPdfForm() {
+        document.getElementById('pdfForm').reset();
+        document.getElementById('pdfId').value = '';
+        document.getElementById('pdfCoverName').textContent = 'Aucune image sélectionnée';
+        document.getElementById('pdfFileName').textContent = 'Aucun fichier sélectionné';
+        document.getElementById('pdfModalTitle').textContent = 'Ajouter un PDF';
+        document.getElementById('submitPdfBtn').textContent = 'Ajouter le PDF';
+        currentEditingCourse = null;
+    }
+
+    // Réinitialiser le formulaire vidéo
+    function resetVideoForm() {
+        document.getElementById('videoForm').reset();
+        document.getElementById('videoId').value = '';
+        document.getElementById('videoThumbnailName').textContent = 'Aucune image sélectionnée';
+        document.getElementById('videoModalTitle').textContent = 'Ajouter une vidéo';
+        document.getElementById('submitVideoBtn').textContent = 'Ajouter la vidéo';
+        currentEditingCourse = null;
+    }
+
+    // Ouvrir un modal
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    // Fermer un modal
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        if (modalId === 'pdfModal') {
+            resetPdfForm();
+        } else if (modalId === 'videoModal') {
+            resetVideoForm();
+        }
+    }
+
+    // Configurer les événements
+    function setupEventListeners() {
+        // Boutons ajouter cours
+        document.getElementById('addPdfBtn').addEventListener('click', () => openModal('pdfModal'));
+        document.getElementById('addVideoBtn').addEventListener('click', () => openModal('videoModal'));
+        
+        // Boutons voir plus
+        document.getElementById('viewMorePdfBtn').addEventListener('click', viewMorePdf);
+        document.getElementById('viewMoreVideoBtn').addEventListener('click', viewMoreVideo);
+        
+        // Recherche PDF
+        document.getElementById('pdfSearchInput').addEventListener('input', searchPdf);
+        document.getElementById('pdfSearchButton').addEventListener('click', searchPdf);
+        document.getElementById('pdfSearchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchPdf();
+        });
+        
+        // Recherche vidéo
+        document.getElementById('videoSearchInput').addEventListener('input', searchVideo);
+        document.getElementById('videoSearchButton').addEventListener('click', searchVideo);
+        document.getElementById('videoSearchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchVideo();
+        });
+        
+        // Fermer les modals
+        document.getElementById('closePdfModal').addEventListener('click', () => closeModal('pdfModal'));
+        document.getElementById('closeVideoModal').addEventListener('click', () => closeModal('videoModal'));
+        document.getElementById('closeVideoPlayer').addEventListener('click', closeVideoModal);
+        document.getElementById('cancelPdfBtn').addEventListener('click', () => closeModal('pdfModal'));
+        document.getElementById('cancelVideoBtn').addEventListener('click', () => closeModal('videoModal'));
+        
+        // Gestion des fichiers
+        document.getElementById('pdfCover').addEventListener('change', function() {
+            const fileName = this.files.length > 0 ? this.files[0].name : 'Aucune image sélectionnée';
+            document.getElementById('pdfCoverName').textContent = fileName;
+        });
+        
+        document.getElementById('pdfFile').addEventListener('change', function() {
+            const fileName = this.files.length > 0 ? this.files[0].name : 'Aucun fichier sélectionné';
+            document.getElementById('pdfFileName').textContent = fileName;
+        });
+        
+        document.getElementById('videoThumbnail').addEventListener('change', function() {
+            const fileName = this.files.length > 0 ? this.files[0].name : 'Aucune image sélectionnée';
+            document.getElementById('videoThumbnailName').textContent = fileName;
+        });
+        
+        // Fermer les modals en cliquant en dehors
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                if (e.target.id === 'videoPlayerModal') {
+                    closeVideoModal();
+                } else {
+                    closeModal(e.target.id);
+                }
+            }
+        });
+        
+        // Menu & theme
+        const sideMenu = document.querySelector("aside");
+        const menuBtn = document.getElementById('menu-btn');
+        const closeBtn = document.querySelector("#close-btn");
+        const themeToggler = document.querySelector(".theme-toggler");
+        
+        menuBtn.addEventListener('click',()=>{ sideMenu.style.display='block'; });
+        closeBtn.addEventListener('click',()=>{ sideMenu.style.display='none'; });
+        themeToggler.addEventListener('click',()=>{
+            document.body.classList.toggle('dark-theme-variables');
+            themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
+            themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
+        });
+    }
+</script>
+</body>
+</html>

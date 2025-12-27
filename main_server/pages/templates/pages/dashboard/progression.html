@@ -1,0 +1,1129 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Cours - LearnHub{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .current-date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            background: var(--bg-light);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        /* Progress Overview */
+        .overview-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .time-filter {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-light);
+            padding: 0.3rem;
+            border-radius: 10px;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-light);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Progress Stats */
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-change.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-header {
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Course Progress List */
+        .course-progress-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .progress-table th {
+            background: var(--bg-light);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .progress-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-table tr:hover {
+            background: var(--light-blue);
+        }
+
+        .course-name {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .course-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .course-icon.web {
+            background: var(--gradient-blue);
+        }
+
+        .course-icon.data {
+            background: var(--gradient-purple);
+        }
+
+        .course-icon.design {
+            background: var(--gradient-green);
+        }
+
+        .course-icon.marketing {
+            background: var(--gradient-orange);
+        }
+
+        .course-info h4 {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .course-info p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .progress-cell {
+            min-width: 150px;
+        }
+
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .progress-percent {
+            font-weight: 600;
+            color: var(--text-dark);
+            min-width: 45px;
+        }
+
+        .time-spent {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-active {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .status-completed {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--accent-green);
+        }
+
+        .status-paused {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--accent-yellow);
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Achievements */
+        .achievements-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .achievement-card {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .achievement-card.locked .achievement-icon {
+            background: var(--text-light);
+        }
+
+        .achievement-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .achievement-progress {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .achievement-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--gradient-orange);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Learning Streak */
+        .streak-card {
+            background: linear-gradient(135deg, #4A90E2, #9B51E0);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .streak-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .streak-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .streak-info p {
+            opacity: 0.9;
+        }
+
+        .streak-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .streak-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .streak-day {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .streak-day.active {
+            background: white;
+            color: var(--primary-blue);
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .sidebar-logo-text,
+            .user-info,
+            .nav-text,
+            .logout-btn span:last-child {
+                display: none;
+            }
+            
+            .user-profile {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+            
+            .logout-btn {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .achievements-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .streak-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .streak-calendar {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .streak-calendar {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Menu Toggle Button */
+        .menu-toggle {
+            display: none;
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card, .chart-card, .achievement-card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--text-dark);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+           <!-- Sidebar -->
+{% endblock %}
+
+{% block content %}
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Votre Progression 📈</h1>
+                    <p>Suivez vos performances et vos accomplissements</p>
+                </div>
+                <div class="current-date">
+                    <i class="far fa-calendar"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <!-- Learning Streak -->
+            <div class="streak-card">
+                <div class="streak-header">
+                    <div class="streak-info">
+                        <h3>Votre série d'apprentissage</h3>
+                        <p>Continuez votre apprentissage pour maintenir votre série !</p>
+                    </div>
+                    <div class="streak-value">14 jours</div>
+                </div>
+                <div class="streak-calendar" id="streakCalendar">
+                    <!-- Generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Progress Overview -->
+            <div class="overview-section">
+                <div class="overview-header">
+                    <h2 class="section-title">Aperçu de la progression</h2>
+                    <div class="time-filter">
+                        <button class="filter-btn active" data-period="week">Semaine</button>
+                        <button class="filter-btn" data-period="month">Mois</button>
+                        <button class="filter-btn" data-period="year">Année</button>
+                        <button class="filter-btn" data-period="all">Tout</button>
+                    </div>
+                </div>
+
+                <!-- Progress Stats -->
+                <div class="progress-stats">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Progression moyenne</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i> 12%
+                            </div>
+                        </div>
+                        <div class="stat-value">76%</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Temps total d'étude</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i> 18%
+                            </div>
+                        </div>
+                        <div class="stat-value">142h</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Cours terminés</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i> 2
+                            </div>
+                        </div>
+                        <div class="stat-value">8</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Score moyen</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down"></i> 2%
+                            </div>
+                        </div>
+                        <div class="stat-value">87%</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Progression par cours</h3>
+                            <p class="chart-subtitle">Distribution de votre avancement</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="courseProgressChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Temps d'étude hebdomadaire</h3>
+                            <p class="chart-subtitle">Heures consacrées par jour</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="studyTimeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Progress Details -->
+            <div class="course-progress-section">
+                <h2 class="section-title" style="margin-bottom: 1.5rem;">Détails par cours</h2>
+                
+                <div class="progress-table-container">
+                    <table class="progress-table">
+                        <thead>
+                            <tr>
+                                <th>Cours</th>
+                                <th>Progression</th>
+                                <th>Temps passé</th>
+                                <th>Dernière activité</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courseProgressTable">
+                            <!-- Generated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="achievements-section">
+                <h2 class="section-title">Succès & Récompenses</h2>
+                <p style="color: var(--text-light); margin-bottom: 1rem;">Débloquez des succès en progressant dans votre apprentissage</p>
+                
+                <div class="achievements-grid">
+                    <!-- Generated by JavaScript -->
+                </div>
+            </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Current date
+            function updateDate() {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                document.getElementById('currentDate').textContent = 
+                    now.toLocaleDateString('fr-FR', options);
+            }
+            updateDate();
+
+            // Generate streak calendar
+            function generateStreakCalendar() {
+                const calendar = document.getElementById('streakCalendar');
+                calendar.innerHTML = '';
+                
+                const today = new Date();
+                const startDate = new Date();
+                startDate.setDate(today.getDate() - 20); // Show 21 days
+                
+                for (let i = 0; i < 21; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'streak-day';
+                    
+                    // Mark active days (last 14 days)
+                    if (i >= 7) {
+                        dayElement.classList.add('active');
+                    }
+                    
+                    dayElement.textContent = date.getDate();
+                    dayElement.title = date.toLocaleDateString('fr-FR');
+                    
+                    calendar.appendChild(dayElement);
+                }
+            }
+
+            // Course progress data
+            const courses = [
+                {
+                    name: "React Avancé",
+                    category: "Développement Web",
+                    progress: 65,
+                    timeSpent: "42h",
+                    lastActivity: "Aujourd'hui",
+                    status: "active",
+                    icon: "web"
+                },
+                {
+                    name: "Machine Learning",
+                    category: "Data Science",
+                    progress: 42,
+                    timeSpent: "28h",
+                    lastActivity: "Hier",
+                    status: "active",
+                    icon: "data"
+                },
+                {
+                    name: "UI/UX Design",
+                    category: "Design",
+                    progress: 78,
+                    timeSpent: "35h",
+                    lastActivity: "Il y a 2 jours",
+                    status: "active",
+                    icon: "design"
+                },
+                {
+                    name: "Marketing Digital",
+                    category: "Marketing",
+                    progress: 92,
+                    timeSpent: "48h",
+                    lastActivity: "Terminé",
+                    status: "completed",
+                    icon: "marketing"
+                },
+                {
+                    name: "DevOps",
+                    category: "Développement Web",
+                    progress: 30,
+                    timeSpent: "15h",
+                    lastActivity: "Il y a 5 jours",
+                    status: "paused",
+                    icon: "web"
+                }
+            ];
+
+            // Populate course progress table
+            function populateCourseTable() {
+                const tableBody = document.getElementById('courseProgressTable');
+                tableBody.innerHTML = '';
+                
+                courses.forEach(course => {
+                    const row = document.createElement('tr');
+                    
+                    const progressColor = course.progress < 30 ? 'var(--accent-red)' : 
+                                         course.progress < 70 ? 'var(--accent-yellow)' : 
+                                         'var(--accent-green)';
+                    
+                    row.innerHTML = `
+                        <td>
+                            <div class="course-name">
+                                <div class="course-icon ${course.icon}">
+                                    <i class="fas fa-${course.icon === 'data' ? 'database' : course.icon}"></i>
+                                </div>
+                                <div class="course-info">
+                                    <h4>${course.name}</h4>
+                                    <p>${course.category}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="progress-cell">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${course.progress}%; background: ${progressColor};"></div>
+                                </div>
+                                <span class="progress-percent">${course.progress}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="time-spent">${course.timeSpent}</span>
+                        </td>
+                        <td>
+                            <span class="time-spent">${course.lastActivity}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${course.status}">
+                                ${course.status === 'active' ? 'En cours' : 
+                                  course.status === 'completed' ? 'Terminé' : 'En pause'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="action-btn" onclick="viewCourseDetails('${course.name}')">
+                                <i class="fas fa-eye"></i> Détails
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // Achievements data
+            const achievements = [
+                { id: 1, title: "Débutant motivé", desc: "Complétez votre premier cours", icon: "fas fa-rocket", progress: 100, unlocked: true },
+                { id: 2, title: "Expert React", desc: "Terminez le cours React avancé", icon: "fab fa-react", progress: 65, unlocked: false },
+                { id: 3, title: "Marathonien", desc: "Étudiez 7 jours d'affilée", icon: "fas fa-running", progress: 100, unlocked: true },
+                { id: 4, title: "Noctambule", desc: "Étudiez après minuit", icon: "fas fa-moon", progress: 0, unlocked: false },
+                { id: 5, title: "Perfectionniste", desc: "Obtenez 100% à 3 quiz", icon: "fas fa-star", progress: 67, unlocked: false },
+                { id: 6, title: "Social Learner", desc: "Partagez 5 réalisations", icon: "fas fa-share-alt", progress: 40, unlocked: false },
+                { id: 7, title: "Polyglotte", desc: "Suivez 3 types de cours", icon: "fas fa-globe", progress: 100, unlocked: true },
+                { id: 8, title: "Maître du temps", desc: "Étudiez 100 heures", icon: "fas fa-clock", progress: 42, unlocked: false }
+            ];
+
+            // Populate achievements grid
+            function populateAchievements() {
+                const grid = document.querySelector('.achievements-grid');
+                grid.innerHTML = '';
+                
+                achievements.forEach(achievement => {
+                    const card = document.createElement('div');
+                    card.className = `achievement-card ${achievement.unlocked ? '' : 'locked'}`;
+                    
+                    card.innerHTML = `
+                        <div class="achievement-icon">
+                            <i class="${achievement.icon}"></i>
+                        </div>
+                        <h4 class="achievement-title">${achievement.title}</h4>
+                        <p class="achievement-desc">${achievement.desc}</p>
+                        <div class="achievement-progress">
+                            ${achievement.progress}% complété
+                        </div>
+                        ${achievement.unlocked ? 
+                          '<div class="achievement-badge"><i class="fas fa-trophy"></i></div>' : ''}
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            }
+
+            // Initialize Charts
+            function initializeCharts() {
+                // Course Progress Chart (Doughnut)
+                const courseProgressCtx = document.getElementById('courseProgressChart').getContext('2d');
+                new Chart(courseProgressCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['React Avancé', 'Machine Learning', 'UI/UX Design', 'Marketing Digital', 'DevOps'],
+                        datasets: [{
+                            data: [65, 42, 78, 92, 30],
+                            backgroundColor: [
+                                '#4A90E2',
+                                '#9B51E0',
+                                '#27AE60',
+                                '#FF7A45',
+                                '#FFC107'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+
+                // Study Time Chart (Bar)
+                const studyTimeCtx = document.getElementById('studyTimeChart').getContext('2d');
+                new Chart(studyTimeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                        datasets: [{
+                            label: 'Heures d\'étude',
+                            data: [3.5, 2.8, 4.2, 3.1, 2.5, 5.0, 1.8],
+                            backgroundColor: '#4A90E2',
+                            borderRadius: 8,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + 'h';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Here you would update charts based on period
+                    const period = this.dataset.period;
+                    console.log('Filter changed to:', period);
+                });
+            });
+
+            // Mobile menu toggle
+            if (window.innerWidth < 480) {
+                const menuToggle = document.createElement('button');
+                menuToggle.className = 'menu-toggle';
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                document.querySelector('.top-bar').prepend(menuToggle);
+                
+                menuToggle.addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                });
+            }
+
+            // Logout button
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if (confirm('Retourner à la page de connexion ?')) {
+                    window.location.href = "/login/";
+                }
+            });
+
+            // Initialize all components
+            generateStreakCalendar();
+            populateCourseTable();
+            populateAchievements();
+            initializeCharts();
+
+            // Animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            document.querySelectorAll('.stat-card, .chart-card, .achievement-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // Helper functions
+        function viewCourseDetails(courseName) {
+            alert(`Détails du cours: ${courseName}\n\nFonctionnalité détaillée à implémenter.`);
+        }
+
+        function shareProgress() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Ma progression LearnHub',
+                    text: 'Je viens d\'atteindre un nouveau record dans mon apprentissage !',
+                    url: window.location.href
+                });
+            } else {
+                alert('Partagez votre progression sur les réseaux sociaux !');
+            }
+        }
+
+        // Update date every minute
+        setInterval(updateDate, 60000);
+    </script>
+{% endblock %}

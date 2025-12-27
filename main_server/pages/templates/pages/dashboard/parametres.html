@@ -1,0 +1,1759 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Cours - LearnHub{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .settings-search {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* Settings Container */
+        .settings-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .settings-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Settings Sidebar */
+        .settings-sidebar {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .settings-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .settings-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .settings-nav-item:hover {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+        }
+
+        .settings-nav-item.active {
+            background: var(--gradient-blue);
+            color: white;
+        }
+
+        .settings-nav-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .settings-nav-text {
+            flex: 1;
+        }
+
+        /* Settings Content */
+        .settings-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Settings Section */
+        .settings-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-label .required {
+            color: var(--accent-red);
+            margin-left: 0.2rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--bg-white);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .form-input:disabled {
+            background: var(--bg-light);
+            color: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        /* Profile Picture */
+        .profile-picture-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-picture {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .change-photo-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary-blue);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .change-photo-btn:hover {
+            background: var(--secondary-purple);
+            transform: scale(1.1);
+        }
+
+        .profile-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        /* Switch Toggle */
+        .switch-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .switch-label {
+            flex: 1;
+        }
+
+        .switch-label h4 {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .switch-label p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Checkbox and Radio */
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: var(--bg-light);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover, .radio-item:hover {
+            background: var(--light-blue);
+        }
+
+        .checkbox-item input[type="checkbox"],
+        .radio-item input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-blue);
+        }
+
+        .checkbox-label, .radio-label {
+            flex: 1;
+        }
+
+        .checkbox-label h4, .radio-label h4 {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .checkbox-label p, .radio-label p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Color Picker */
+        .color-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .color-option.active {
+            border-color: var(--text-dark);
+            transform: scale(1.1);
+        }
+
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Danger Zone */
+        .danger-zone {
+            background: linear-gradient(135deg, #FFF5F5, #FFEBEE);
+            border: 2px solid #FFCDD2;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 1rem;
+        }
+
+        .danger-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #D32F2F;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .danger-text {
+            color: #D32F2F;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Buttons */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: var(--gradient-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 82, 82, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        /* Theme Preview */
+        .theme-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .theme-card {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow);
+        }
+
+        .theme-card.active {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .theme-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .theme-body {
+            padding: 1rem;
+            background: var(--bg-white);
+        }
+
+        .theme-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .theme-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Notification Types */
+        .notification-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .notification-type {
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .notification-type:hover {
+            background: var(--light-blue);
+            transform: translateY(-2px);
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .notification-icon.email {
+            background: var(--gradient-blue);
+        }
+
+        .notification-icon.push {
+            background: var(--gradient-purple);
+        }
+
+        .notification-icon.sms {
+            background: var(--gradient-green);
+        }
+
+        .notification-icon.desktop {
+            background: var(--gradient-orange);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .sidebar-logo-text,
+            .user-info,
+            .nav-text,
+            .logout-btn span:last-child {
+                display: none;
+            }
+            
+            .user-profile {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+            
+            .logout-btn {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .settings-search {
+                width: 100%;
+            }
+            
+            .profile-picture-section {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .settings-section {
+                padding: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Menu Toggle Button */
+        .menu-toggle {
+            display: none;
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-section {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Paramètres ⚙️</h1>
+                    <p>Personnalisez votre expérience LearnHub</p>
+                </div>
+                <div class="settings-search">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="settingsSearch" placeholder="Rechercher un paramètre...">
+                </div>
+            </div>
+
+            <!-- Settings Container -->
+            <div class="settings-container">
+                <!-- Settings Sidebar -->
+                <div class="settings-sidebar">
+                    <nav class="settings-nav">
+                        <div class="settings-nav-item active" data-section="profile">
+                            <i class="settings-nav-icon fas fa-user"></i>
+                            <span class="settings-nav-text">Profil</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="account">
+                            <i class="settings-nav-icon fas fa-user-cog"></i>
+                            <span class="settings-nav-text">Compte</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="notifications">
+                            <i class="settings-nav-icon fas fa-bell"></i>
+                            <span class="settings-nav-text">Notifications</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="privacy">
+                            <i class="settings-nav-icon fas fa-shield-alt"></i>
+                            <span class="settings-nav-text">Confidentialité</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="appearance">
+                            <i class="settings-nav-icon fas fa-palette"></i>
+                            <span class="settings-nav-text">Apparence</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="language">
+                            <i class="settings-nav-icon fas fa-globe"></i>
+                            <span class="settings-nav-text">Langue</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="billing">
+                            <i class="settings-nav-icon fas fa-credit-card"></i>
+                            <span class="settings-nav-text">Facturation</span>
+                        </div>
+                        <div class="settings-nav-item" data-section="danger">
+                            <i class="settings-nav-icon fas fa-exclamation-triangle"></i>
+                            <span class="settings-nav-text">Zone de danger</span>
+                        </div>
+                    </nav>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="settings-content">
+                    <!-- Profile Section -->
+                    <div class="settings-section" id="profileSection">
+                        <div class="section-header">
+                            <h2 class="section-title">Profil</h2>
+                            <p class="section-description">Gérez les informations de votre profil et comment les autres vous voient sur la plateforme</p>
+                        </div>
+
+                        <div class="profile-picture-section">
+                            <div class="profile-picture">
+                                <div class="profile-avatar" id="profileAvatar">
+                                    É
+                                </div>
+                                <div class="change-photo-btn" onclick="document.getElementById('avatarUpload').click()">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                            </div>
+                            <div class="profile-info">
+                                <h3>Étudiant LearnHub</h3>
+                                <p>Membre depuis Novembre 2023</p>
+                                <button class="btn btn-outline" onclick="document.getElementById('avatarUpload').click()">
+                                    <i class="fas fa-upload"></i> Changer la photo
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="profileForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Prénom <span class="required">*</span></label>
+                                    <input type="text" class="form-input" value="Étudiant" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nom <span class="required">*</span></label>
+                                    <input type="text" class="form-input" value="LearnHub" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Adresse email <span class="required">*</span></label>
+                                <input type="email" class="form-input" value="etudiant@learnhub.com" required>
+                                <div class="form-help">Cette adresse est utilisée pour vous connecter</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Bio</label>
+                                <textarea class="form-textarea" placeholder="Décrivez-vous en quelques mots...">Étudiant passionné par l'apprentissage en ligne et le développement web. Actuellement en train de maîtriser React et le machine learning.</textarea>
+                                <div class="form-help">Maximum 200 caractères</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Site web</label>
+                                <input type="url" class="form-input" placeholder="https://votresite.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Localisation</label>
+                                <input type="text" class="form-input" placeholder="Ville, Pays">
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="resetProfileForm()">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Account Section (hidden by default) -->
+                    <div class="settings-section" id="accountSection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Compte</h2>
+                            <p class="section-description">Gérez les paramètres de votre compte et votre sécurité</p>
+                        </div>
+
+                        <form id="accountForm">
+                            <div class="form-group">
+                                <label class="form-label">Nom d'utilisateur</label>
+                                <input type="text" class="form-input" value="etudiant_learnhub">
+                                <div class="form-help">Ce nom est utilisé pour votre profil public</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Mot de passe actuel</label>
+                                <input type="password" class="form-input" placeholder="Entrez votre mot de passe actuel">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Nouveau mot de passe</label>
+                                    <input type="password" class="form-input" placeholder="Nouveau mot de passe">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Confirmer le mot de passe</label>
+                                    <input type="password" class="form-input" placeholder="Confirmer le mot de passe">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="switch-group">
+                                    <div class="switch-label">
+                                        <h4>Authentification à deux facteurs</h4>
+                                        <p>Sécurisez votre compte avec une vérification supplémentaire</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="twoFactorAuth">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="switch-group">
+                                    <div class="switch-label">
+                                        <h4>Connexion sociale</h4>
+                                        <p>Connectez-vous avec Google, Facebook ou GitHub</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="socialLogin" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Mettre à jour le compte
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Notifications Section (hidden by default) -->
+                    <div class="settings-section" id="notificationsSection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Notifications</h2>
+                            <p class="section-description">Contrôlez comment et quand vous recevez des notifications</p>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group">
+                                <div class="switch-label">
+                                    <h4>Notifications par email</h4>
+                                    <p>Recevez des mises à jour importantes par email</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="emailNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group">
+                                <div class="switch-label">
+                                    <h4>Notifications push</h4>
+                                    <p>Recevez des notifications sur votre appareil</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="pushNotifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Types de notifications</h3>
+                            <div class="notification-types">
+                                <div class="notification-type">
+                                    <div class="notification-header">
+                                        <div class="notification-icon email">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <h4>Nouveaux cours</h4>
+                                            <p>Alertes de nouveaux cours</p>
+                                        </div>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="notification-type">
+                                    <div class="notification-header">
+                                        <div class="notification-icon push">
+                                            <i class="fas fa-comment"></i>
+                                        </div>
+                                        <div>
+                                            <h4>Messages</h4>
+                                            <p>Nouveaux messages et réponses</p>
+                                        </div>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="notification-type">
+                                    <div class="notification-header">
+                                        <div class="notification-icon sms">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                        <div>
+                                            <h4>Rappels</h4>
+                                            <p>Rappels de cours et devoirs</p>
+                                        </div>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="notification-type">
+                                    <div class="notification-header">
+                                        <div class="notification-icon desktop">
+                                            <i class="fas fa-certificate"></i>
+                                        </div>
+                                        <div>
+                                            <h4>Progression</h4>
+                                            <p>Mises à jour de progression</p>
+                                        </div>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Fréquence des emails</h3>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="emailFrequency" value="instant" checked>
+                                    <div class="radio-label">
+                                        <h4>Instantané</h4>
+                                        <p>Recevez immédiatement chaque notification</p>
+                                    </div>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="emailFrequency" value="daily">
+                                    <div class="radio-label">
+                                        <h4>Quotidien</h4>
+                                        <p>Recevez un résumé quotidien</p>
+                                    </div>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="emailFrequency" value="weekly">
+                                    <div class="radio-label">
+                                        <h4>Hebdomadaire</h4>
+                                        <p>Recevez un résumé hebdomadaire</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">
+                                Rétablir les valeurs par défaut
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer les préférences
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Section (hidden by default) -->
+                    <div class="settings-section" id="privacySection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Confidentialité</h2>
+                            <p class="section-description">Contrôlez votre vie privée et la visibilité de vos informations</p>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group">
+                                <div class="switch-label">
+                                    <h4>Profil public</h4>
+                                    <p>Permettre aux autres de voir votre profil</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="publicProfile" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group">
+                                <div class="switch-label">
+                                    <h4>Recherche dans les moteurs</h4>
+                                    <p>Autoriser l'indexation de votre profil</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="searchIndexing">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Qui peut voir</h3>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <div class="checkbox-label">
+                                        <h4>Mes activités d'apprentissage</h4>
+                                        <p>Partager mes progrès de cours</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <div class="checkbox-label">
+                                        <h4>Mes certificats</h4>
+                                        <p>Afficher mes certifications obtenues</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div class="checkbox-label">
+                                        <h4>Mon email</h4>
+                                        <p>Afficher mon adresse email publique</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <div class="checkbox-label">
+                                        <h4>Mes posts dans la communauté</h4>
+                                        <p>Partager mes discussions publiques</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Télécharger mes données</label>
+                            <p style="color: var(--text-light); margin-bottom: 1rem;">Vous pouvez télécharger une copie de toutes vos données personnelles</p>
+                            <button type="button" class="btn btn-outline">
+                                <i class="fas fa-download"></i> Télécharger les données
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">
+                                Annuler
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer les paramètres
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Section (hidden by default) -->
+                    <div class="settings-section" id="appearanceSection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Apparence</h2>
+                            <p class="section-description">Personnalisez l'apparence de votre interface LearnHub</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Thème</label>
+                            <div class="theme-preview">
+                                <div class="theme-card active" data-theme="light">
+                                    <div class="theme-header" style="background: #4A90E2;">
+                                        Light
+                                    </div>
+                                    <div class="theme-body">
+                                        <div class="theme-title">Mode clair</div>
+                                        <div class="theme-description">Interface claire et lumineuse</div>
+                                    </div>
+                                </div>
+                                <div class="theme-card" data-theme="dark">
+                                    <div class="theme-header" style="background: #1A1A2E;">
+                                        Dark
+                                    </div>
+                                    <div class="theme-body">
+                                        <div class="theme-title">Mode sombre</div>
+                                        <div class="theme-description">Interface sombre pour les yeux</div>
+                                    </div>
+                                </div>
+                                <div class="theme-card" data-theme="auto">
+                                    <div class="theme-header" style="background: linear-gradient(90deg, #4A90E2, #1A1A2E);">
+                                        Auto
+                                    </div>
+                                    <div class="theme-body">
+                                        <div class="theme-title">Automatique</div>
+                                        <div class="theme-description">Suivre les préférences système</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Couleur principale</label>
+                            <div class="color-options">
+                                <div class="color-option active" style="background: #4A90E2;" data-color="blue"></div>
+                                <div class="color-option" style="background: #9B51E0;" data-color="purple"></div>
+                                <div class="color-option" style="background: #27AE60;" data-color="green"></div>
+                                <div class="color-option" style="background: #FF7A45;" data-color="orange"></div>
+                                <div class="color-option" style="background: #FF5252;" data-color="red"></div>
+                                <div class="color-option" style="background: #FFC107;" data-color="yellow"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Taille de la police</label>
+                            <input type="range" min="12" max="18" value="16" class="form-input" id="fontSizeSlider">
+                            <div class="form-help" id="fontSizeHelp">Taille actuelle: Moyenne (16px)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group">
+                                <div class="switch-label">
+                                    <h4>Animations</h4>
+                                    <p>Activer les animations et transitions</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="animations" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group">
+                                <div class="switch-label">
+                                    <h4>Compact mode</h4>
+                                    <p>Interface plus compacte avec moins d'espace</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="compactMode">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">
+                                Rétablir les valeurs par défaut
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Appliquer l'apparence
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Language Section (hidden by default) -->
+                    <div class="settings-section" id="languageSection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Langue et région</h2>
+                            <p class="section-description">Personnalisez la langue et les formats régionaux</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Langue de l'interface</label>
+                            <select class="form-select" id="interfaceLanguage">
+                                <option value="fr" selected>Français</option>
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                                <option value="de">Deutsch</option>
+                                <option value="it">Italiano</option>
+                                <option value="pt">Português</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Langue des cours</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <div class="checkbox-label">
+                                        <h4>Français</h4>
+                                        <p>Afficher les cours en français</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div class="checkbox-label">
+                                        <h4>Anglais</h4>
+                                        <p>Afficher les cours en anglais</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div class="checkbox-label">
+                                        <h4>Autres langues</h4>
+                                        <p>Afficher les cours dans d'autres langues</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fuseau horaire</label>
+                            <select class="form-select" id="timezone">
+                                <option value="Europe/Paris" selected>Europe/Paris (UTC+1)</option>
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">America/New_York (UTC-5)</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Format de date</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="dateFormat" value="DD/MM/YYYY" checked>
+                                    <div class="radio-label">
+                                        <h4>Jour/Mois/Année (31/12/2023)</h4>
+                                        <p>Format européen</p>
+                                    </div>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="dateFormat" value="MM/DD/YYYY">
+                                    <div class="radio-label">
+                                        <h4>Mois/Jour/Année (12/31/2023)</h4>
+                                        <p>Format américain</p>
+                                    </div>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="dateFormat" value="YYYY-MM-DD">
+                                    <div class="radio-label">
+                                        <h4>Année-Mois-Jour (2023-12-31)</h4>
+                                        <p>Format international (ISO)</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">
+                                Annuler
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer les préférences
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Billing Section (hidden by default) -->
+                    <div class="settings-section" id="billingSection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Facturation et abonnement</h2>
+                            <p class="section-description">Gérez votre abonnement et vos méthodes de paiement</p>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="switch-group" style="background: linear-gradient(135deg, #f0f7ff, #e3f2fd);">
+                                <div class="switch-label">
+                                    <h4>Abonnement Premium</h4>
+                                    <p>Actif • Renouvelle le 15/12/2023</p>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span style="font-weight: 600; color: var(--accent-green);">€19,99/mois</span>
+                                    <button class="btn btn-outline" style="padding: 0.5rem 1rem;">
+                                        Gérer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Méthodes de paiement</h3>
+                            <div class="file-upload" onclick="addPaymentMethod()">
+                                <div class="upload-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="upload-text">Ajouter une méthode de paiement</div>
+                                <div class="upload-subtext">Carte de crédit, PayPal, etc.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Historique de facturation</label>
+                            <div style="background: var(--bg-light); border-radius: 10px; padding: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Novembre 2023</span>
+                                    <span style="font-weight: 600;">€19,99</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Octobre 2023</span>
+                                    <span style="font-weight: 600;">€19,99</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Septembre 2023</span>
+                                    <span style="font-weight: 600;">€19,99</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline">
+                                <i class="fas fa-download"></i> Télécharger les factures
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-sync"></i> Mettre à jour l'abonnement
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone Section (hidden by default) -->
+                    <div class="settings-section" id="dangerSection" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">Zone de danger ⚠️</h2>
+                            <p class="section-description">Actions irréversibles sur votre compte</p>
+                        </div>
+
+                        <div class="danger-zone">
+                            <div class="danger-title">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Supprimer le compte
+                            </div>
+                            <div class="danger-text">
+                                Cette action est irréversible. Toutes vos données, y compris vos cours, progrès et certifications, seront définitivement supprimées.
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="showDeleteAccountModal()">
+                                <i class="fas fa-trash"></i> Supprimer mon compte
+                            </button>
+                        </div>
+
+                        <div class="danger-zone" style="margin-top: 2rem; background: linear-gradient(135deg, #FFF8E1, #FFECB3); border-color: #FFE082;">
+                            <div class="danger-title" style="color: #FF8F00;">
+                                <i class="fas fa-ban"></i>
+                                Désactiver le compte
+                            </div>
+                            <div class="danger-text" style="color: #FF8F00;">
+                                Votre compte sera désactivé temporairement. Vous pourrez le réactiver à tout moment en vous reconnectant.
+                            </div>
+                            <button type="button" class="btn btn-outline" onclick="deactivateAccount()">
+                                <i class="fas fa-power-off"></i> Désactiver mon compte
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">
+                                Annuler
+                            </button>
+                            <button type="button" class="btn btn-primary" disabled>
+                                Ces actions ne peuvent pas être annulées
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation between settings sections
+            const navItems = document.querySelectorAll('.settings-nav-item');
+            const sections = {
+                profile: document.getElementById('profileSection'),
+                account: document.getElementById('accountSection'),
+                notifications: document.getElementById('notificationsSection'),
+                privacy: document.getElementById('privacySection'),
+                appearance: document.getElementById('appearanceSection'),
+                language: document.getElementById('languageSection'),
+                billing: document.getElementById('billingSection'),
+                danger: document.getElementById('dangerSection')
+            };
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const sectionId = this.dataset.section;
+                    
+                    // Update active nav item
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show selected section
+                    Object.values(sections).forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    
+                    if (sections[sectionId]) {
+                        sections[sectionId].style.display = 'block';
+                    }
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('settingsSearch');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                navItems.forEach(item => {
+                    const text = item.querySelector('.settings-nav-text').textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Theme selection
+            const themeCards = document.querySelectorAll('.theme-card');
+            themeCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    themeCards.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const theme = this.dataset.theme;
+                    console.log('Theme selected:', theme);
+                    // In a real app, you would apply the theme here
+                });
+            });
+
+            // Color selection
+            const colorOptions = document.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    colorOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const color = this.dataset.color;
+                    console.log('Color selected:', color);
+                    // In a real app, you would apply the color theme here
+                });
+            });
+
+            // Font size slider
+            const fontSizeSlider = document.getElementById('fontSizeSlider');
+            const fontSizeHelp = document.getElementById('fontSizeHelp');
+            
+            fontSizeSlider.addEventListener('input', function() {
+                const size = this.value;
+                let sizeText = '';
+                
+                if (size <= 13) sizeText = 'Très petite';
+                else if (size <= 14) sizeText = 'Petite';
+                else if (size <= 16) sizeText = 'Moyenne';
+                else if (size <= 17) sizeText = 'Grande';
+                else sizeText = 'Très grande';
+                
+                fontSizeHelp.textContent = `Taille actuelle: ${sizeText} (${size}px)`;
+            });
+
+            // Form submissions
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Show success message
+                    showNotification('Paramètres enregistrés avec succès!', 'success');
+                });
+            });
+
+            // Mobile menu toggle
+            if (window.innerWidth < 480) {
+                const menuToggle = document.createElement('button');
+                menuToggle.className = 'menu-toggle';
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                document.querySelector('.top-bar').prepend(menuToggle);
+                
+                menuToggle.addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                });
+            }
+
+            // Logout button
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if (confirm('Retourner à la page de connexion ?')) {
+                    window.location.href = "/login/";
+                }
+            });
+
+            // Animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all sections for animation
+            document.querySelectorAll('.settings-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+
+        // Global functions
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    showNotification('Veuillez sélectionner une image valide', 'error');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showNotification('L\'image est trop volumineuse (max 5MB)', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatar = document.getElementById('profileAvatar');
+                    avatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+                    showNotification('Photo de profil mise à jour avec succès!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetProfileForm() {
+            if (confirm('Réinitialiser le formulaire? Toutes les modifications non enregistrées seront perdues.')) {
+                document.getElementById('profileForm').reset();
+                showNotification('Formulaire réinitialisé', 'info');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#27AE60' : type === 'error' ? '#FF5252' : '#4A90E2'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+                max-width: 400px;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        function addPaymentMethod() {
+            showNotification('Fonctionnalité d\'ajout de paiement à implémenter', 'info');
+        }
+
+        function showDeleteAccountModal() {
+            if (confirm('ÊTES-VOUS ABSOLUMENT SÛR ?\n\nCette action ne peut pas être annulée. Toutes vos données seront définitivement supprimées.\n\nPour confirmer, tapez "SUPPRIMER" ci-dessous.')) {
+                const confirmation = prompt('Tapez "SUPPRIMER" pour confirmer la suppression définitive:');
+                if (confirmation === 'SUPPRIMER') {
+                    alert('Compte supprimé avec succès (démonstration)');
+                    // In a real app, you would make an API call to delete the account
+                } else {
+                    alert('Suppression annulée');
+                }
+            }
+        }
+
+        function deactivateAccount() {
+            if (confirm('Désactiver votre compte ?\n\nVous pourrez le réactiver à tout moment en vous reconnectant.')) {
+                showNotification('Compte désactivé avec succès (démonstration)', 'info');
+                // In a real app, you would make an API call to deactivate the account
+            }
+        }
+
+        // Close settings search on escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.getElementById('settingsSearch').value = '';
+                document.querySelectorAll('.settings-nav-item').forEach(item => {
+                    item.style.display = 'flex';
+                });
+            }
+        });
+    </script>
+{% endblock %}

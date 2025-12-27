@@ -1,0 +1,1372 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Cours - LearnHub{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* Community Stats */
+        .community-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .stat-icon.members {
+            background: var(--gradient-blue);
+        }
+
+        .stat-icon.groups {
+            background: var(--gradient-purple);
+        }
+
+        .stat-icon.discussions {
+            background: var(--gradient-green);
+        }
+
+        .stat-icon.online {
+            background: var(--gradient-orange);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Main Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Discussions Section */
+        .discussions-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .new-post-btn {
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .new-post-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Discussion Filters */
+        .discussion-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 0.5rem 1rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tag:hover, .filter-tag.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        /* Discussions List */
+        .discussions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .discussion-card {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .discussion-card:hover {
+            transform: translateX(5px);
+            border-color: var(--light-blue);
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .discussion-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .discussion-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .discussion-info {
+            flex: 1;
+        }
+
+        .discussion-author {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .discussion-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .discussion-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .discussion-content {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .discussion-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .discussion-tag {
+            padding: 0.3rem 0.8rem;
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .discussion-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-blue);
+        }
+
+        .action-btn.liked {
+            color: var(--accent-red);
+        }
+
+        .discussion-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Sidebar Sections */
+        .community-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Active Members */
+        .members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .member-item:hover {
+            background: var(--bg-light);
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .member-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .member-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        /* Study Groups */
+        .groups-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .group-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .group-item:hover {
+            background: var(--light-blue);
+            transform: translateX(5px);
+        }
+
+        .group-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: var(--gradient-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .group-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .group-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .join-btn {
+            margin-left: auto;
+            padding: 0.4rem 1rem;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .join-btn:hover {
+            background: var(--secondary-purple);
+            transform: scale(1.05);
+        }
+
+        /* Recent Activities */
+        .activities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: var(--bg-light);
+        }
+
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            background: var(--light-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        /* Modal for New Post */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--accent-red);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .tag-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            min-height: 50px;
+        }
+
+        .tag {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-remove {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .tag-input-field {
+            flex: 1;
+            min-width: 100px;
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            background: transparent;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-post {
+            background: var(--gradient-blue);
+            color: white;
+        }
+
+        .btn-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .sidebar-logo-text,
+            .user-info,
+            .nav-text,
+            .logout-btn span:last-child {
+                display: none;
+            }
+            
+            .user-profile {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+            
+            .logout-btn {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .search-bar {
+                width: 100%;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .discussion-meta {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            
+            .discussion-actions {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* Menu Toggle Button */
+        .menu-toggle {
+            display: none;
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .discussion-card, .stat-card, .member-item {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light-blue);
+            border-radius: 50%;
+            border-top-color: var(--primary-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    {% endblock %}
+
+{% block content %}
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Communauté 👥</h1>
+                    <p>Connectez-vous, partagez et apprenez avec d'autres étudiants</p>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Rechercher des discussions, groupes...">
+                </div>
+            </div>
+
+            <!-- Community Stats -->
+            <div class="community-stats">
+                <div class="stat-card">
+                    <div class="stat-icon members">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value">2,847</div>
+                    <div class="stat-label">Membres actifs</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon groups">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="stat-value">48</div>
+                    <div class="stat-label">Groupes d'étude</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon discussions">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-value">1,243</div>
+                    <div class="stat-label">Discussions actives</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon online">
+                        <i class="fas fa-signal"></i>
+                    </div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-label">En ligne maintenant</div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="content-grid">
+                <!-- Discussions Section -->
+                <div class="discussions-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Discussions récentes</h2>
+                        <button class="new-post-btn" id="newPostBtn">
+                            <i class="fas fa-plus"></i> Nouvelle discussion
+                        </button>
+                    </div>
+
+                    <!-- Discussion Filters -->
+                    <div class="discussion-filters">
+                        <div class="filter-tag active">Toutes</div>
+                        <div class="filter-tag">Populaires</div>
+                        <div class="filter-tag">Questions</div>
+                        <div class="filter-tag">Ressources</div>
+                        <div class="filter-tag">Projets</div>
+                        <div class="filter-tag">Aide</div>
+                    </div>
+
+                    <!-- Discussions List -->
+                    <div class="discussions-list" id="discussionsList">
+                        <!-- Discussions will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="community-sidebar">
+                    <!-- Active Members -->
+                    <div class="sidebar-card">
+                        <h3 class="section-title" style="margin-bottom: 1.5rem;">Membres en ligne</h3>
+                        <div class="members-list" id="activeMembers">
+                            <!-- Members will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Study Groups -->
+                    <div class="sidebar-card">
+                        <h3 class="section-title" style="margin-bottom: 1.5rem;">Groupes d'étude</h3>
+                        <div class="groups-list" id="studyGroups">
+                            <!-- Groups will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities -->
+                    <div class="sidebar-card">
+                        <h3 class="section-title" style="margin-bottom: 1.5rem;">Activités récentes</h3>
+                        <div class="activities-list" id="recentActivities">
+                            <!-- Activities will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- New Post Modal -->
+    <div class="modal" id="newPostModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Créer une nouvelle discussion</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <form id="newPostForm">
+                <div class="form-group">
+                    <label class="form-label">Titre de la discussion</label>
+                    <input type="text" class="form-input" id="postTitle" required placeholder="Quel est le sujet de votre discussion ?">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Contenu</label>
+                    <textarea class="form-textarea" id="postContent" required placeholder="Partagez vos pensées, questions ou ressources..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Catégories (séparées par des virgules)</label>
+                    <div class="tag-input" id="tagContainer">
+                        <input type="text" class="tag-input-field" id="tagInput" placeholder="Ajouter une catégorie...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Visibilité</label>
+                    <select class="form-input" id="postVisibility">
+                        <option value="public">Publique (tout le monde peut voir)</option>
+                        <option value="members">Membres seulement</option>
+                        <option value="private">Privée (moi seulement)</option>
+                    </select>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Annuler</button>
+                    <button type="submit" class="btn btn-post">Publier la discussion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample Data
+            const discussions = [
+                {
+                    id: 1,
+                    author: "Marie Dupont",
+                    authorInitials: "MD",
+                    title: "Problème avec les Hooks React",
+                    content: "Je rencontre des problèmes avec useEffect dans mon projet. Quand je change d'état, le composant se re-rend plusieurs fois. Quelqu'un a-t-il une solution ?",
+                    tags: ["React", "JavaScript", "Frontend", "Aide"],
+                    likes: 24,
+                    comments: 12,
+                    shares: 3,
+                    time: "Il y a 2 heures",
+                    category: "questions"
+                },
+                {
+                    id: 2,
+                    author: "Jean Martin",
+                    authorInitials: "JM",
+                    title: "Ressources gratuites pour apprendre Python",
+                    content: "J'ai compilé une liste de ressources gratuites pour apprendre Python. Inclut des cours, exercices pratiques et projets open-source.",
+                    tags: ["Python", "Ressources", "Débutant"],
+                    likes: 42,
+                    comments: 8,
+                    shares: 15,
+                    time: "Il y a 5 heures",
+                    category: "ressources"
+                },
+                {
+                    id: 3,
+                    author: "Sophie Leroy",
+                    authorInitials: "SL",
+                    title: "Recherche collaborateurs pour projet machine learning",
+                    content: "Je travaille sur un projet de classification d'images avec TensorFlow. Je recherche des collaborateurs intéressés par le ML.",
+                    tags: ["Machine Learning", "Projet", "TensorFlow", "Collaboration"],
+                    likes: 18,
+                    comments: 7,
+                    shares: 2,
+                    time: "Hier",
+                    category: "projets"
+                },
+                {
+                    id: 4,
+                    author: "Alexandre Bernard",
+                    authorInitials: "AB",
+                    title: "Meilleures pratiques pour le responsive design",
+                    content: "Partagez vos meilleures astuces et techniques pour créer des designs responsive qui fonctionnent sur tous les appareils.",
+                    tags: ["CSS", "Design", "Responsive", "Best Practices"],
+                    likes: 31,
+                    comments: 14,
+                    shares: 5,
+                    time: "Il y a 2 jours",
+                    category: "questions"
+                }
+            ];
+
+            const activeMembers = [
+                { name: "Claire Dubois", role: "Étudiante React", initials: "CD" },
+                { name: "Thomas Moreau", role: "Data Scientist", initials: "TM" },
+                { name: "Emma Petit", role: "UX Designer", initials: "EP" },
+                { name: "Lucas Girard", role: "Full Stack Dev", initials: "LG" },
+                { name: "Julie Blanc", role: "Étudiante Python", initials: "JB" }
+            ];
+
+            const studyGroups = [
+                { name: "React Masters", members: 24, topic: "Développement Frontend" },
+                { name: "Data Science FR", members: 42, topic: "ML & Data Analysis" },
+                { name: "Design Thinkers", members: 18, topic: "UI/UX Design" },
+                { name: "Python Beginners", members: 56, topic: "Apprentissage Python" }
+            ];
+
+            const recentActivities = [
+                { icon: "fa-comment", text: "Marie a répondu à votre question React", time: "10 min" },
+                { icon: "fa-user-plus", text: "Jean a rejoint le groupe Python Beginners", time: "45 min" },
+                { icon: "fa-heart", text: "Sophie a aimé votre post sur le ML", time: "2h" },
+                { icon: "fa-share", text: "Alexandre a partagé une ressource CSS", time: "4h" }
+            ];
+
+            // Initialize Discussions
+            function loadDiscussions() {
+                const container = document.getElementById('discussionsList');
+                container.innerHTML = '';
+                
+                discussions.forEach(discussion => {
+                    const discussionCard = document.createElement('div');
+                    discussionCard.className = 'discussion-card';
+                    discussionCard.innerHTML = `
+                        <div class="discussion-header">
+                            <div class="discussion-avatar">${discussion.authorInitials}</div>
+                            <div class="discussion-info">
+                                <div class="discussion-author">${discussion.author}</div>
+                                <div class="discussion-meta">
+                                    <span>${discussion.time}</span>
+                                    <span>•</span>
+                                    <span>${discussion.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 class="discussion-title">${discussion.title}</h3>
+                        <p class="discussion-content">${discussion.content}</p>
+                        
+                        <div class="discussion-tags">
+                            ${discussion.tags.map(tag => `<span class="discussion-tag">${tag}</span>`).join('')}
+                        </div>
+                        
+                        <div class="discussion-actions">
+                            <div class="action-buttons">
+                                <button class="action-btn like-btn" data-id="${discussion.id}">
+                                    <i class="far fa-heart"></i> J'aime
+                                </button>
+                                <button class="action-btn comment-btn">
+                                    <i class="far fa-comment"></i> Commenter
+                                </button>
+                                <button class="action-btn share-btn">
+                                    <i class="far fa-share-square"></i> Partager
+                                </button>
+                            </div>
+                            <div class="discussion-stats">
+                                <span>${discussion.likes} likes</span>
+                                <span>•</span>
+                                <span>${discussion.comments} commentaires</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(discussionCard);
+                });
+            }
+
+            // Load Active Members
+            function loadActiveMembers() {
+                const container = document.getElementById('activeMembers');
+                container.innerHTML = '';
+                
+                activeMembers.forEach(member => {
+                    const memberItem = document.createElement('div');
+                    memberItem.className = 'member-item';
+                    memberItem.innerHTML = `
+                        <div class="member-avatar">${member.initials}</div>
+                        <div class="member-info">
+                            <h4>${member.name}</h4>
+                            <p>${member.role}</p>
+                        </div>
+                        <div class="online-indicator"></div>
+                    `;
+                    
+                    container.appendChild(memberItem);
+                });
+            }
+
+            // Load Study Groups
+            function loadStudyGroups() {
+                const container = document.getElementById('studyGroups');
+                container.innerHTML = '';
+                
+                studyGroups.forEach(group => {
+                    const groupItem = document.createElement('div');
+                    groupItem.className = 'group-item';
+                    groupItem.innerHTML = `
+                        <div class="group-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="group-info">
+                            <h4>${group.name}</h4>
+                            <p>${group.members} membres • ${group.topic}</p>
+                        </div>
+                        <button class="join-btn">Rejoindre</button>
+                    `;
+                    
+                    container.appendChild(groupItem);
+                });
+            }
+
+            // Load Recent Activities
+            function loadRecentActivities() {
+                const container = document.getElementById('recentActivities');
+                container.innerHTML = '';
+                
+                recentActivities.forEach(activity => {
+                    const activityItem = document.createElement('div');
+                    activityItem.className = 'activity-item';
+                    activityItem.innerHTML = `
+                        <div class="activity-icon">
+                            <i class="fas ${activity.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">${activity.text}</div>
+                            <div class="activity-time">${activity.time}</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(activityItem);
+                });
+            }
+
+            // Modal functionality
+            const modal = document.getElementById('newPostModal');
+            const newPostBtn = document.getElementById('newPostBtn');
+            const closeModal = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const newPostForm = document.getElementById('newPostForm');
+
+            function openModal() {
+                modal.classList.add('active');
+                document.getElementById('postTitle').focus();
+            }
+
+            function closeModalFunc() {
+                modal.classList.remove('active');
+                newPostForm.reset();
+            }
+
+            newPostBtn.addEventListener('click', openModal);
+            closeModal.addEventListener('click', closeModalFunc);
+            cancelBtn.addEventListener('click', closeModalFunc);
+
+            // Tag input functionality
+            const tagContainer = document.getElementById('tagContainer');
+            const tagInput = document.getElementById('tagInput');
+            let tags = [];
+
+            tagInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const tag = tagInput.value.trim();
+                    if (tag && !tags.includes(tag)) {
+                        tags.push(tag);
+                        updateTagDisplay();
+                    }
+                    tagInput.value = '';
+                }
+            });
+
+            function updateTagDisplay() {
+                const tagElements = tags.map(tag => `
+                    <div class="tag">
+                        ${tag}
+                        <button type="button" class="tag-remove" onclick="removeTag('${tag}')">&times;</button>
+                    </div>
+                `).join('');
+                
+                tagContainer.innerHTML = tagElements + '<input type="text" class="tag-input-field" id="tagInput" placeholder="Ajouter une catégorie...">';
+                
+                // Re-attach event listener
+                document.getElementById('tagInput').addEventListener('keypress', tagInput.addEventListener);
+            }
+
+            window.removeTag = function(tag) {
+                tags = tags.filter(t => t !== tag);
+                updateTagDisplay();
+            };
+
+            // Form submission
+            newPostForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const title = document.getElementById('postTitle').value;
+                const content = document.getElementById('postContent').value;
+                const visibility = document.getElementById('postVisibility').value;
+                
+                // Add new discussion
+                const newDiscussion = {
+                    id: discussions.length + 1,
+                    author: "Étudiant LearnHub",
+                    authorInitials: "ÉL",
+                    title: title,
+                    content: content,
+                    tags: tags,
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    time: "À l'instant",
+                    category: "questions"
+                };
+                
+                discussions.unshift(newDiscussion);
+                loadDiscussions();
+                
+                // Show success message
+                alert('Discussion publiée avec succès !');
+                
+                // Close modal and reset
+                closeModalFunc();
+                tags = [];
+                updateTagDisplay();
+            });
+
+            // Like button functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.like-btn')) {
+                    const btn = e.target.closest('.like-btn');
+                    const icon = btn.querySelector('i');
+                    
+                    if (icon.classList.contains('far')) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'liked');
+                        btn.innerHTML = '<i class="fas fa-heart"></i> Aimé';
+                        btn.classList.add('liked');
+                    } else {
+                        icon.classList.remove('fas', 'liked');
+                        icon.classList.add('far');
+                        btn.innerHTML = '<i class="far fa-heart"></i> J\'aime';
+                        btn.classList.remove('liked');
+                    }
+                }
+                
+                if (e.target.closest('.comment-btn')) {
+                    const discussionId = e.target.closest('.comment-btn').dataset.id;
+                    const postTitle = e.target.closest('.discussion-card').querySelector('.discussion-title').textContent;
+                    alert(`Fonctionnalité commentaire pour "${postTitle}" à implémenter.`);
+                }
+                
+                if (e.target.closest('.share-btn')) {
+                    alert('Fonctionnalité de partage à implémenter.');
+                }
+                
+                if (e.target.closest('.join-btn')) {
+                    const groupName = e.target.closest('.group-item').querySelector('h4').textContent;
+                    e.target.closest('.join-btn').textContent = 'Demande envoyée';
+                    e.target.closest('.join-btn').style.background = 'var(--accent-green)';
+                    e.target.closest('.join-btn').disabled = true;
+                    alert(`Demande envoyée pour rejoindre "${groupName}"`);
+                }
+            });
+
+            // Filter tags
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.textContent.toLowerCase();
+                    // In a real app, you would filter discussions here
+                    console.log('Filter changed to:', filter);
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                // In a real app, you would filter discussions based on search term
+                console.log('Searching for:', searchTerm);
+            });
+
+            // Mobile menu toggle
+            if (window.innerWidth < 480) {
+                const menuToggle = document.createElement('button');
+                menuToggle.className = 'menu-toggle';
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                document.querySelector('.top-bar').prepend(menuToggle);
+                
+                menuToggle.addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                });
+            }
+
+            // Logout button
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if (confirm('Retourner à la page de connexion ?')) {
+                    window.location.href = "/login/";
+                }
+            });
+
+            // Initialize all components
+            loadDiscussions();
+            loadActiveMembers();
+            loadStudyGroups();
+            loadRecentActivities();
+
+            // Animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            document.querySelectorAll('.discussion-card, .stat-card, .member-item').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // Helper functions
+        function joinGroup(groupName) {
+            alert(`Vous avez rejoint le groupe "${groupName}"`);
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,771 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des Achats - LearnHub</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        :root {
+            --primary-blue: #4A90E2;
+            --secondary-purple: #9B51E0;
+            --accent-teal: #2D9CDB;
+            --light-blue: #E3F2FD;
+            --text-dark: #1A1A2E;
+            --text-light: #6B7280;
+            --bg-white: #ffffff;
+            --bg-light: #F8FAFC;
+            --border-color: #E5E7EB;
+            --gradient-blue: linear-gradient(135deg, #4A90E2, #2D9CDB);
+            --gradient-purple: linear-gradient(135deg, #9B51E0, #6A0DAD);
+            --gradient-teal: linear-gradient(135deg, #2D9CDB, #56CCF2);
+            --shadow: 0 6px 20px rgba(74, 144, 226, 0.1);
+            --shadow-hover: 0 12px 30px rgba(74, 144, 226, 0.2);
+            --shadow-card: 0 3px 10px rgba(0, 0, 0, 0.06);
+            --shadow-nav: 0 3px 15px rgba(0, 0, 0, 0.06);
+            
+            --card-border-radius: 12px;
+            --border-radius-1: 6px;
+            --border-radius-2: 8px;
+            --border-radius-3: 20px;
+            --card-padding: 1.2rem;
+            --padding-1: 0.8rem;
+            --box-shadow: var(--shadow);
+            
+            font-size: 14px;
+        }
+        
+        .dark-theme-variables {
+            --bg-white: #1E293B;
+            --bg-light: #0F172A;
+            --text-dark: #F1F5F9;
+            --text-light: #94A3B8;
+            --border-color: #334155;
+            --light-blue: #1E3A8A;
+            --shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            outline: 0;
+            appearance: none;
+            border: 0;
+            text-decoration: none;
+            list-style: none;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 14px;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            background: var(--bg-light);
+            user-select: none;
+            overflow-x: hidden;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.8rem;
+            min-height: 100vh;
+        }
+        
+        a {
+            color: var(--text-dark);
+        }
+        
+        img {
+            display: block;
+            width: 100%;
+            border-radius: var(--border-radius-2);
+        }
+        
+        h1 {
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.8rem;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: var(--text-dark);
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-dark);
+        }
+        
+        h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        small {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+        
+        .profile-photo {
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--primary-blue);
+        }
+        
+        .text-muted {
+            color: var(--text-light);
+        }
+        
+        /* Navigation Bar */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            background: var(--bg-white);
+            border-radius: var(--card-border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-nav);
+            position: sticky;
+            top: 0.8rem;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .dark-theme-variables .top-nav {
+            background: rgba(30, 41, 59, 0.95);
+        }
+        
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 5px rgba(74, 144, 226, 0.3));
+        }
+        
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: -0.5px;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 0.3rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius-3);
+            cursor: pointer;
+            transition: all 300ms ease;
+            color: var(--text-light);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+        
+        .nav-item.active {
+            background: var(--gradient-blue);
+            color: white;
+            box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
+        }
+        
+        .nav-item:hover:not(.active) {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .user-avatar {
+            width: 2.8rem;
+            height: 2.8rem;
+            border-radius: 50%;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        .user-details h4 {
+            margin-bottom: 0.2rem;
+            font-size: 1rem;
+        }
+        
+        .user-details p {
+            color: var(--text-light);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        
+        .premium-badge {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #7A5C00;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .theme-toggler {
+            background: var(--light-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 1.6rem;
+            width: 3.2rem;
+            cursor: pointer;
+            border-radius: 50px;
+            padding: 0.15rem;
+            box-shadow: var(--shadow-card);
+        }
+        
+        .theme-toggler span {
+            font-size: 0.9rem;
+            width: 1.3rem;
+            height: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggler span.active {
+            background: var(--gradient-blue);
+            color: white;
+            box-shadow: 0 3px 8px rgba(74, 144, 226, 0.3);
+        }
+        
+        /* Sections Scrollables */
+        .scroll-section {
+            background: var(--bg-white);
+            border-radius: var(--card-border-radius);
+            padding: var(--card-padding);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .scroll-section:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        
+        .section-icon {
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 8px;
+            background: var(--light-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+        }
+        
+        .view-all {
+            color: var(--primary-blue);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--border-radius-1);
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+        
+        .view-all:hover {
+            background: var(--light-blue);
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-1);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-blue);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--gradient-purple);
+            color: white;
+            box-shadow: 0 4px 15px rgba(155, 81, 224, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(155, 81, 224, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        .btn-copy {
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--border-radius-1);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-copy:hover {
+            background: var(--secondary-purple);
+            transform: translateY(-2px);
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead tr {
+            background: var(--gradient-blue);
+            color: white;
+        }
+        
+        th {
+            padding: 0.8rem;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+        
+        th:first-child {
+            border-radius: var(--border-radius-1) 0 0 0;
+        }
+        
+        th:last-child {
+            border-radius: 0 var(--border-radius-1) 0 0;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        td {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+        
+        code {
+            background: var(--light-blue);
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--border-radius-1);
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive Design */
+        @media screen and (max-width: 1200px){
+            .container {
+                width: 95%;
+                padding: 0.8rem;
+            }
+        }
+        
+        @media screen and (max-width: 768px){
+            body {
+                overflow: auto;
+            }
+            
+            .container {
+                width: 100%;
+                padding: 0.5rem;
+                height: auto;
+            }
+            
+            .top-nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0.8rem;
+                margin-bottom: 1.2rem;
+            }
+            
+            .nav-left {
+                flex-direction: column;
+                gap: 0.8rem;
+                width: 100%;
+            }
+            
+            .nav-menu {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.3rem;
+            }
+            
+            .nav-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.1rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="logo">
+                <div class="logo-icon">🎓</div>
+                <div class="logo-text">LearnHub</div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="{% url 'utilisateur_dashboard' %}" class="nav-item">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    Tableau de bord
+                </a>
+                <a href="{% url 'courses_available' %}" class="nav-item">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    Cours disponibles
+                </a>
+                <a href="{% url 'cours' %}" class="nav-item">
+                    <span class="material-symbols-outlined">school</span>
+                    Mes cours
+                </a>
+                <a href="{% url 'historique' %}" class="nav-item active">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                    Historique
+                </a>
+                <a href="{% url 'profil' %}" class="nav-item">
+                    <span class="material-symbols-outlined">account_circle</span>
+                    Profil
+                </a>
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="theme-toggler">
+                <span class="material-symbols-outlined active">light_mode</span>
+                <span class="material-symbols-outlined">dark_mode</span>
+            </div>
+            
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <div class="nav-item" onclick="document.getElementById('logout-form').submit();" 
+         style="cursor: pointer;">
+        <span class="material-symbols-outlined">logout</span>
+        Déconnexion
+    </div>
+</form>
+            
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <div class="user-details">
+                    <h4> {{ user.username|upper }}</h4>
+                    <p>Étudiant <span class="premium-badge">PREMIUM</span></p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="page-header">
+            <div>
+                <h1>Historique des Achats</h1>
+                <p class="text-muted">Consultez tous vos achats et téléchargez vos factures</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportToPDF()">
+                    <span class="material-symbols-outlined">download</span>
+                    Exporter en PDF
+                </button>
+            </div>
+        </div>
+
+        <div class="scroll-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                    </div>
+                    <h2>Tous les Achats</h2>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Cours</th>
+                            <th>Prix</th>
+                            <th>Code d'accès</th>
+                            <th>Statut</th>
+                            <th>Facture</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>15/03/2024</td>
+                            <td style="font-weight: 600;">JavaScript Avancé</td>
+                            <td>€ 149.99</td>
+                            <td><code>JS-2024-789</code></td>
+                            <td><span style="color: var(--accent-teal); font-weight: 600; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;"><span class="material-symbols-outlined" style="font-size: 0.9rem;">check_circle</span> Actif</span></td>
+                            <td><button class="btn-copy" onclick="downloadInvoice('JS-2024-789')">Télécharger</button></td>
+                        </tr>
+                        <tr>
+                            <td>10/02/2024</td>
+                            <td style="font-weight: 600;">React JS Masterclass</td>
+                            <td>€ 169.99</td>
+                            <td><code>REACT-2024-456</code></td>
+                            <td><span style="color: var(--accent-teal); font-weight: 600; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;"><span class="material-symbols-outlined" style="font-size: 0.9rem;">check_circle</span> Actif</span></td>
+                            <td><button class="btn-copy" onclick="downloadInvoice('REACT-2024-456')">Télécharger</button></td>
+                        </tr>
+                        <tr>
+                            <td>20/01/2024</td>
+                            <td style="font-weight: 600;">Introduction à la Programmation</td>
+                            <td>€ 89.99</td>
+                            <td><code>PROG-2024-001</code></td>
+                            <td><span style="color: var(--accent-teal); font-weight: 600; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;"><span class="material-symbols-outlined" style="font-size: 0.9rem;">check_circle</span> Terminé</span></td>
+                            <td><button class="btn-copy" onclick="downloadInvoice('PROG-2024-001')">Télécharger</button></td>
+                        </tr>
+                        <tr>
+                            <td>05/01/2024</td>
+                            <td style="font-weight: 600;">Base de Données SQL</td>
+                            <td>€ 119.99</td>
+                            <td><code>SQL-2024-123</code></td>
+                            <td><span style="color: var(--accent-teal); font-weight: 600; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;"><span class="material-symbols-outlined" style="font-size: 0.9rem;">check_circle</span> Terminé</span></td>
+                            <td><button class="btn-copy" onclick="downloadInvoice('SQL-2024-123')">Télécharger</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding: 1.2rem; background: var(--light-blue); border-radius: var(--border-radius-2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="margin-bottom: 0.4rem; font-size: 1.1rem;">Total dépensé: <span style="color: var(--primary-blue);">€ 529.96</span></h3>
+                        <p style="color: var(--text-light); font-size: 0.85rem;">Vous bénéficiez d'une réduction de 15% sur votre prochain achat!</p>
+                    </div>
+                    <div style="display: flex; gap: 0.8rem;">
+                        <button class="btn btn-primary" onclick="applyCoupon()">
+                            <span class="material-symbols-outlined">local_offer</span>
+                            Utiliser coupon
+                        </button>
+                        <button class="btn btn-secondary" onclick="referFriend()">
+                            <span class="material-symbols-outlined">share</span>
+                            Parrainer un ami
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function exportToPDF() {
+        alert('Exportation en PDF simulée. Dans une application réelle, cela générerait un PDF avec vos achats.');
+    }
+
+    function downloadInvoice(code) {
+        alert(`Téléchargement de la facture pour le code: ${code}\nDans une application réelle, cela téléchargerait un fichier PDF.`);
+    }
+
+    function applyCoupon() {
+        const coupon = prompt('Entrez votre code promo:');
+        if (coupon) {
+            alert(`Code promo "${coupon}" appliqué avec succès!`);
+        }
+    }
+
+    function referFriend() {
+        const friendEmail = prompt('Entrez l\'email de votre ami:');
+        if (friendEmail) {
+            alert(`Invitation envoyée à ${friendEmail}! Votre ami recevra 10% de réduction sur son premier achat.`);
+        }
+    }
+
+    // Theme toggler
+    const themeToggler = document.querySelector(".theme-toggler");
+    
+    themeToggler.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme-variables');
+        themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
+        themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
+        
+        const isDarkMode = document.body.classList.contains('dark-theme-variables');
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    });
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme-variables');
+        themeToggler.querySelector('span:nth-child(1)').classList.remove('active');
+        themeToggler.querySelector('span:nth-child(2)').classList.add('active');
+    }
+
+    // Logout button
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
+            alert('Vous avez été déconnecté avec succès.');
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,1450 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Cours - LearnHub{% endblock %}
+
+{% block extra_styles %}
+    <style>
+       
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .certificate-count {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            background: var(--bg-light);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Certificate Stats */
+        .certificate-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-blue);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .stat-icon.completed {
+            background: var(--gradient-green);
+        }
+
+        .stat-icon.in-progress {
+            background: var(--gradient-orange);
+        }
+
+        .stat-icon.score {
+            background: var(--gradient-purple);
+        }
+
+        .stat-icon.share {
+            background: var(--gradient-blue);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Certificates Grid */
+        .certificates-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 0.3rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Certificates Grid */
+        .certificates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .certificates-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .certificate-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-blue);
+        }
+
+        .certificate-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            color: white;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+        }
+
+        .certificate-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .certificate-type {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .certificate-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .certificate-meta {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .certificate-body {
+            padding: 2rem;
+        }
+
+        .certificate-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .skills-earned {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .skill-badge {
+            padding: 0.3rem 0.8rem;
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .certificate-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-light);
+        }
+
+        .certificate-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .certificate-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-btn-cert {
+            background: var(--gradient-blue);
+            color: white;
+        }
+
+        .view-btn-cert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .share-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .share-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        /* Certificate Preview Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .certificate-preview {
+            padding: 3rem;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            text-align: center;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            background-size: cover;
+        }
+
+        .certificate-border {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        .certificate-logo {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: var(--certificate-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .certificate-preview-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .certificate-of {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+
+        .recipient-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #4A90E2;
+            margin: 2rem 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .certificate-text {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .certificate-details {
+            display: flex;
+            justify-content: space-around;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .signature {
+            text-align: center;
+        }
+
+        .signature-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .signature-title {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            background: var(--bg-white);
+        }
+
+        .modal-btn {
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn {
+            background: var(--gradient-blue);
+            color: white;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .close-btn {
+            background: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .close-btn:hover {
+            background: #e5e7eb;
+        }
+
+        /* Share Modal */
+        .share-modal .modal-content {
+            max-width: 500px;
+        }
+
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-option:hover {
+            background: var(--light-blue);
+            transform: translateY(-2px);
+        }
+
+        .share-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .share-icon.linkedin {
+            background: #0077B5;
+        }
+
+        .share-icon.twitter {
+            background: #1DA1F2;
+        }
+
+        .share-icon.facebook {
+            background: #4267B2;
+        }
+
+        .share-icon.whatsapp {
+            background: #25D366;
+        }
+
+        .share-icon.email {
+            background: var(--primary-blue);
+        }
+
+        .share-icon.link {
+            background: var(--accent-green);
+        }
+
+        .share-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* In Progress Certificates */
+        .in-progress-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .progress-card {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .progress-card:hover {
+            transform: translateX(5px);
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-card-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .progress-percentage {
+            font-weight: 600;
+            color: var(--accent-orange);
+        }
+
+        .progress-bar-small {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-orange);
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .time-remaining {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .sidebar-logo-text,
+            .user-info,
+            .nav-text,
+            .logout-btn span:last-child {
+                display: none;
+            }
+            
+            .user-profile {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+            
+            .logout-btn {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .certificate-details {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .signatures {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            .share-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .certificate-footer {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .certificate-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .modal-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Menu Toggle Button */
+        .menu-toggle {
+            display: none;
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .certificate-card, .stat-card, .progress-card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Certificate Shine Effect */
+        .certificate-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: left 0.7s;
+        }
+
+        .certificate-card:hover::after {
+            left: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Mes Certifications 🏆</h1>
+                    <p>Visualisez et partagez vos accomplissements</p>
+                </div>
+                <div class="certificate-count">
+                    <i class="fas fa-trophy"></i>
+                    <span>3 certifications obtenues</span>
+                </div>
+            </div>
+
+            <!-- Certificate Stats -->
+            <div class="certificate-stats">
+                <div class="stat-card">
+                    <div class="stat-icon completed">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Certifications obtenues</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon in-progress">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">En cours d'acquisition</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon score">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value">92%</div>
+                    <div class="stat-label">Score moyen</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon share">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <div class="stat-value">18</div>
+                    <div class="stat-label">Partages</div>
+                </div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div class="certificates-section">
+                <div class="section-header">
+                    <h2 class="section-title">Certifications obtenues</h2>
+                    <div class="view-toggle">
+                        <button class="view-btn active">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Certificates Grid -->
+                <div class="certificates-grid" id="certificatesGrid">
+                    <!-- Certificate 1 -->
+                    <div class="certificate-card" data-id="1">
+                        <div class="certificate-header">
+                            <div class="certificate-badge">
+                                <i class="fas fa-award"></i> Excellence
+                            </div>
+                            <span class="certificate-type">Développement Web</span>
+                            <h3 class="certificate-title">Certification React Avancé</h3>
+                            <div class="certificate-meta">
+                                <div class="meta-item">
+                                    <i class="far fa-calendar"></i> 15 Nov 2023
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-star"></i> 95%
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i> 42h
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-body">
+                            <p class="certificate-description">
+                                Certification validant la maîtrise des concepts avancés de React, 
+                                y compris les Hooks, Context API, et les meilleures pratiques de performance.
+                            </p>
+                            
+                            <div class="skills-earned">
+                                <span class="skill-badge">
+                                    <i class="fab fa-react"></i> React Hooks
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-code"></i> Context API
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-tachometer-alt"></i> Performance
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-vial"></i> Testing
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-footer">
+                            <div class="certificate-actions">
+                                <button class="certificate-btn view-btn-cert" onclick="viewCertificate(1)">
+                                    <i class="fas fa-eye"></i> Voir le certificat
+                                </button>
+                                <button class="certificate-btn share-btn" onclick="shareCertificate(1)">
+                                    <i class="fas fa-share-alt"></i> Partager
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificate 2 -->
+                    <div class="certificate-card" data-id="2">
+                        <div class="certificate-header" style="background: linear-gradient(135deg, #9B51E0, #6A0DAD);">
+                            <div class="certificate-badge">
+                                <i class="fas fa-graduation-cap"></i> Distinction
+                            </div>
+                            <span class="certificate-type">Data Science</span>
+                            <h3 class="certificate-title">Machine Learning Fundamentals</h3>
+                            <div class="certificate-meta">
+                                <div class="meta-item">
+                                    <i class="far fa-calendar"></i> 05 Nov 2023
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-star"></i> 89%
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i> 56h
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-body">
+                            <p class="certificate-description">
+                                Certification attestant des compétences fondamentales en machine learning, 
+                                incluant la préparation des données, la modélisation et l'évaluation.
+                            </p>
+                            
+                            <div class="skills-earned">
+                                <span class="skill-badge">
+                                    <i class="fab fa-python"></i> Python
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-brain"></i> Scikit-learn
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-chart-line"></i> Data Analysis
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-project-diagram"></i> ML Models
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-footer">
+                            <div class="certificate-actions">
+                                <button class="certificate-btn view-btn-cert" onclick="viewCertificate(2)">
+                                    <i class="fas fa-eye"></i> Voir le certificat
+                                </button>
+                                <button class="certificate-btn share-btn" onclick="shareCertificate(2)">
+                                    <i class="fas fa-share-alt"></i> Partager
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificate 3 -->
+                    <div class="certificate-card" data-id="3">
+                        <div class="certificate-header" style="background: linear-gradient(135deg, #27AE60, #2ECC71);">
+                            <div class="certificate-badge">
+                                <i class="fas fa-medal"></i> Excellence
+                            </div>
+                            <span class="certificate-type">Design</span>
+                            <h3 class="certificate-title">UI/UX Design Professional</h3>
+                            <div class="certificate-meta">
+                                <div class="meta-item">
+                                    <i class="far fa-calendar"></i> 28 Oct 2023
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-star"></i> 92%
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i> 38h
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-body">
+                            <p class="certificate-description">
+                                Certification professionnelle en design d'interface et expérience utilisateur, 
+                                validant les compétences en recherche utilisateur et prototypage.
+                            </p>
+                            
+                            <div class="skills-earned">
+                                <span class="skill-badge">
+                                    <i class="fab fa-figma"></i> Figma
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-user-friends"></i> User Research
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-paint-brush"></i> Prototypage
+                                </span>
+                                <span class="skill-badge">
+                                    <i class="fas fa-sitemap"></i> Design System
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-footer">
+                            <div class="certificate-actions">
+                                <button class="certificate-btn view-btn-cert" onclick="viewCertificate(3)">
+                                    <i class="fas fa-eye"></i> Voir le certificat
+                                </button>
+                                <button class="certificate-btn share-btn" onclick="shareCertificate(3)">
+                                    <i class="fas fa-share-alt"></i> Partager
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- In Progress Section -->
+            <div class="in-progress-section">
+                <h2 class="section-title">Certifications en cours</h2>
+                <p style="color: var(--text-light); margin-bottom: 1rem;">Continuez votre apprentissage pour débloquer ces certifications</p>
+                
+                <div class="progress-cards">
+                    <div class="progress-card">
+                        <div class="progress-card-header">
+                            <div class="progress-card-title">Full Stack Development</div>
+                            <div class="progress-percentage">65%</div>
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill" style="width: 65%;"></div>
+                        </div>
+                        <div class="time-remaining">
+                            <i class="far fa-clock"></i>
+                            <span>Terminez dans 3 semaines</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-card-header">
+                            <div class="progress-card-title">Data Analysis with Python</div>
+                            <div class="progress-percentage">42%</div>
+                        </div>
+                        <div class="progress-bar-small">
+                            <div class="progress-fill" style="width: 42%;"></div>
+                        </div>
+                        <div class="time-remaining">
+                            <i class="far fa-clock"></i>
+                            <span>Terminez dans 6 semaines</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- Certificate Preview Modal -->
+    <div class="modal" id="certificateModal">
+        <div class="modal-content">
+            <div class="certificate-preview" id="certificatePreview">
+                <div class="certificate-border"></div>
+                
+                <div class="certificate-logo">
+                    🎓
+                </div>
+                
+                <h2 class="certificate-preview-title">CERTIFICAT DE RÉUSSITE</h2>
+                
+                <div class="certificate-of">
+                    Ce document certifie que
+                </div>
+                
+                <div class="recipient-name" id="recipientName">Étudiant LearnHub</div>
+                
+                <div class="certificate-text">
+                    a suivi avec succès le cours et a démontré une compréhension approfondie 
+                    des concepts et techniques enseignés, obtenant une performance exceptionnelle 
+                    lors des évaluations.
+                </div>
+                
+                <div class="certificate-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Date d'émission</div>
+                        <div class="detail-value" id="issueDate">15 Nov 2023</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Score obtenu</div>
+                        <div class="detail-value" id="certificateScore">95%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Identifiant</div>
+                        <div class="detail-value" id="certificateId">LH-2023-001</div>
+                    </div>
+                </div>
+                
+                <div class="signatures">
+                    <div class="signature">
+                        <div style="width: 150px; height: 2px; background: white; margin: 0 auto;"></div>
+                        <div class="signature-name">Dr. Sarah Johnson</div>
+                        <div class="signature-title">Directrice Pédagogique</div>
+                    </div>
+                    <div class="signature">
+                        <div style="width: 150px; height: 2px; background: white; margin: 0 auto;"></div>
+                        <div class="signature-name">LearnHub Academy</div>
+                        <div class="signature-title">Institution Accréditée</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn download-btn" onclick="downloadCertificate()">
+                    <i class="fas fa-download"></i> Télécharger (PDF)
+                </button>
+                <button class="modal-btn close-btn" onclick="closeCertificateModal()">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal share-modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color);">
+                <h3 class="modal-title">Partager la certification</h3>
+                <button class="close-modal" onclick="closeShareModal()">&times;</button>
+            </div>
+            
+            <div style="padding: 2rem;">
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+                    Partagez votre certification sur vos réseaux ou copiez le lien pour le partager.
+                </p>
+                
+                <div class="share-options">
+                    <div class="share-option" onclick="shareOnLinkedIn()">
+                        <div class="share-icon linkedin">
+                            <i class="fab fa-linkedin-in"></i>
+                        </div>
+                        <div class="share-label">LinkedIn</div>
+                    </div>
+                    
+                    <div class="share-option" onclick="shareOnTwitter()">
+                        <div class="share-icon twitter">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div class="share-label">Twitter</div>
+                    </div>
+                    
+                    <div class="share-option" onclick="shareOnFacebook()">
+                        <div class="share-icon facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <div class="share-label">Facebook</div>
+                    </div>
+                    
+                    <div class="share-option" onclick="shareOnWhatsApp()">
+                        <div class="share-icon whatsapp">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="share-label">WhatsApp</div>
+                    </div>
+                    
+                    <div class="share-option" onclick="shareByEmail()">
+                        <div class="share-icon email">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="share-label">Email</div>
+                    </div>
+                    
+                    <div class="share-option" onclick="copyCertificateLink()">
+                        <div class="share-icon link">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="share-label">Copier le lien</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-dark);">
+                        Lien de partage
+                    </label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="certificateLink" value="https://learnhub.com/certificates/LH-2023-001" 
+                               style="flex: 1; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px;"
+                               readonly>
+                        <button onclick="copyCertificateLink()" style="padding: 0.8rem 1.5rem; background: var(--gradient-blue); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Copier
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Certificate data
+            const certificates = {
+                1: {
+                    title: "Certification React Avancé",
+                    issueDate: "15 Nov 2023",
+                    score: "95%",
+                    id: "LH-2023-001",
+                    category: "Développement Web"
+                },
+                2: {
+                    title: "Machine Learning Fundamentals",
+                    issueDate: "05 Nov 2023",
+                    score: "89%",
+                    id: "LH-2023-002",
+                    category: "Data Science"
+                },
+                3: {
+                    title: "UI/UX Design Professional",
+                    issueDate: "28 Oct 2023",
+                    score: "92%",
+                    id: "LH-2023-003",
+                    category: "Design"
+                }
+            };
+
+            // View toggle buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const isGrid = this.querySelector('.fa-th-large');
+                    const certificatesGrid = document.getElementById('certificatesGrid');
+                    
+                    if (isGrid) {
+                        certificatesGrid.classList.remove('list-view');
+                        certificatesGrid.classList.add('grid-view');
+                    } else {
+                        certificatesGrid.classList.remove('grid-view');
+                        certificatesGrid.classList.add('list-view');
+                    }
+                });
+            });
+
+            // Mobile menu toggle
+            if (window.innerWidth < 480) {
+                const menuToggle = document.createElement('button');
+                menuToggle.className = 'menu-toggle';
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                document.querySelector('.top-bar').prepend(menuToggle);
+                
+                menuToggle.addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.toggle('active');
+                });
+            }
+
+            // Logout button
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if (confirm('Retourner à la page de connexion ?')) {
+                    window.location.href = "/login/";
+                }
+            });
+
+            // Animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            document.querySelectorAll('.certificate-card, .stat-card, .progress-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Add shine effect to certificate cards
+            document.querySelectorAll('.certificate-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+
+        // Global functions for certificate actions
+        function viewCertificate(certificateId) {
+            const cert = certificates[certificateId];
+            if (!cert) return;
+            
+            // Update modal content
+            document.getElementById('certificatePreview').querySelector('.certificate-preview-title').textContent = cert.title;
+            document.getElementById('issueDate').textContent = cert.issueDate;
+            document.getElementById('certificateScore').textContent = cert.score;
+            document.getElementById('certificateId').textContent = cert.id;
+            
+            // Show modal
+            document.getElementById('certificateModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificateModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function shareCertificate(certificateId) {
+            const cert = certificates[certificateId];
+            if (!cert) return;
+            
+            // Update share link
+            document.getElementById('certificateLink').value = 
+                `https://learnhub.com/certificates/${cert.id}`;
+            
+            // Show share modal
+            document.getElementById('shareModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function downloadCertificate() {
+            // In a real app, this would generate/download a PDF
+            alert('Téléchargement du certificat en PDF...\n\nFonctionnalité de génération PDF à implémenter.');
+        }
+
+        // Share functions
+        function shareOnLinkedIn() {
+            const link = document.getElementById('certificateLink').value;
+            const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(link)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareOnTwitter() {
+            const link = document.getElementById('certificateLink').value;
+            const text = "J'ai obtenu une certification sur LearnHub! 🎓";
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareOnFacebook() {
+            const link = document.getElementById('certificateLink').value;
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareOnWhatsApp() {
+            const link = document.getElementById('certificateLink').value;
+            const text = "Regarde ma nouvelle certification! 🎓 " + link;
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareByEmail() {
+            const link = document.getElementById('certificateLink').value;
+            const subject = "Ma certification LearnHub";
+            const body = `Bonjour,\n\nJe voulais partager avec toi ma nouvelle certification obtenue sur LearnHub!\n\nTu peux la voir ici: ${link}\n\nÀ bientôt!`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        function copyCertificateLink() {
+            const linkInput = document.getElementById('certificateLink');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // For mobile devices
+            
+            try {
+                navigator.clipboard.writeText(linkInput.value).then(() => {
+                    alert('Lien copié dans le presse-papier!');
+                });
+            } catch (err) {
+                // Fallback for older browsers
+                document.execCommand('copy');
+                alert('Lien copié dans le presse-papier!');
+            }
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            const certModal = document.getElementById('certificateModal');
+            const shareModal = document.getElementById('shareModal');
+            
+            if (event.target === certModal) {
+                closeCertificateModal();
+            }
+            
+            if (event.target === shareModal) {
+                closeShareModal();
+            }
+        });
+
+        // Escape key to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCertificateModal();
+                closeShareModal();
+            }
+        });
+    </script>
+{% endblock %}

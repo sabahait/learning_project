@@ -526,6 +526,22 @@
                 gap: 0.8rem;
             }
         }
+
+ .user-avatar-container:hover .avatar-overlay {
+    display: flex;
+}
+
+.user-avatar-container:hover .user-avatar {
+    opacity: 0.7;
+}
+
+#profileAvatar {
+    transition: opacity 0.3s ease;
+}
+
+input[type="file"] {
+    display: none;
+}
     </style>
 </head>
 <body>
@@ -578,9 +594,28 @@
 </form>
             
             <div class="user-info">
-                <div class="user-avatar">JD</div>
+                <!-- MODIFICATION ICI : Avatar dans la navbar -->
+                <div class="user-avatar" id="navbarAvatar" 
+     style="background: var(--gradient-purple); cursor: pointer;">
+    {% if user.photo_profil %}
+        {% with photo_url=user.photo_profil.url|default:'' %}
+            {% if photo_url %}
+                <!-- IMPORTANT: Utiliser /media/profile_photos/ pour le proxy main server -->
+                {% with filename=photo_url|cut:'/media/profiles/'|cut:'/media/profile_photos/' %}
+                    <img src="/media/profile_photos/{{ filename }}" 
+                         alt="Photo de profil"
+                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% endwith %}
+            {% else %}
+                {{ user.username|slice:":1"|upper }}
+            {% endif %}
+        {% endwith %}
+    {% else %}
+        {{ user.username|slice:":1"|upper }}
+    {% endif %}
+</div>
                 <div class="user-details">
-                    <h4> {{ user.username|upper }}</h4>
+                    <h4>{{ user.username|upper }}</h4>
                     <p>Étudiant <span class="premium-badge">PREMIUM</span></p>
                 </div>
             </div>
@@ -610,52 +645,132 @@
                 </button>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
-                <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); text-align: center; box-shadow: var(--shadow-card); border: 1px solid var(--border-color);">
-                    <div class="user-avatar" style="width: 4rem; height: 4rem; font-size: 1.4rem; margin: 0 auto 0.8rem; background: var(--gradient-purple);">JD</div>
-                    <h3>{{ user.username|upper }}</h3>
-                    <p style="color: var(--text-light); margin-bottom: 0.8rem; font-size: 0.9rem;">Étudiant Premium</p>
-                    <div style="margin-bottom: 1.2rem; padding: 0.8rem; background: var(--bg-light); border-radius: var(--border-radius-1);">
-                        <div style="font-size: 0.8rem; color: var(--text-light);">Membre depuis</div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">Janvier 2024</div>
-                    </div>
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+    <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); text-align: center; box-shadow: var(--shadow-card); border: 1px solid var(--border-color); position: relative;">
+        <!-- Photo de profil avec bouton de changement -->
+        <div class="user-avatar-container" style="position: relative; display: inline-block; margin-bottom: 0.8rem;">
+           <div class="user-avatar" id="profileAvatar" 
+     style="width: 8rem; height: 8rem; font-size: 2.5rem; margin: 0 auto; background: var(--gradient-purple); 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;">
+    {% if user.photo_profil %}
+        {% with photo_url=user.photo_profil.url|default:'' %}
+            {% if photo_url %}
+                <!-- IMPORTANT: Utiliser /media/profile_photos/ pour le proxy main server -->
+                {% with filename=photo_url|cut:'/media/profiles/'|cut:'/media/profile_photos/' %}
+                    <img src="/media/profile_photos/{{ filename }}" 
+                         alt="Photo de profil" 
+                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% endwith %}
+            {% else %}
+                {{ user.username|slice:":1"|upper }}
+            {% endif %}
+        {% endwith %}
+    {% else %}
+        {{ user.username|slice:":1"|upper }}
+    {% endif %}
+</div>
+            
+            <!-- Bouton de changement overlay -->
+            <div class="avatar-overlay" 
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                        background: rgba(0,0,0,0.5); border-radius: 50%; display: none; 
+                        align-items: center; justify-content: center; cursor: pointer;">
+                <span class="material-symbols-outlined" style="color: white; font-size: 2rem;">
+                    photo_camera
+                </span>
+            </div>
+        </div>
+        
+        <button id="changePhotoBtn" class="btn btn-outline" style="margin-bottom: 1rem; padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+            <span class="material-symbols-outlined" style="font-size: 1rem;">photo_camera</span>
+            Changer la photo
+        </button>
+        
+        <h3 style="font-size: 1.4rem; margin: 1rem 0 0.5rem;">{{ user.username|upper }}</h3>
+        <p style="color: var(--text-light); margin-bottom: 0.8rem; font-size: 0.9rem;">
+            {% if user.is_superuser %}
+                <span style="color: var(--accent-teal); font-weight: 600;">👑 Administrateur</span>
+            {% elif user.user_type == 'teacher' %}
+                <span style="color: var(--secondary-purple); font-weight: 600;">🎓 Enseignant</span>
+            {% else %}
+                <span style="color: var(--primary-blue); font-weight: 600;">📚 Étudiant</span> 
+                {% if user.is_premium %}<span class="premium-badge" style="margin-left: 0.5rem;">PREMIUM</span>{% endif %}
+            {% endif %}
+        </p>
+        
+        <div style="margin-bottom: 1.2rem; padding: 1rem; background: var(--bg-light); border-radius: var(--border-radius-1);">
+            <div style="font-size: 0.8rem; color: var(--text-light);">Membre depuis</div>
+            <div style="font-weight: 600; font-size: 1rem;">
+                {{ user.date_joined|date:"F Y"|default:"Janvier 2024" }}
+            </div>
+        </div>
+    </div>
+    
+    <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); box-shadow: var(--shadow-card); border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.3rem;">Détails du Compte</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">mail</span>
+                    Email
                 </div>
-                
-                <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); box-shadow: var(--shadow-card); border: 1px solid var(--border-color);">
-                    <h3 style="margin-bottom: 1.2rem;">Détails du Compte</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.3rem;">Email</div>
-                            <div style="font-weight: 600; font-size: 0.95rem;" id="userEmail">john.doe@email.com</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.3rem;">Téléphone</div>
-                            <div style="font-weight: 600; font-size: 0.95rem;" id="userPhone">+33 6 12 34 56 78</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.3rem;">Pays</div>
-                            <div style="font-weight: 600; font-size: 0.95rem;" id="userCountry">France</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.3rem;">Langue</div>
-                            <div style="font-weight: 600; font-size: 0.95rem;" id="userLanguage">Français</div>
-                        </div>
-                    </div>
-                    
-                    <h3 style="margin-bottom: 1.2rem; margin-top: 2rem;">Préférences</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.3rem;">Notifications email</div>
-                            <div style="font-weight: 600; font-size: 0.95rem; color: var(--accent-teal);">Activées</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.3rem;">Mode sombre</div>
-                            <div style="font-weight: 600; font-size: 0.95rem;" id="darkModeStatus">Désactivé</div>
-                        </div>
-                    </div>
+                <div style="font-weight: 600; font-size: 1rem; padding: 0.5rem; background: var(--bg-light); border-radius: var(--border-radius-1);" id="userEmail">
+                    {{ user.email|default:"Non spécifié" }}
                 </div>
             </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">call</span>
+                    Téléphone
+                </div>
+                <div style="font-weight: 600; font-size: 1rem; padding: 0.5rem; background: var(--bg-light); border-radius: var(--border-radius-1);" id="userPhone">
+                    {{ user.telephone|default:"Non spécifié" }}
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">location_on</span>
+                    Pays
+                </div>
+                <div style="font-weight: 600; font-size: 1rem; padding: 0.5rem; background: var(--bg-light); border-radius: var(--border-radius-1);" id="userCountry">
+                    {{ user.pays|default:"Non spécifié" }}
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">translate</span>
+                    Langue
+                </div>
+                <div style="font-weight: 600; font-size: 1rem; padding: 0.5rem; background: var(--bg-light); border-radius: var(--border-radius-1);" id="userLanguage">
+                    {{ user.langue|default:"Français" }}
+                </div>
+            </div>
+        </div>
+        
+        <h3 style="margin-bottom: 1.5rem; margin-top: 2rem; font-size: 1.3rem;">Préférences</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">notifications</span>
+                    Notifications email
+                </div>
+                <div style="font-weight: 600; font-size: 1rem; color: var(--accent-teal); padding: 0.5rem; background: var(--bg-light); border-radius: var(--border-radius-1);">
+                    Activées
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">dark_mode</span>
+                    Mode sombre
+                </div>
+                <div style="font-weight: 600; font-size: 1rem; padding: 0.5rem; background: var(--bg-light); border-radius: var(--border-radius-1);" id="darkModeStatus">
+                    Désactivé
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         </div>
 
         <div class="scroll-section">
@@ -670,7 +785,10 @@
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                 <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); box-shadow: var(--shadow-card); border: 1px solid var(--border-color);">
-                    <h3 style="margin-bottom: 1rem;">Changer le mot de passe</h3>
+                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined">lock</span>
+                        Changer le mot de passe
+                    </h3>
                     <div class="form-group">
                         <label class="form-label" for="currentPassword">Mot de passe actuel</label>
                         <input type="password" id="currentPassword" class="form-input" placeholder="••••••••">
@@ -684,21 +802,34 @@
                         <input type="password" id="confirmPassword" class="form-input" placeholder="••••••••">
                     </div>
                     <button class="btn btn-primary btn-full" onclick="changePassword()">
-                        <span class="material-symbols-outlined">lock</span>
+                        <span class="material-symbols-outlined">lock_reset</span>
                         Mettre à jour le mot de passe
                     </button>
                 </div>
                 
                 <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); box-shadow: var(--shadow-card); border: 1px solid var(--border-color);">
-                    <h3 style="margin-bottom: 1rem;">Session active</h3>
+                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined">devices</span>
+                        Session active
+                    </h3>
                     <div style="padding: 1rem; background: var(--bg-light); border-radius: var(--border-radius-1); margin-bottom: 1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <div style="font-weight: 600; font-size: 0.9rem;">Navigateur actuel</div>
-                            <div style="color: var(--accent-teal); font-size: 0.8rem; font-weight: 600;">Active maintenant</div>
+                            <div style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">desktop_windows</span>
+                                Navigateur actuel
+                            </div>
+                            <div style="color: var(--accent-teal); font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem;">
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">check_circle</span>
+                                Active maintenant
+                            </div>
                         </div>
-                        <div style="font-size: 0.8rem; color: var(--text-light);">Chrome • Windows • Paris, France</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">public</span>
+                            Chrome • Windows • Paris, France
+                        </div>
                     </div>
-                    <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">schedule</span>
                         Dernière activité: Il y a 2 minutes
                     </div>
                     <button class="btn btn-outline btn-full" onclick="logoutOtherSessions()">
@@ -712,93 +843,554 @@
 </div>
 
 <script>
-    function editProfile() {
-        const newEmail = prompt('Nouvel email:', document.getElementById('userEmail').textContent);
-        if (newEmail) {
-            document.getElementById('userEmail').textContent = newEmail;
+// Fonction pour mettre à jour le profil
+async function updateProfile(profileData) {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            alert('Non authentifié. Veuillez vous reconnecter.');
+            return { success: false, message: 'Non authentifié' };
         }
         
-        const newPhone = prompt('Nouveau téléphone:', document.getElementById('userPhone').textContent);
-        if (newPhone) {
-            document.getElementById('userPhone').textContent = newPhone;
+        console.log('📤 Envoi des données:', profileData);
+        
+        const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(profileData)
+        });
+        
+        console.log('📡 Status de la réponse:', response.status);
+        
+        const responseText = await response.text();
+        console.log('📦 Réponse brute:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (e) {
+            console.error('❌ Erreur parsing JSON:', e);
+            return { success: false, message: 'Réponse invalide du serveur' };
         }
         
-        const newCountry = prompt('Nouveau pays:', document.getElementById('userCountry').textContent);
-        if (newCountry) {
-            document.getElementById('userCountry').textContent = newCountry;
+        if (response.ok && data.success) {
+            console.log('✅ Profil mis à jour avec succès:', data.message);
+            
+            // Mettre à jour l'affichage
+            if (profileData.email) {
+                document.getElementById('userEmail').textContent = profileData.email;
+            }
+            if (profileData.telephone) {
+                document.getElementById('userPhone').textContent = profileData.telephone;
+            }
+            if (profileData.pays) {
+                document.getElementById('userCountry').textContent = profileData.pays;
+            }
+            if (profileData.langue) {
+                document.getElementById('userLanguage').textContent = profileData.langue;
+            }
+            
+            return { success: true, message: data.message || 'Profil mis à jour' };
+        } else {
+            console.error('❌ Échec mise à jour:', data.error || data.message);
+            return { 
+                success: false, 
+                message: data.error || data.message || 'Erreur lors de la mise à jour' 
+            };
         }
-        
-        alert('Profil mis à jour avec succès!');
+    } catch (error) {
+        console.error('💥 Erreur réseau ou serveur:', error);
+        return { 
+            success: false, 
+            message: 'Erreur de connexion: ' + error.message 
+        };
     }
+}
 
-    function changeProfilePhoto() {
-        alert('Dans une application réelle, cela permettrait de télécharger une nouvelle photo de profil.');
+// Dans votre template profile.html, modifiez getAuthToken() :
+
+function getAuthToken() {
+    console.log('🔍 Récupération du token...');
+    
+    // 1. Depuis localStorage (nettoyer le token)
+    let token = localStorage.getItem('auth_token');
+    if (token) {
+        // Nettoyer le token
+        token = token.trim()
+                    .replace(/['"]+/g, '')  // Enlever les guillemets
+                    .replace(/\s+/g, '');   // Enlever les espaces
+        
+        if (token !== 'undefined' && token !== 'null' && token !== '') {
+            console.log('✅ Token trouvé dans localStorage:', token.substring(0, 20) + '...');
+            return token;
+        }
     }
+    
+    // 2. Depuis la session Django
+    const djangoToken = '{{ request.session.auth_token|default:"" }}';
+    if (djangoToken && djangoToken !== 'None' && djangoToken !== '' && djangoToken !== 'undefined') {
+        const cleanToken = djangoToken.trim()
+                                      .replace(/['"]+/g, '')
+                                      .replace(/\s+/g, '');
+        console.log('✅ Token trouvé dans session Django');
+        return cleanToken;
+    }
+    
+    // 3. Depuis les cookies
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'auth_token' || name === 'token') {
+            const cleanToken = value.trim()
+                                   .replace(/['"]+/g, '')
+                                   .replace(/\s+/g, '');
+            console.log('✅ Token trouvé dans les cookies');
+            return cleanToken;
+        }
+    }
+    
+    console.error('❌ Aucun token valide trouvé');
+    return '';
+}
+// Fonction pour uploader une photo de profil
+async function uploadProfilePhoto(file) {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            return { success: false, message: 'Non authentifié' };
+        }
+        
+        const formData = new FormData();
+        formData.append('photo', file);
+        
+        console.log('📤 Upload photo vers:', '/api/profile/photo/');
+        
+        const response = await fetch('/api/profile/photo/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        const responseText = await response.text();
+        console.log('📡 Réponse upload photo:', response.status, responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (e) {
+            console.error('❌ Erreur parsing JSON:', e);
+            return { success: false, message: 'Réponse invalide du serveur' };
+        }
+        
+        if (response.ok && data.success) {
+            console.log('✅ Photo uploadée avec succès:', data);
+            
+            // Mettre à jour l'image de profil AVEC L'URL COMPLÈTE
+            if (data.photo_url) {
+                const avatar = document.getElementById('profileAvatar');
+                const navbarAvatar = document.getElementById('navbarAvatar');
+                
+                // Préparer l'URL complète
+                let photoUrl = data.photo_url;
+                if (!photoUrl.startsWith('http')) {
+                    // Ajouter le domaine de l'auth server
+                    photoUrl = 'http://127.0.0.1:8001' + photoUrl;
+                }
+                
+                console.log('🖼️ URL photo:', photoUrl);
+                
+                // Mettre à jour l'avatar principal
+                if (avatar) {
+                    avatar.innerHTML = `
+                        <img src="${photoUrl}" 
+                             alt="Photo de profil" 
+                             onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
+                             style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    `;
+                }
+                
+                // Mettre à jour l'avatar de la navbar
+                if (navbarAvatar) {
+                    navbarAvatar.innerHTML = `
+                        <img src="${photoUrl}" 
+                             alt="Photo de profil"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
+                             style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    `;
+                }
+            }
+            
+            return { success: true, message: data.message || 'Photo mise à jour' };
+        } else {
+            return { success: false, message: data.error || 'Erreur lors de l\'upload' };
+        }
+    } catch (error) {
+        console.error('💥 Erreur upload photo:', error);
+        return { success: false, message: 'Erreur de connexion au serveur: ' + error.message };
+    }
+}
 
-    function changePassword() {
-        const currentPassword = document.getElementById('currentPassword').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            alert('Veuillez remplir tous les champs.');
-            return;
+// Fonction pour changer le mot de passe
+async function updatePassword(currentPassword, newPassword, confirmPassword) {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            return { success: false, message: 'Non authentifié' };
         }
         
-        if (newPassword !== confirmPassword) {
-            alert('Les nouveaux mots de passe ne correspondent pas.');
-            return;
-        }
+        const response = await fetch('/api/profile/password/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            })
+        });
         
-        if (newPassword.length < 8) {
-            alert('Le nouveau mot de passe doit contenir au moins 8 caractères.');
-            return;
-        }
+        const data = await response.json();
         
-        alert('Mot de passe mis à jour avec succès!');
+        if (data.success) {
+            // Mettre à jour le token dans localStorage si fourni
+            if (data.tokens && data.tokens.access_token) {
+                localStorage.setItem('auth_token', data.tokens.access_token);
+            }
+            
+            return { success: true, message: data.message || 'Mot de passe changé avec succès' };
+        } else {
+            return { success: false, message: data.error || 'Erreur lors du changement' };
+        }
+    } catch (error) {
+        console.error('Erreur changement mot de passe:', error);
+        return { success: false, message: 'Erreur de connexion au serveur' };
+    }
+}
+
+// MODIFIEZ la fonction editProfile
+async function editProfile() {
+    // Créer un formulaire de modification
+    const modalHtml = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+            <div style="background: var(--bg-white); padding: 2rem; border-radius: var(--card-border-radius); width: 500px; max-width: 90%; max-height: 80vh; overflow-y: auto;">
+                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modifier le profil
+                </h2>
+                
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">mail</span>
+                        Email
+                    </label>
+                    <input type="email" id="editEmail" class="form-input" value="${document.getElementById('userEmail').textContent}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">call</span>
+                        Téléphone
+                    </label>
+                    <input type="text" id="editPhone" class="form-input" value="${document.getElementById('userPhone').textContent}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">location_on</span>
+                        Pays
+                    </label>
+                    <input type="text" id="editCountry" class="form-input" value="${document.getElementById('userCountry').textContent}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">translate</span>
+                        Langue
+                    </label>
+                    <select id="editLanguage" class="form-input">
+                        <option value="fr" ${document.getElementById('userLanguage').textContent === 'Français' ? 'selected' : ''}>Français</option>
+                        <option value="en" ${document.getElementById('userLanguage').textContent === 'English' ? 'selected' : ''}>English</option>
+                        <option value="ar" ${document.getElementById('userLanguage').textContent === 'Arabe' ? 'selected' : ''}>العربية</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button onclick="closeEditModal()" class="btn btn-outline" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined">close</span>
+                        Annuler
+                    </button>
+                    <button onclick="saveProfileChanges()" class="btn btn-primary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined">save</span>
+                        Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.innerHTML = modalHtml;
+    modal.id = 'editProfileModal';
+    document.body.appendChild(modal);
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('editProfileModal');
+    if (modal) modal.remove();
+}
+
+async function saveProfileChanges() {
+    const email = document.getElementById('editEmail').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const country = document.getElementById('editCountry').value.trim();
+    const language = document.getElementById('editLanguage').value;
+    
+    console.log('💾 Données à sauvegarder:', { email, phone, country, language });
+    
+    // Validation
+    if (!email) {
+        alert('❌ L\'email est obligatoire');
+        return;
+    }
+    
+    // Validation email simple
+    if (!validateEmail(email)) {
+        alert('❌ Veuillez entrer un email valide (ex: nom@domaine.com)');
+        return;
+    }
+    
+    // Afficher un indicateur de chargement
+    const saveBtn = document.querySelector('#editProfileModal button[onclick="saveProfileChanges()"]');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Sauvegarde...';
+    saveBtn.disabled = true;
+    
+    const profileData = {
+        email: email,
+        telephone: phone || '',
+        pays: country || '',
+        langue: language === 'fr' ? 'Français' : 
+                language === 'en' ? 'English' : 
+                language === 'ar' ? 'Arabe' : 'Français'
+    };
+    
+    console.log('📤 Envoi des données:', profileData);
+    
+    const result = await updateProfile(profileData);
+    
+    // Restaurer le bouton
+    saveBtn.innerHTML = originalText;
+    saveBtn.disabled = false;
+    
+    if (result.success) {
+        alert('✅ ' + result.message);
+        closeEditModal();
+        
+        console.log('✅ Profil mis à jour avec succès');
+    } else {
+        alert('❌ Erreur: ' + result.message);
+        console.error('❌ Échec mise à jour profil:', result.message);
+    }
+}
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// MODIFIEZ la fonction changePassword
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('❌ Veuillez remplir tous les champs.');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert('❌ Les nouveaux mots de passe ne correspondent pas.');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        alert('❌ Le nouveau mot de passe doit contenir au moins 8 caractères.');
+        return;
+    }
+    
+    // Afficher un indicateur de chargement
+    const btn = document.querySelector('button[onclick="changePassword()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Modification...';
+    btn.disabled = true;
+    
+    const result = await updatePassword(currentPassword, newPassword, confirmPassword);
+    
+    // Restaurer le bouton
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    
+    if (result.success) {
+        alert('✅ ' + result.message);
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
+    } else {
+        alert('❌ Erreur: ' + result.message);
     }
+}
 
-    function logoutOtherSessions() {
-        if (confirm('Voulez-vous déconnecter toutes les autres sessions?')) {
-            alert('Toutes les autres sessions ont été déconnectées.');
-        }
-    }
-
-    // Theme toggler
-    const themeToggler = document.querySelector(".theme-toggler");
+// Gestion du changement de photo
+function handleProfilePhotoChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
     
-    themeToggler.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme-variables');
-        themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
-        themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
+    // Vérifier le type de fichier
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('❌ Type de fichier non autorisé. Utilisez JPG, PNG, GIF ou WebP.');
+        return;
+    }
+    
+    // Vérifier la taille (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('❌ La photo est trop grande (max 5MB).');
+        return;
+    }
+    
+    // Afficher un indicateur de chargement
+    const avatar = document.getElementById('profileAvatar');
+    const originalContent = avatar.innerHTML;
+    avatar.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: rgba(255,255,255,0.8); border-radius: 50%;">
+            <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--primary-blue);">hourglass_empty</span>
+        </div>
+    `;
+    
+    // Désactiver le bouton
+    const changePhotoBtn = document.getElementById('changePhotoBtn');
+    if (changePhotoBtn) {
+        changePhotoBtn.disabled = true;
+        changePhotoBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Upload en cours...';
+    }
+    
+    // Uploader la photo
+    uploadProfilePhoto(file).then(result => {
+        // Restaurer le bouton
+        if (changePhotoBtn) {
+            changePhotoBtn.disabled = false;
+            changePhotoBtn.innerHTML = '<span class="material-symbols-outlined">photo_camera</span> Changer la photo';
+        }
         
-        const isDarkMode = document.body.classList.contains('dark-theme-variables');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-        
-        // Update dark mode status display
-        document.getElementById('darkModeStatus').textContent = isDarkMode ? 'Activé' : 'Désactivé';
-        document.getElementById('darkModeStatus').style.color = isDarkMode ? 'var(--accent-teal)' : 'inherit';
+        if (!result.success) {
+            alert('❌ Erreur: ' + result.message);
+            // Restaurer l'avatar original
+            avatar.innerHTML = originalContent;
+        } else {
+            alert('✅ ' + result.message);
+        }
     });
+}
 
-    // Check for saved theme preference
+// Gestion du mode sombre (exemple)
+function toggleDarkMode() {
+    const body = document.body;
+    const isDark = body.classList.contains('dark-theme-variables');
+    
+    if (isDark) {
+        body.classList.remove('dark-theme-variables');
+        document.getElementById('darkModeStatus').textContent = 'Désactivé';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.classList.add('dark-theme-variables');
+        document.getElementById('darkModeStatus').textContent = 'Activé';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Page profil chargée');
+    
+    // Vérifier le token
+    const token = getAuthToken();
+    console.log('🔑 Token disponible:', token ? 'OUI' : 'NON');
+    
+    // Input file caché pour la photo
+    const photoInput = document.createElement('input');
+    photoInput.type = 'file';
+    photoInput.accept = 'image/*';
+    photoInput.id = 'photoUploadInput';
+    photoInput.style.display = 'none';
+    document.body.appendChild(photoInput);
+    
+    // Gestionnaire de changement de photo
+    photoInput.addEventListener('change', handleProfilePhotoChange);
+    
+    // Événements pour déclencher l'upload
+    const changePhotoBtn = document.getElementById('changePhotoBtn');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const avatarOverlay = document.querySelector('.avatar-overlay');
+    const navbarAvatar = document.getElementById('navbarAvatar');
+    
+    if (changePhotoBtn) {
+        changePhotoBtn.addEventListener('click', function() {
+            photoInput.click();
+        });
+    }
+    
+    if (profileAvatar) {
+        profileAvatar.addEventListener('click', function() {
+            photoInput.click();
+        });
+    }
+    
+    if (avatarOverlay) {
+        avatarOverlay.addEventListener('click', function() {
+            photoInput.click();
+        });
+    }
+    
+    if (navbarAvatar) {
+        navbarAvatar.addEventListener('click', function() {
+            photoInput.click();
+        });
+    }
+    
+    // Gestion du survol de l'avatar
+    if (profileAvatar) {
+        const overlay = document.querySelector('.avatar-overlay');
+        profileAvatar.addEventListener('mouseenter', function() {
+            if (overlay) overlay.style.display = 'flex';
+        });
+        
+        profileAvatar.addEventListener('mouseleave', function() {
+            if (overlay) overlay.style.display = 'none';
+        });
+    }
+    
+    // Charger le thème sauvegardé
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme-variables');
-        themeToggler.querySelector('span:nth-child(1)').classList.remove('active');
-        themeToggler.querySelector('span:nth-child(2)').classList.add('active');
         document.getElementById('darkModeStatus').textContent = 'Activé';
-        document.getElementById('darkModeStatus').style.color = 'var(--accent-teal)';
     }
-
-    // Logout button
-    document.getElementById('logout-btn').addEventListener('click', function() {
-        if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
-            alert('Vous avez été déconnecté avec succès.');
-        }
-    });
+    
+    // Gestionnaire pour le toggler de thème
+    const themeToggler = document.querySelector('.theme-toggler');
+    if (themeToggler) {
+        themeToggler.addEventListener('click', toggleDarkMode);
+    }
+});
 </script>
 </body>
 </html>

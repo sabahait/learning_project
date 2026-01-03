@@ -20,6 +20,9 @@
             --text: #1e293b;
             --text-light: #64748b;
             --white: #ffffff;
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
+            --success: #10b981;
             --radius: 24px;
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -210,9 +213,32 @@
             font-weight: 300;
         }
         
+        /* Styles pour les champs Django */
         .form-group {
             margin-bottom: 25px;
             position: relative;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            font-size: 16px;
+            color: var(--white);
+            transition: var(--transition);
+            outline: none;
+            backdrop-filter: blur(10px);
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            border-color: var(--primary-light);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
         }
         
         .floating-label {
@@ -227,27 +253,8 @@
             padding: 0 8px;
         }
         
-        .input-field {
-            width: 100%;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            font-size: 16px;
-            color: var(--white);
-            transition: var(--transition);
-            outline: none;
-            backdrop-filter: blur(10px);
-        }
-        
-        .input-field:focus {
-            border-color: var(--primary-light);
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-        }
-        
-        .input-field:focus + .floating-label,
-        .input-field:not(:placeholder-shown) + .floating-label {
+        .form-group input:focus + .floating-label,
+        .form-group input:not(:placeholder-shown) + .floating-label {
             top: -10px;
             left: 12px;
             font-size: 12px;
@@ -265,8 +272,22 @@
             transition: var(--transition);
         }
         
-        .input-field:focus ~ .input-icon {
+        .form-group input:focus ~ .input-icon {
             color: var(--primary-light);
+        }
+        
+        .error-message {
+            color: #fecaca;
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .error-message i {
+            font-size: 14px;
         }
         
         .remember-forgot {
@@ -473,15 +494,15 @@
         }
         
         .error {
-            background: rgba(239, 68, 68, 0.1);
+            background: var(--error-bg);
             color: #fecaca;
-            border-left: 4px solid #ef4444;
+            border-left: 4px solid var(--error);
         }
         
         .success {
             background: rgba(16, 185, 129, 0.1);
             color: #a7f3d0;
-            border-left: 4px solid #10b981;
+            border-left: 4px solid var(--success);
         }
         
         @media (max-width: 480px) {
@@ -536,7 +557,16 @@
         </div>
         {% endif %}
         
-        <form method="POST" id="loginForm">
+        {% if form.errors %}
+        <div class="messages">
+            <div class="message error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Identifiants incorrects. Veuillez réessayer.</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="" id="loginForm">
             {% csrf_token %}
             
             <div class="form-group">
@@ -545,11 +575,18 @@
                        id="id_username" 
                        class="input-field" 
                        placeholder=" "
+                       value="{{ form.username.value|default_if_none:'' }}"
                        required>
-                <label class="floating-label">Nom d'utilisateur ou email</label>
+                <label class="floating-label">Nom d'utilisateur</label>
                 <div class="input-icon">
                     <i class="fas fa-user"></i>
                 </div>
+                {% if form.username.errors %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.username.errors.0 }}
+                </div>
+                {% endif %}
             </div>
             
             <div class="form-group">
@@ -563,7 +600,18 @@
                 <div class="input-icon">
                     <i class="fas fa-lock"></i>
                 </div>
+                {% if form.password.errors %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.password.errors.0 }}
+                </div>
+                {% endif %}
             </div>
+            
+            <!-- Champ next pour redirection après login -->
+            {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
             
             <div class="remember-forgot">
                 <label class="checkbox-container">
@@ -587,18 +635,18 @@
         </div>
         
         <div class="auth-links">
-            <a href="{% url 'register_html' %}" class="auth-link">
-                <i class="fas fa-user-plus"></i>
-                Nouveau compte
-            </a>
-            <a href="http://127.0.0.1:8000/" class="auth-link">
-                <i class="fas fa-home"></i>
-                Site principal
-            </a>
-            <a href="{% url 'auth_home' %}" class="auth-link">
-                <i class="fas fa-shield-alt"></i>
-                Sécurité
-            </a>
+            <a  href="{% url 'register' %}" class="auth-link">
+    <i class="fas fa-user-plus"></i>
+    Nouveau compte
+</a>
+<a href="http://127.0.0.1:8000/" class="auth-link">
+    <i class="fas fa-home"></i>
+    Site principal
+</a>
+<a href="#" class="auth-link">
+    <i class="fas fa-shield-alt"></i>
+    Sécurité
+</a>
         </div>
     </div>
 
@@ -614,13 +662,22 @@
                     this.parentElement.classList.remove('focused');
                 }
             });
+            
+            // Initialiser l'état si déjà rempli
+            if (input.value) {
+                input.parentElement.classList.add('focused');
+            }
         });
 
         // Effet de soumission du formulaire
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const btn = this.querySelector('.btn-login');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connexion...</span>';
-            btn.disabled = true;
+            const btnContent = btn.querySelector('.btn-content');
+            
+            if (btnContent) {
+                btnContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connexion...</span>';
+                btn.disabled = true;
+            }
         });
 
         // Effet de survol pour les liens

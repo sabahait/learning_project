@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - LearnHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    {% if auth_path %}
+    <iframe 
+        src="http://127.0.0.1:8001{{ auth_path }}?redirect={{ request.GET.redirect|default:'/'|urlencode }}">
+    </iframe>
+    {% else %}
+    <div class="loading">
+        Chargement de la page d'authentification...
+    </div>
+    {% endif %}
+</body>
+</html>

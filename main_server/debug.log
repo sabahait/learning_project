@@ -1,0 +1,4 @@
+INFO 2025-12-31 16:19:19,115 autoreload 5360 7808 Watching for file changes with StatReloader
+INFO 2025-12-31 16:21:25,448 autoreload 5360 7808 C:\Users\pc\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\django\conf\locale\__init__.py changed, reloading.
+INFO 2025-12-31 16:21:38,266 autoreload 3216 12908 Watching for file changes with StatReloader
+INFO 2025-12-31 16:21:54,181 autoreload 3216 12908 C:\Users\pc\Desktop\learning_project\main_server\monprojet\settings.py changed, reloading.

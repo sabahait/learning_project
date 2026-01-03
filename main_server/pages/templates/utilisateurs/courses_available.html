@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+    <!-- PDF Modal - AJOUTEZ CE CODE AVANT </body> -->
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
@@ -344,6 +346,7 @@
             transition: all 0.3s ease;
             border: 1px solid var(--border-color);
             font-size: 0.85rem;
+            position: relative;
         }
         
         .filter-btn.active {
@@ -357,6 +360,56 @@
             background: var(--light-blue);
             color: var(--primary-blue);
             border-color: var(--primary-blue);
+        }
+        
+        .filter-count {
+            margin-left: 0.5rem;
+            background: var(--border-color);
+            color: var(--text-light);
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .filter-btn.active .filter-count {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        /* Loading States */
+        .loading-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: var(--bg-white);
+            border-radius: var(--card-border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--light-blue);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: var(--bg-white);
+            border-radius: var(--card-border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--light-blue);
+            margin-bottom: 1rem;
         }
         
         /* Sections Scrollables */
@@ -590,6 +643,37 @@
             width: 100%;
         }
         
+        .btn-outline {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        
+        .btn-copy {
+            padding: 0.3rem 0.6rem;
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border-radius: var(--border-radius-1);
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-copy:hover {
+            background: var(--gradient-blue);
+            color: white;
+        }
+        
         /* Modal Styles */
         .modal {
             display: none;
@@ -818,6 +902,17 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Animations */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -861,18 +956,18 @@
             </div>
             
             <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
-    {% csrf_token %}
-    <div class="nav-item" onclick="document.getElementById('logout-form').submit();" 
-         style="cursor: pointer;">
-        <span class="material-symbols-outlined">logout</span>
-        Déconnexion
-    </div>
-</form>
+                {% csrf_token %}
+                <div class="nav-item" onclick="document.getElementById('logout-form').submit();" 
+                     style="cursor: pointer;">
+                    <span class="material-symbols-outlined">logout</span>
+                    Déconnexion
+                </div>
+            </form>
             
             <div class="user-info">
                 <div class="user-avatar">JD</div>
                 <div class="user-details">
-                    <h4> {{ user.username|upper }}</h4>
+                    <h4>{{ user.username|upper }}</h4>
                     <p>Étudiant <span class="premium-badge">PREMIUM</span></p>
                 </div>
             </div>
@@ -884,12 +979,12 @@
         <div class="page-header">
             <div>
                 <h1>Cours Disponibles</h1>
-                <p class="text-muted">Explorez notre catalogue de +150 cours professionnels</p>
+                <p class="text-muted">Explorez notre catalogue de cours professionnels</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-secondary">
-                    <span class="material-symbols-outlined">search</span>
-                    Rechercher
+                <button class="btn btn-secondary" onclick="refreshCourses()">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Actualiser
                 </button>
             </div>
         </div>
@@ -904,212 +999,68 @@
             <div class="filter-btn" data-filter="marketing">Marketing</div>
         </div>
 
-        <!-- Development Courses Section -->
-        <div class="scroll-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <span class="material-symbols-outlined">code</span>
-                    </div>
-                    <h2>Développement & Programmation</h2>
-                </div>
-                <a href="#" class="view-all">
-                    Voir plus
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
-            </div>
-            
-            <div class="courses-grid">
-                <!-- Course 1 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Développement Web">
-                        <div class="course-badge badge-bestseller">BESTSELLER</div>
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Développement Web</span>
-                        <h3 class="course-title">Développement Web Full Stack 2024</h3>
-                        <p class="course-description">Devenez développeur full stack avec HTML5, CSS3, JavaScript, React, Node.js et MongoDB.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                85 heures
-                            </span>
-                            <span class="course-level">Débutant à Avancé</span>
-                        </div>
-                        <div class="course-price">
-                            <span class="price-old">€ 199.99</span>
-                            € 149.99
-                        </div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(1)">Acheter maintenant</button>
-                    </div>
-                </div>
-
-                <!-- Course 2 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Python">
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Python</span>
-                        <h3 class="course-title">Python pour Débutants</h3>
-                        <p class="course-description">Apprenez Python de zéro avec des projets pratiques dans la data science, web et automatisation.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                36 heures
-                            </span>
-                            <span class="course-level">Débutant</span>
-                        </div>
-                        <div class="course-price">€ 99.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(2)">Acheter maintenant</button>
-                    </div>
-                </div>
-
-                <!-- Course 3 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Java">
-                        <div class="course-badge badge-new">NOUVEAU</div>
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Java</span>
-                        <h3 class="course-title">Java & Spring Boot Masterclass</h3>
-                        <p class="course-description">Développez des applications Java d'entreprise avec Spring Boot, JPA et microservices.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                62 heures
-                            </span>
-                            <span class="course-level">Intermédiaire</span>
-                        </div>
-                        <div class="course-price">€ 169.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(3)">Acheter maintenant</button>
-                    </div>
-                </div>
-
-                <!-- Course 4 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="C#">
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">C# & .NET</span>
-                        <h3 class="course-title">C# Avancé & ASP.NET Core</h3>
-                        <p class="course-description">Créez des applications web modernes avec C# et le framework ASP.NET Core.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                55 heures
-                            </span>
-                            <span class="course-level">Intermédiaire</span>
-                        </div>
-                        <div class="course-price">€ 159.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(4)">Acheter maintenant</button>
-                    </div>
-                </div>
-            </div>
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state" style="display: none;">
+            <div class="loading-spinner"></div>
+            <h3>Chargement des cours...</h3>
+            <p class="text-muted">Veuillez patienter pendant que nous récupérons les cours disponibles.</p>
         </div>
 
-        <!-- Data Science Courses Section -->
-        <div class="scroll-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <span class="material-symbols-outlined">data_array</span>
-                    </div>
-                    <h2>Data Science & Analyse</h2>
-                </div>
-                <a href="#" class="view-all">
-                    Voir plus
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+                <span class="material-symbols-outlined">menu_book</span>
             </div>
-            
-            <div class="courses-grid">
-                <!-- Course 1 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Data Science">
-                        <div class="course-badge badge-popular">POPULAIRE</div>
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Data Science</span>
-                        <h3 class="course-title">Data Science avec Python</h3>
-                        <p class="course-description">Maîtrisez Pandas, NumPy, Scikit-learn pour l'analyse de données et le machine learning.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                60 heures
-                            </span>
-                            <span class="course-level">Avancé</span>
-                        </div>
-                        <div class="course-price">€ 199.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(5)">Acheter maintenant</button>
-                    </div>
-                </div>
+            <h3>Aucun cours disponible</h3>
+            <p class="text-muted" id="emptyStateMessage">Il n'y a pas de cours disponibles pour le moment.</p>
+            <button class="btn btn-primary" onclick="refreshCourses()">
+                <span class="material-symbols-outlined">refresh</span>
+                Réessayer
+            </button>
+        </div>
 
-                <!-- Course 2 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Data Analysis">
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Analyse de Données</span>
-                        <h3 class="course-title">Analyse de Données avec Excel & Power BI</h3>
-                        <p class="course-description">Devenez expert en analyse de données avec Excel avancé et Power BI pour la visualisation.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                42 heures
-                            </span>
-                            <span class="course-level">Intermédiaire</span>
-                        </div>
-                        <div class="course-price">€ 129.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(6)">Acheter maintenant</button>
-                    </div>
-                </div>
+        <!-- Dynamic Courses Container -->
+        <div id="dynamicCoursesContainer"></div>
 
-                <!-- Course 3 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="SQL">
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Bases de Données</span>
-                        <h3 class="course-title">SQL Complet & Optimisation</h3>
-                        <p class="course-description">Maîtrisez SQL avancé, l'optimisation de requêtes et la modélisation de bases de données.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                38 heures
-                            </span>
-                            <span class="course-level">Tous niveaux</span>
+        <!-- Static sections as fallback (will be hidden when dynamic content loads) -->
+        <div id="staticContent" style="display: none;">
+            <!-- Development Courses Section -->
+            <div class="scroll-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-icon">
+                            <span class="material-symbols-outlined">code</span>
                         </div>
-                        <div class="course-price">€ 119.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(7)">Acheter maintenant</button>
+                        <h2>Développement & Programmation</h2>
                     </div>
+                    <a href="#" class="view-all">
+                        Voir plus
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
                 </div>
+                
+                <div class="courses-grid">
+                    <!-- Static course cards will be replaced by dynamic ones -->
+                </div>
+            </div>
 
-                <!-- Course 4 -->
-                <div class="course-card">
-                    <div class="course-image">
-                        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Machine Learning">
-                    </div>
-                    <div class="course-content">
-                        <span class="course-category">Machine Learning</span>
-                        <h3 class="course-title">Machine Learning Avancé</h3>
-                        <p class="course-description">Apprenez les algorithmes de ML, le deep learning avec TensorFlow et les cas d'utilisation réels.</p>
-                        <div class="course-meta">
-                            <span class="course-duration">
-                                <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
-                                75 heures
-                            </span>
-                            <span class="course-level">Avancé</span>
+            <!-- Data Science Courses Section -->
+            <div class="scroll-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-icon">
+                            <span class="material-symbols-outlined">data_array</span>
                         </div>
-                        <div class="course-price">€ 229.99</div>
-                        <button class="btn btn-primary btn-full" onclick="openPaymentModal(8)">Acheter maintenant</button>
+                        <h2>Data Science & Analyse</h2>
                     </div>
+                    <a href="#" class="view-all">
+                        Voir plus
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+                
+                <div class="courses-grid">
+                    <!-- Static course cards will be replaced by dynamic ones -->
                 </div>
             </div>
         </div>
@@ -1221,135 +1172,677 @@
     </div>
 </div>
 
+<!-- Course Details Modal -->
+<div id="courseDetailsModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3><span class="material-symbols-outlined">info</span> Détails du cours</h3>
+            <button class="close-modal" onclick="closeCourseDetails()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="margin-bottom: 1.5rem;">
+                <h4 id="courseDetailsTitle" style="margin-bottom: 0.5rem;"></h4>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <span id="courseDetailsCategory" style="background: var(--light-blue); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem;"></span>
+                    <span id="courseDetailsLevel" style="background: var(--light-blue); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem;"></span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h5 style="margin-bottom: 0.5rem; color: var(--text-dark);">Description</h5>
+                <p id="courseDetailsDescription" style="color: var(--text-light); line-height: 1.6;"></p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; color: var(--text-dark);">Instructeur</h5>
+                    <p id="courseDetailsInstructor" style="color: var(--text-light);"></p>
+                </div>
+                <div>
+                    <h5 style="margin-bottom: 0.5rem; color: var(--text-dark);">Durée</h5>
+                    <p id="courseDetailsDuration" style="color: var(--text-light);"></p>
+                </div>
+            </div>
+            
+            <div style="background: var(--light-blue); padding: 1.5rem; border-radius: var(--border-radius-1); margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5 style="margin-bottom: 0.5rem; color: var(--text-dark);">Prix</h5>
+                        <p id="courseDetailsPrice" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-blue);"></p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openPaymentModal()">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        Acheter maintenant
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="pdfModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; width: 95%; max-height: 90vh;">
+        <div class="modal-header">
+            <h3><span class="material-symbols-outlined">picture_as_pdf</span> Cours PDF</h3>
+            <button class="close-modal" onclick="closePdfModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h4 id="pdfModalTitle" style="flex: 1; min-width: 200px;"></h4>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a id="pdfDownloadLink" href="#" class="btn btn-primary" style="font-size: 0.85rem; white-space: nowrap; text-decoration: none;">
+                        <span class="material-symbols-outlined">download</span>
+                        Télécharger
+                    </a>
+                    <button id="openInNewTabBtn" class="btn btn-secondary" style="font-size: 0.85rem; white-space: nowrap;">
+                        <span class="material-symbols-outlined">open_in_new</span>
+                        Ouvrir PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div id="pdfContainer" style="height: 500px; border: 1px solid var(--border-color); border-radius: var(--border-radius-1); overflow: hidden; background: var(--bg-light);">
+                <!-- Le contenu PDF sera affiché ici -->
+            </div>
+            
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="color: var(--text-light); font-size: 0.8rem; flex: 1;">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1rem;">info</span>
+                    Utilisez les boutons ci-dessus pour télécharger ou ouvrir le document PDF
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    
+                    <button onclick="closePdfModal()" class="btn btn-outline">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
-    // Sample courses data
-    const courses = [
-        {
-            id: 1,
-            title: "Développement Web Full Stack 2024",
-            price: 149.99,
-            description: "Devenez développeur full stack avec HTML5, CSS3, JavaScript, React, Node.js et MongoDB.",
-            category: "Développement",
-            duration: "85 heures",
-            level: "Débutant à Avancé"
-        },
-        {
-            id: 2,
-            title: "Python pour Débutants",
-            price: 99.99,
-            description: "Apprenez Python de zéro avec des projets pratiques dans la data science, web et automatisation.",
-            category: "Développement",
-            duration: "36 heures",
-            level: "Débutant"
-        },
-        {
-            id: 3,
-            title: "Java & Spring Boot Masterclass",
-            price: 169.99,
-            description: "Développez des applications Java d'entreprise avec Spring Boot, JPA et microservices.",
-            category: "Développement",
-            duration: "62 heures",
-            level: "Intermédiaire"
-        },
-        {
-            id: 4,
-            title: "C# Avancé & ASP.NET Core",
-            price: 159.99,
-            description: "Créez des applications web modernes avec C# et le framework ASP.NET Core.",
-            category: "Développement",
-            duration: "55 heures",
-            level: "Intermédiaire"
-        },
-        {
-            id: 5,
-            title: "Data Science avec Python",
-            price: 199.99,
-            description: "Maîtrisez Pandas, NumPy, Scikit-learn pour l'analyse de données et le machine learning.",
-            category: "Data Science",
-            duration: "60 heures",
-            level: "Avancé"
-        },
-        {
-            id: 6,
-            title: "Analyse de Données avec Excel & Power BI",
-            price: 129.99,
-            description: "Devenez expert en analyse de données avec Excel avancé et Power BI pour la visualisation.",
-            category: "Data Science",
-            duration: "42 heures",
-            level: "Intermédiaire"
-        },
-        {
-            id: 7,
-            title: "SQL Complet & Optimisation",
-            price: 119.99,
-            description: "Maîtrisez SQL avancé, l'optimisation de requêtes et la modélisation de bases de données.",
-            category: "Data Science",
-            duration: "38 heures",
-            level: "Tous niveaux"
-        },
-        {
-            id: 8,
-            title: "Machine Learning Avancé",
-            price: 229.99,
-            description: "Apprenez les algorithmes de ML, le deep learning avec TensorFlow et les cas d'utilisation réels.",
-            category: "Data Science",
-            duration: "75 heures",
-            level: "Avancé"
-        }
-    ];
-
-    // Variables
+    // Variables globales
+    let allCourses = [];
     let currentCourse = null;
     let selectedPaymentMethod = 'card';
+    let currentFilter = 'all';
+    let currentPdfCourse = null;
 
-    // Initialize when DOM is loaded
+    // Initialisation
     document.addEventListener('DOMContentLoaded', function() {
-        // Course filter functionality
+        console.log('🚀 Initialisation de la page Cours Disponibles...');
+        
+        // Charger les cours depuis l'API
+        loadCourses();
+        
+        // Configuration des filtres
+        setupFilters();
+        
+        // Configuration du thème
+        setupTheme();
+        
+        // Configuration des modaux
+        setupModals();
+    });
+
+    // ========== FONCTION POUR CHARGER LES COURS ==========
+    async function loadCourses() {
+        try {
+            console.log('📚 Chargement des cours...');
+            
+            // Afficher l'état de chargement
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('dynamicCoursesContainer').innerHTML = '';
+            document.getElementById('staticContent').style.display = 'none';
+            
+            // Récupérer le token depuis le localStorage ou les cookies
+            const token = getAuthToken();
+            if (!token) {
+                console.error('❌ Pas de token, redirection vers login');
+                window.location.href = '/login/';
+                return;
+            }
+            
+            // Appeler l'API pour récupérer les cours
+            console.log('🌐 Appel API cours...');
+            const response = await fetch('/api/courses/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log(`📡 Réponse API: ${response.status}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log('📦 Données reçues:', data);
+            
+            // Masquer le chargement
+            document.getElementById('loadingState').style.display = 'none';
+            
+            // CORRECTION IMPORTANTE ICI : 
+            // Vérifier si la réponse est directement une liste ou si elle contient une clé 'courses'
+            if (Array.isArray(data)) {
+                // Cas 1: La réponse est directement une liste de cours
+                allCourses = data;
+                console.log(`✅ ${allCourses.length} cours chargés (liste directe)`);
+                
+                // Afficher les cours
+                displayCourses(allCourses);
+                updateFilterCounts(allCourses);
+                
+            } else if (data && data.courses && Array.isArray(data.courses)) {
+                // Cas 2: La réponse contient une clé 'courses' avec la liste
+                allCourses = data.courses;
+                console.log(`✅ ${allCourses.length} cours chargés (dans clé courses)`);
+                
+                // Afficher les cours
+                displayCourses(allCourses);
+                updateFilterCounts(allCourses);
+                
+            } else {
+                console.warn('⚠️ Aucun cours ou format invalide:', data);
+                showEmptyState('Aucun cours disponible pour le moment.');
+            }
+            
+        } catch (error) {
+            console.error('💥 Erreur chargement cours:', error);
+            
+            // Masquer le chargement
+            document.getElementById('loadingState').style.display = 'none';
+            
+            // Afficher l'état vide avec message d'erreur
+            showEmptyState('Impossible de charger les cours. Veuillez vérifier votre connexion et réessayer.');
+            
+            // Afficher des données de test en cas d'erreur
+            setTimeout(() => {
+                showTestData();
+            }, 1000);
+        }
+    }
+
+    function showEmptyState(message) {
+        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('emptyStateMessage').textContent = message;
+        document.getElementById('dynamicCoursesContainer').innerHTML = '';
+        document.getElementById('staticContent').style.display = 'none';
+    }
+
+    // ========== FONCTION POUR AFFICHER LES COURS ==========
+    function displayCourses(courses) {
+        const container = document.getElementById('dynamicCoursesContainer');
+        container.innerHTML = '';
+        
+        if (!courses || courses.length === 0) {
+            showEmptyState('Aucun cours disponible dans notre catalogue.');
+            return;
+        }
+        
+        // Regrouper les cours par catégorie
+        const coursesByCategory = groupCoursesByCategory(courses);
+        
+        // Créer les sections pour chaque catégorie
+        for (const [categoryName, categoryCourses] of Object.entries(coursesByCategory)) {
+            if (categoryCourses.length > 0) {
+                const section = createCategorySection(categoryName, categoryCourses);
+                container.appendChild(section);
+            }
+        }
+        
+        // Cacher le contenu statique
+        document.getElementById('staticContent').style.display = 'none';
+        
+        // Animer les cartes
+        animateCards();
+    }
+
+    function groupCoursesByCategory(courses) {
+        const groups = {};
+        
+        courses.forEach(course => {
+            const categoryName = course.category?.name || 'Autres';
+            
+            if (!groups[categoryName]) {
+                groups[categoryName] = [];
+            }
+            
+            groups[categoryName].push(course);
+        });
+        
+        return groups;
+    }
+
+    function createCategorySection(categoryName, courses) {
+        const sectionId = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        
+        // Choisir une icône appropriée selon la catégorie
+        const iconMap = {
+            'développement': 'code',
+            'programmation': 'code',
+            'data': 'data_array',
+            'science': 'data_array',
+            'design': 'design_services',
+            'business': 'business_center',
+            'marketing': 'campaign',
+            'autre': 'category'
+        };
+        
+        const icon = Object.keys(iconMap).find(key => 
+            categoryName.toLowerCase().includes(key)
+        ) || 'category';
+        
+        const sectionHTML = `
+            <div class="scroll-section" data-category="${sectionId}">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-icon">
+                            <span class="material-symbols-outlined">${iconMap[icon] || 'category'}</span>
+                        </div>
+                        <h2>${categoryName}</h2>
+                    </div>
+                    <div class="course-count-badge" style="background: var(--light-blue); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+                        ${courses.length} cours
+                    </div>
+                </div>
+                <div class="courses-grid">
+                    ${courses.map(course => createCourseCard(course)).join('')}
+                </div>
+            </div>
+        `;
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = sectionHTML;
+        return tempDiv.firstElementChild;
+    }
+
+    function createCourseCard(course) {
+        // Formater le prix
+        const price = parseFloat(course.price) || 0;
+        const isFree = price === 0;
+        const priceFormatted = isFree ? 
+            '<span style="color: var(--accent-teal); font-weight: 600;">GRATUIT</span>' : 
+            `€ ${price.toFixed(2)}`;
+        
+        // Badge selon le type
+        let badge = '';
+        if (isFree) {
+            badge = '<div class="course-badge" style="background: var(--gradient-teal);">GRATUIT</div>';
+        } else if (price > 100) {
+            badge = '<div class="course-badge badge-popular">POPULAIRE</div>';
+        } else if (course.is_new) {
+            badge = '<div class="course-badge badge-new">NOUVEAU</div>';
+        }
+        
+        // Image du cours
+        const imageUrl = course.cover_photo || 
+                        course.thumbnail || 
+                        course.image_url ||
+                        `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80`;
+        
+        // Niveau avec couleur
+        const levelColors = {
+            'débutant': 'var(--accent-teal)',
+            'intermédiaire': 'var(--primary-blue)',
+            'avancé': 'var(--secondary-purple)',
+            'beginner': 'var(--accent-teal)',
+            'intermediate': 'var(--primary-blue)',
+            'advanced': 'var(--secondary-purple)'
+        };
+        
+        const level = course.level?.toLowerCase() || '';
+        const levelColor = levelColors[level] || 'var(--text-light)';
+        
+        // Description tronquée
+        const description = course.short_description || 
+                          course.description?.substring(0, 120) || 
+                          'Description non disponible';
+        
+        // Catégorie filtrée
+        const categoryName = course.category?.name || 'Autres';
+        const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        // Déterminer le texte et l'action du bouton
+        let buttonText, buttonAction, buttonIcon;
+        
+        if (isFree) {
+            buttonText = 'Accéder au cours';
+            buttonIcon = 'play_circle';
+            buttonAction = `accessFreeCourse(${course.id})`;
+        } else {
+            buttonText = 'Acheter maintenant';
+            buttonIcon = 'shopping_cart';
+            buttonAction = `openPaymentModal(${course.id})`;
+        }
+        
+        return `
+            <div class="course-card" data-category="${categorySlug}" data-id="${course.id}">
+                <div class="course-image">
+                    <img src="${imageUrl}" alt="${course.title}" 
+                         onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'">
+                    ${badge}
+                </div>
+                <div class="course-content">
+                    <span class="course-category">${categoryName}</span>
+                    <h3 class="course-title">${course.title}</h3>
+                    <p class="course-description">${description}${course.description?.length > 120 ? '...' : ''}</p>
+                    <div class="course-meta">
+                        <span class="course-duration">
+                            <span class="material-symbols-outlined" style="font-size: 0.9rem;">schedule</span>
+                            ${course.duration_hours ? `${course.duration_hours} heures` : 'Durée variable'}
+                        </span>
+                        <span class="course-level" style="color: ${levelColor};">
+                            ${course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'Tous niveaux'}
+                        </span>
+                    </div>
+                    <div class="course-price">${priceFormatted}</div>
+                    <button class="btn ${isFree ? 'btn-secondary' : 'btn-primary'} btn-full" onclick="${buttonAction}">
+                        <span class="material-symbols-outlined">${buttonIcon}</span>
+                        ${buttonText}
+                    </button>
+                    <button class="btn btn-outline btn-full" style="margin-top: 0.5rem;" onclick="openCourseDetails(${course.id})">
+                        <span class="material-symbols-outlined">info</span>
+                        Voir les détails
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ========== FONCTIONS DE FILTRE ==========
+    function setupFilters() {
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
+                // Mettre à jour l'état actif
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 
-                const filter = this.getAttribute('data-filter');
-                
-                if (filter === 'all') {
-                    document.querySelectorAll('.course-card').forEach(card => {
-                        card.style.display = 'flex';
-                    });
-                } else {
-                    document.querySelectorAll('.course-card').forEach(card => {
-                        card.style.display = 'none';
-                    });
-                    
-                    document.querySelectorAll(`.course-card .course-category`).forEach(category => {
-                        if (category.textContent.toLowerCase().includes(filter)) {
-                            category.closest('.course-card').style.display = 'flex';
-                        }
-                    });
-                }
+                // Appliquer le filtre
+                currentFilter = this.getAttribute('data-filter');
+                applyFilter(currentFilter);
             });
         });
+    }
 
-        // Theme toggler - CORRECTION IMPORTANTE
+    function applyFilter(filter) {
+        const allCards = document.querySelectorAll('.course-card');
+        const allSections = document.querySelectorAll('.scroll-section');
+        
+        if (filter === 'all') {
+            // Afficher tous les cours
+            allCards.forEach(card => {
+                card.style.display = 'flex';
+            });
+            
+            // Afficher toutes les sections
+            allSections.forEach(section => {
+                section.style.display = 'block';
+                
+                // Mettre à jour le compteur
+                updateSectionCount(section);
+            });
+            
+        } else {
+            let hasVisibleCourses = false;
+            
+            // Afficher seulement les cours correspondants au filtre
+            allCards.forEach(card => {
+                const cardCategory = card.getAttribute('data-category').toLowerCase();
+                const shouldShow = cardCategory.includes(filter);
+                
+                card.style.display = shouldShow ? 'flex' : 'none';
+                if (shouldShow) hasVisibleCourses = true;
+            });
+            
+            // Gérer les sections
+            allSections.forEach(section => {
+                const cardsInSection = section.querySelectorAll('.course-card');
+                const visibleCards = Array.from(cardsInSection).filter(card => 
+                    card.style.display !== 'none'
+                );
+                
+                if (visibleCards.length === 0) {
+                    section.style.display = 'none';
+                } else {
+                    section.style.display = 'block';
+                    updateSectionCount(section);
+                }
+            });
+            
+            // Si aucun cours visible, afficher message
+            if (!hasVisibleCourses) {
+                const container = document.getElementById('dynamicCoursesContainer');
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-state';
+                emptyMessage.innerHTML = `
+                    <div class="empty-state-icon">
+                        <span class="material-symbols-outlined">search_off</span>
+                    </div>
+                    <h3>Aucun cours trouvé</h3>
+                    <p class="text-muted">Aucun cours disponible dans la catégorie "${filter}".</p>
+                    <button class="btn btn-primary" onclick="resetFilter()">
+                        <span class="material-symbols-outlined">refresh</span>
+                        Afficher tous les cours
+                    </button>
+                `;
+                container.innerHTML = '';
+                container.appendChild(emptyMessage);
+            }
+        }
+        
+        // Animer l'apparition
+        animateCards();
+    }
+
+    function updateSectionCount(section) {
+        const cardsInSection = section.querySelectorAll('.course-card');
+        const visibleCards = Array.from(cardsInSection).filter(card => 
+            card.style.display !== 'none'
+        );
+        
+        const countBadge = section.querySelector('.course-count-badge');
+        if (countBadge) {
+            countBadge.textContent = `${visibleCards.length} cours`;
+        }
+    }
+
+    function resetFilter() {
+        document.querySelector('.filter-btn[data-filter="all"]').click();
+    }
+
+    function updateFilterCounts(courses) {
+        // Compter les cours par catégorie
+        const counts = {
+            'all': courses.length,
+            'development': courses.filter(c => {
+                const category = (c.category?.name || '').toLowerCase();
+                return category.includes('développement') || 
+                       category.includes('programmation') ||
+                       category.includes('web') ||
+                       category.includes('mobile');
+            }).length,
+            'data': courses.filter(c => {
+                const category = (c.category?.name || '').toLowerCase();
+                return category.includes('data') || 
+                       category.includes('science') ||
+                       category.includes('analyse') ||
+                       category.includes('machine');
+            }).length,
+            'design': courses.filter(c => {
+                const category = (c.category?.name || '').toLowerCase();
+                return category.includes('design') || 
+                       category.includes('ui') ||
+                       category.includes('ux');
+            }).length,
+            'business': courses.filter(c => {
+                const category = (c.category?.name || '').toLowerCase();
+                return category.includes('business') || 
+                       category.includes('gestion') ||
+                       category.includes('management');
+            }).length,
+            'marketing': courses.filter(c => {
+                const category = (c.category?.name || '').toLowerCase();
+                return category.includes('marketing') || 
+                       category.includes('publicité');
+            }).length
+        };
+        
+        // Mettre à jour les badges
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            const filter = btn.getAttribute('data-filter');
+            const count = counts[filter] || 0;
+            
+            // Créer ou mettre à jour le badge de comptage
+            let countBadge = btn.querySelector('.filter-count');
+            if (!countBadge) {
+                countBadge = document.createElement('span');
+                countBadge.className = 'filter-count';
+                btn.appendChild(countBadge);
+            }
+            
+            countBadge.textContent = count;
+        });
+    }
+
+    // ========== ANIMATIONS ==========
+    function animateCards() {
+        const cards = document.querySelectorAll('.course-card');
+        cards.forEach((card, index) => {
+            if (card.style.display !== 'none') {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            }
+        });
+    }
+
+    // ========== FONCTIONS UTILITAIRES ==========
+    function getAuthToken() {
+        // 1. Essayer d'abord avec le token Django du template
+        const djangoToken = "{{ auth_token|escapejs }}";
+        if (djangoToken && djangoToken !== 'None' && djangoToken !== '' && djangoToken !== 'undefined') {
+            console.log('🔑 Token trouvé dans template Django');
+            localStorage.setItem('auth_token', djangoToken);
+            return djangoToken;
+        }
+        
+        // 2. Vérifier dans localStorage
+        let token = localStorage.getItem('auth_token');
+        if (token && token !== 'undefined' && token !== 'null' && token.length > 30) {
+            console.log('🔑 Token trouvé dans localStorage');
+            return token;
+        }
+        
+        // 3. Vérifier dans les cookies
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'auth_token' && value && value !== 'undefined') {
+                console.log('🔑 Token trouvé dans les cookies');
+                localStorage.setItem('auth_token', value);
+                return value;
+            }
+        }
+        
+        console.warn('⚠️ Aucun token trouvé');
+        return null;
+    }
+
+    function showTestData() {
+        // Données de test en cas d'erreur
+        console.log('📋 Affichage données de test...');
+        
+        const testCourses = [
+            {
+                id: 1,
+                title: "Introduction à Python",
+                description: "Apprenez les bases de Python",
+                short_description: "Cours complet Python",
+                price: 0,
+                category: { name: "Développement" },
+                level: "beginner",
+                duration_hours: 10,
+                cover_photo: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+                course_type: "free"
+            },
+            {
+                id: 2,
+                title: "Data Science avec Python",
+                description: "Introduction à la data science",
+                short_description: "Maîtrisez Python pour la data science",
+                price: 199.99,
+                category: { name: "Data Science" },
+                level: "advanced",
+                duration_hours: 60,
+                cover_photo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+                course_type: "paid"
+            }
+        ];
+        
+        allCourses = testCourses;
+        displayCourses(allCourses);
+        updateFilterCounts(allCourses);
+        
+        // Afficher un message d'avertissement
+        const warningDiv = document.createElement('div');
+        warningDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #FFA500;
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius-1);
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+            z-index: 3000;
+            max-width: 300px;
+            animation: fadeIn 0.3s ease;
+        `;
+        
+        warningDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span class="material-symbols-outlined">warning</span>
+                <strong>Mode démo</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.9rem;">Affichage de données de test</p>
+        `;
+        
+        document.body.appendChild(warningDiv);
+        
+        // Supprimer après 5 secondes
+        setTimeout(() => {
+            warningDiv.style.opacity = '0';
+            warningDiv.style.transform = 'translateY(-10px)';
+            setTimeout(() => warningDiv.remove(), 300);
+        }, 5000);
+    }
+
+    // ========== CONFIGURATION DU THÈME ==========
+    function setupTheme() {
         const themeToggler = document.querySelector(".theme-toggler");
         
         if (themeToggler) {
             themeToggler.addEventListener('click', () => {
                 document.body.classList.toggle('dark-theme-variables');
                 
-                // Toggle active classes on both icons
                 const lightIcon = themeToggler.querySelector('span:nth-child(1)');
                 const darkIcon = themeToggler.querySelector('span:nth-child(2)');
                 
                 lightIcon.classList.toggle('active');
                 darkIcon.classList.toggle('active');
                 
-                // Save theme preference
                 const isDarkMode = document.body.classList.contains('dark-theme-variables');
                 localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
             });
 
-            // Check for saved theme preference
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-theme-variables');
@@ -1359,162 +1852,693 @@
                 darkIcon.classList.add('active');
             }
         }
+    }
 
-        // Logout button
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
-                if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
-                    alert('Vous avez été déconnecté avec succès.');
-                }
-            });
+    // ========== MODAL COURS DÉTAILS ==========
+    function openCourseDetails(courseId) {
+        const course = allCourses.find(c => c.id === courseId);
+        if (!course) {
+            showErrorMessage('Cours non trouvé');
+            return;
         }
-    });
-
-    // Payment modal functions
-    function openPaymentModal(courseId) {
-        const course = courses.find(c => c.id === courseId);
-        if (!course) return;
         
         currentCourse = course;
         
-        document.getElementById('paymentCourseTitle').textContent = course.title;
-        document.getElementById('paymentCoursePrice').textContent = `€ ${course.price.toFixed(2)}`;
+        const isFree = parseFloat(course.price) === 0;
         
-        selectedPaymentMethod = 'card';
-        document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
-        document.querySelectorAll('.payment-method')[0].classList.add('active');
+        // Remplir les informations du cours
+        document.getElementById('courseDetailsTitle').textContent = course.title;
+        document.getElementById('courseDetailsCategory').textContent = course.category?.name || 'Non catégorisé';
+        document.getElementById('courseDetailsDescription').textContent = course.description || 'Description non disponible';
+        document.getElementById('courseDetailsInstructor').textContent = course.instructor_name || course.instructor || 'Instructeur non spécifié';
         
-        document.getElementById('cardPaymentForm').style.display = 'block';
-        document.getElementById('paypalPaymentForm').style.display = 'none';
+        // Formater le niveau
+        const level = course.level || '';
+        const formattedLevel = level.charAt(0).toUpperCase() + level.slice(1);
+        document.getElementById('courseDetailsLevel').textContent = formattedLevel || 'Tous niveaux';
         
-        document.getElementById('cardNumber').value = '';
-        document.getElementById('cardExpiry').value = '';
-        document.getElementById('cardCVC').value = '';
-        document.getElementById('cardName').value = '';
+        document.getElementById('courseDetailsDuration').textContent = course.duration_hours ? 
+            `${course.duration_hours} heures` : 'Durée variable';
         
-        document.getElementById('paymentModal').style.display = 'flex';
+        // Formater le prix
+        const price = parseFloat(course.price) || 0;
+        document.getElementById('courseDetailsPrice').textContent = isFree ? 
+            'GRATUIT' : `€ ${price.toFixed(2)}`;
+        
+        // Changer le bouton selon si le cours est gratuit ou payant
+        const actionButton = document.querySelector('#courseDetailsModal button.btn-primary');
+        
+        if (actionButton) {
+            if (isFree) {
+                actionButton.innerHTML = '<span class="material-symbols-outlined">play_circle</span> Accéder au cours';
+                actionButton.onclick = () => {
+                    closeCourseDetails();
+                    accessFreeCourse(courseId);
+                };
+            } else {
+                actionButton.innerHTML = '<span class="material-symbols-outlined">shopping_cart</span> Acheter maintenant';
+                actionButton.onclick = () => {
+                    closeCourseDetails();
+                    openPaymentModal(courseId);
+                };
+            }
+        }
+        
+        // Afficher le modal
+        const modal = document.getElementById('courseDetailsModal');
+        modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+    }
+
+    function closeCourseDetails() {
+        const modal = document.getElementById('courseDetailsModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    function showErrorMessage(message) {
+        // Créer une alerte d'erreur
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #FF6B6B;
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius-1);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            z-index: 3000;
+            max-width: 300px;
+            animation: fadeIn 0.3s ease;
+        `;
         
-        // Attach modal event listeners
-        attachModalListeners();
+        errorDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span class="material-symbols-outlined">error</span>
+                <strong>Erreur</strong>
+            </div>
+            <p style="margin: 0; font-size: 0.9rem;">${message}</p>
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        // Supprimer après 5 secondes
+        setTimeout(() => {
+            errorDiv.style.opacity = '0';
+            errorDiv.style.transform = 'translateY(-10px)';
+            setTimeout(() => errorDiv.remove(), 300);
+        }, 5000);
+    }
+
+    // ========== CONFIGURATION DES MODAUX DE PAIEMENT ==========
+    function setupModals() {
+        const paymentModal = document.getElementById('paymentModal');
+        const successModal = document.getElementById('successModal');
+        
+        if (paymentModal) {
+            document.getElementById('closePaymentModal').addEventListener('click', () => {
+                paymentModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            document.getElementById('cancelPayment').addEventListener('click', () => {
+                paymentModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            document.getElementById('confirmPayment').addEventListener('click', processPayment);
+        }
+        
+        if (successModal) {
+            document.getElementById('closeSuccessModal').addEventListener('click', () => {
+                successModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                window.location.href = "{% url 'cours' %}";
+            });
+        }
+        
+        // Fermer les modaux en cliquant à l'extérieur
+        window.addEventListener('click', (event) => {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    }
+
+    function openPaymentModal(courseId) {
+        let course;
+        
+        if (courseId) {
+            course = allCourses.find(c => c.id === courseId);
+        } else if (currentCourse) {
+            course = currentCourse;
+        }
+        
+        if (!course) {
+            showErrorMessage('Cours non sélectionné');
+            return;
+        }
+        
+        currentCourse = course;
+        
+        // Mettre à jour les informations du modal
+        document.getElementById('paymentCourseTitle').textContent = course.title;
+        document.getElementById('paymentCoursePrice').textContent = 
+            course.price > 0 ? `€ ${parseFloat(course.price).toFixed(2)}` : 'GRATUIT';
+        
+        // Afficher le modal
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
 
     function selectPaymentMethod(method) {
         selectedPaymentMethod = method;
         
-        document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
-        event.target.closest('.payment-method').classList.add('active');
+        // Mettre à jour les boutons de méthode de paiement
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.classList.remove('active');
+        });
         
-        document.getElementById('cardPaymentForm').style.display = method === 'card' ? 'block' : 'none';
-        document.getElementById('paypalPaymentForm').style.display = method === 'paypal' ? 'block' : 'none';
+        event.currentTarget.classList.add('active');
+        
+        // Afficher le formulaire correspondant
+        document.getElementById('cardPaymentForm').style.display = 
+            method === 'card' ? 'block' : 'none';
+        document.getElementById('paypalPaymentForm').style.display = 
+            method === 'paypal' ? 'block' : 'none';
+    }
+
+    function processPayment() {
+        if (!currentCourse) {
+            showErrorMessage('Aucun cours sélectionné');
+            return;
+        }
+        
+        // Validation des données de carte
+        if (selectedPaymentMethod === 'card') {
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCVC = document.getElementById('cardCVC').value;
+            const cardName = document.getElementById('cardName').value;
+            
+            if (!cardNumber || !cardExpiry || !cardCVC || !cardName) {
+                showErrorMessage('Veuillez remplir tous les champs de la carte');
+                return;
+            }
+        }
+        
+        // Simuler le traitement du paiement
+        console.log(`💳 Traitement du paiement pour le cours: ${currentCourse.title}`);
+        
+        // Fermer le modal de paiement
+        document.getElementById('paymentModal').style.display = 'none';
+        
+        // Générer un code d'accès aléatoire
+        const accessCode = generateAccessCode();
+        document.getElementById('generatedCode').textContent = accessCode;
+        
+        // Afficher le modal de succès
+        setTimeout(() => {
+            document.getElementById('successModal').style.display = 'flex';
+        }, 300);
+    }
+
+    function generateAccessCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 12; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+            if ((i + 1) % 4 === 0 && i < 11) code += '-';
+        }
+        return code;
     }
 
     function copyGeneratedCode() {
         const code = document.getElementById('generatedCode').textContent;
         navigator.clipboard.writeText(code).then(() => {
-            const btn = event.target;
-            const originalText = btn.textContent;
-            btn.textContent = 'Copié!';
-            btn.style.background = 'var(--accent-teal)';
+            const copyBtn = event.currentTarget;
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Code copié!';
+            copyBtn.style.background = 'var(--gradient-teal)';
             
             setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = 'var(--gradient-purple)';
+                copyBtn.innerHTML = originalText;
+                copyBtn.style.background = 'var(--gradient-purple)';
             }, 2000);
         });
     }
 
-    function generateAccessCode(courseTitle) {
-        const prefix = courseTitle.substring(0, 3).toUpperCase().replace(/\s/g, '');
-        const year = new Date().getFullYear();
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        return `${prefix}-${year}-${randomNum}`;
+    // ========== FONCTIONS PDF ET SAUVEGARDE ==========
+
+    function accessFreeCourse(courseId) {
+        const course = allCourses.find(c => c.id === courseId);
+        if (!course) {
+            showErrorMessage('Cours non trouvé');
+            return;
+        }
+        
+        console.log(`🎓 Accès au cours gratuit: ${course.title}`);
+        
+        // Obtenir l'URL du PDF
+        const pdfInfo = getCoursePdfUrl(course);
+        
+        if (pdfInfo.url) {
+            // Afficher le PDF avec bouton "Sauvegarder"
+            showPdfModalWithSaveButton(course, pdfInfo.url, pdfInfo.fileName);
+        } else {
+            showErrorMessage('Aucun document PDF disponible pour ce cours');
+        }
     }
 
-    function attachModalListeners() {
-        // Close payment modal
-        const closePaymentModal = document.getElementById('closePaymentModal');
-        if (closePaymentModal) {
-            closePaymentModal.onclick = () => {
-                document.getElementById('paymentModal').style.display = 'none';
-                document.body.style.overflow = 'auto';
+    // FONCTION : Affiche le PDF avec bouton "Sauvegarder"
+    function showPdfModalWithSaveButton(course, pdfUrl, fileName) {
+        console.log(`📄 Affichage du PDF avec bouton Sauvegarder: ${fileName}`);
+        
+        // Vérifier si l'utilisateur a déjà sauvegardé ce cours
+        const isAlreadySaved = checkIfCourseIsSaved(course.id);
+        
+        // Remplir les informations du modal
+        document.getElementById('pdfModalTitle').textContent = course.title;
+        
+        // Configurer les boutons
+        const downloadLink = document.getElementById('pdfDownloadLink');
+        if (downloadLink) {
+            downloadLink.href = pdfUrl;
+            downloadLink.download = fileName || course.title + '.pdf';
+        }
+        
+        const openInNewTabBtn = document.getElementById('openInNewTabBtn');
+        if (openInNewTabBtn) {
+            openInNewTabBtn.onclick = function() {
+                window.open(pdfUrl, '_blank');
             };
         }
-
-        // Cancel payment
-        const cancelPayment = document.getElementById('cancelPayment');
-        if (cancelPayment) {
-            cancelPayment.onclick = () => {
-                document.getElementById('paymentModal').style.display = 'none';
-                document.body.style.overflow = 'auto';
-            };
+        
+        // Afficher le contenu PDF avec bouton "Sauvegarder"
+        const pdfContainer = document.getElementById('pdfContainer');
+        
+        if (pdfContainer) {
+            pdfContainer.innerHTML = `
+                <div style="text-align: center; padding: 3rem; height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="margin-bottom: 2rem;">
+                        <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary-blue);">
+                            picture_as_pdf
+                        </span>
+                        <h3 style="margin: 1rem 0; color: var(--text-dark);">Document PDF disponible</h3>
+                        <p style="color: var(--text-light); line-height: 1.5; max-width: 500px;">
+                            Le document <strong>${fileName || 'PDF'}</strong> est prêt à être consulté.
+                            ${isAlreadySaved ? '<br><span style="color: var(--accent-teal);">✓ Ce cours est déjà dans vos cours</span>' : ''}
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px;">
+                        <a href="${pdfUrl}" target="_blank" class="btn btn-primary" style="width: 100%; text-decoration: none; text-align: center;">
+                            <span class="material-symbols-outlined">open_in_new</span>
+                            Ouvrir le PDF
+                        </a>
+                        
+                        <a href="${pdfUrl}" download="${fileName || 'document.pdf'}" class="btn btn-secondary" style="width: 100%; text-decoration: none; text-align: center;">
+                            <span class="material-symbols-outlined">download</span>
+                            Télécharger le PDF
+                        </a>
+                        
+                        ${!isAlreadySaved ? `
+                            <button onclick="saveCourseToMyCourses(${course.id})" class="btn btn-primary" style="width: 100%; background: var(--gradient-teal);">
+                                <span class="material-symbols-outlined">save</span>
+                                Sauvegarder ce cours
+                            </button>
+                        ` : `
+                            <button class="btn btn-outline" style="width: 100%;" disabled>
+                                <span class="material-symbols-outlined">check_circle</span>
+                                Déjà dans vos cours
+                            </button>
+                        `}
+                        
+                        <button onclick="closePdfModal()" class="btn btn-outline" style="width: 100%;">
+                            <span class="material-symbols-outlined">close</span>
+                            Fermer
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 2rem; padding: 1rem; background: var(--light-blue); border-radius: var(--border-radius-1); max-width: 500px;">
+                        <p style="margin: 0; color: var(--text-light); font-size: 0.85rem; line-height: 1.4;">
+                            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1rem;">lightbulb</span>
+                            <strong>Conseil :</strong> Cliquez sur "Sauvegarder ce cours" pour l'ajouter à votre liste de cours personnels.
+                        </p>
+                    </div>
+                </div>
+            `;
         }
+        
+        // Afficher le modal
+        const pdfModal = document.getElementById('pdfModal');
+        if (pdfModal) {
+            pdfModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        } else {
+            console.error('❌ Modal PDF non trouvé');
+            window.open(pdfUrl, '_blank');
+        }
+    }
 
-        // Confirm payment
-        const confirmPayment = document.getElementById('confirmPayment');
-        if (confirmPayment) {
-            confirmPayment.onclick = () => {
-                if (selectedPaymentMethod === 'card') {
-                    const cardNumber = document.getElementById('cardNumber').value;
-                    const cardExpiry = document.getElementById('cardExpiry').value;
-                    const cardCVC = document.getElementById('cardCVC').value;
-                    const cardName = document.getElementById('cardName').value;
-                    
-                    if (!cardNumber || !cardExpiry || !cardCVC || !cardName) {
-                        alert('Veuillez remplir tous les champs de la carte.');
-                        return;
-                    }
-                    
-                    if (cardNumber.replace(/\s/g, '').length < 16) {
-                        alert('Le numéro de carte est invalide.');
-                        return;
-                    }
+    // FONCTION pour vérifier si le cours est déjà sauvegardé
+    function checkIfCourseIsSaved(courseId) {
+        const savedCourses = JSON.parse(localStorage.getItem('my_courses') || '[]');
+        return savedCourses.some(course => course.id === courseId);
+    }
+
+    // FONCTION PRINCIPALE : Sauvegarde le cours dans "Mes cours"
+    async function saveCourseToMyCourses(courseId) {
+        const course = allCourses.find(c => c.id === courseId);
+        if (!course) {
+            showErrorMessage('Cours non trouvé');
+            return;
+        }
+        
+        console.log(`💾 Sauvegarde du cours: ${course.title}`);
+        
+        try {
+            // 1. Sauvegarder dans localStorage
+            saveToLocalStorage(course);
+            
+            // 2. Sauvegarder sur le serveur (API)
+            const saved = await saveToServer(courseId);
+            
+            if (saved) {
+                // Mettre à jour l'interface
+                updateCourseCardAfterSave(courseId);
+                
+                // Fermer le modal PDF
+                closePdfModal();
+                
+                // Afficher message de succès
+                showSuccessMessage(`Le cours "${course.title}" a été ajouté à vos cours !`);
+                
+                // Rediriger vers la page "Mes cours" après 2 secondes
+                setTimeout(() => {
+                    window.location.href = "{% url 'cours' %}";
+                }, 2000);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde:', error);
+            showErrorMessage('Erreur lors de la sauvegarde: ' + error.message);
+        }
+    }
+
+    // Sauvegarder dans localStorage
+// Dans cours_available.html - Fonction pour sauvegarder le cours
+function saveToLocalStorage(course) {
+    const savedCourses = JSON.parse(localStorage.getItem('my_courses') || '[]');
+    
+    const isAlreadySaved = savedCourses.some(c => c.id === course.id);
+    
+    if (!isAlreadySaved) {
+        // RÉCUPÉRER L'URL DU PDF AVEC LA BONNE MÉTHODE
+        const pdfInfo = getCoursePdfUrl(course);
+        
+        // Sauvegarder TOUTES les données du cours
+        const courseToSave = {
+            ...course,  // Copier toutes les propriétés du cours original
+            saved_date: new Date().toISOString(),
+            progress: 0,
+            status: 'not_started',
+            access_code: generateCourseAccessCode(),
+            // Ajouter les informations PDF explicitement
+            pdf_url: pdfInfo.url,
+            original_pdf_filename: pdfInfo.fileName || course.title + '.pdf'
+        };
+        
+        savedCourses.push(courseToSave);
+        localStorage.setItem('my_courses', JSON.stringify(savedCourses));
+        
+        // SAUVEGARDER AUSSI LA LISTE DES COURS DISPONIBLES
+        localStorage.setItem('available_courses', JSON.stringify(allCourses));
+        
+        console.log(`✅ Cours ${course.id} sauvegardé avec toutes les données`);
+    }
+}
+
+    // Générer un code d'accès pour les cours
+    function generateCourseAccessCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return `COURS-${code}`;
+    }
+
+    // Sauvegarder sur le serveur via API
+    async function saveToServer(courseId) {
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                console.warn('⚠️ Pas de token, sauvegarde locale seulement');
+                return true;
+            }
+            
+            console.log(`🌐 Envoi sauvegarde au serveur pour cours ${courseId}`);
+            
+            // Utiliser l'API d'enrollment que nous avons créée
+            const response = await fetch(`/api/courses/${courseId}/enroll/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    action: 'save'
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Cours ${courseId} sauvegardé sur serveur:`, data);
+                return true;
+            } else {
+                console.warn(`⚠️ Erreur API sauvegarde: ${response.status}`);
+                return false;
+            }
+            
+        } catch (error) {
+            console.error('💥 Erreur sauvegarde serveur:', error);
+            return false;
+        }
+    }
+
+    // Mettre à jour la carte du cours après sauvegarde
+    function updateCourseCardAfterSave(courseId) {
+        const courseCard = document.querySelector(`.course-card[data-id="${courseId}"]`);
+        if (courseCard) {
+            const accessBtn = courseCard.querySelector('.btn-secondary, .btn-primary');
+            if (accessBtn) {
+                accessBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Déjà sauvegardé';
+                accessBtn.classList.remove('btn-secondary', 'btn-primary');
+                accessBtn.classList.add('btn-outline');
+                accessBtn.disabled = true;
+                accessBtn.onclick = null;
+            }
+        }
+    }
+
+    function getCoursePdfUrl(course) {
+        let pdfUrl = null;
+        let fileName = null;
+        
+        // Essayer différentes sources de PDF
+        const possibleSources = [
+            course.document_file,
+            course.document_url,
+            course.pdf_file,
+            course.file_url,
+            course.content_url
+        ];
+        
+        for (const source of possibleSources) {
+            if (source && typeof source === 'string' && source.trim() !== '') {
+                pdfUrl = source.trim();
+                
+                // Extraire le nom de fichier
+                const urlParts = pdfUrl.split('/');
+                fileName = urlParts[urlParts.length - 1];
+                
+                // Assurer que c'est un PDF
+                if (!fileName.toLowerCase().endsWith('.pdf')) {
+                    fileName += '.pdf';
                 }
                 
-                const confirmBtn = document.getElementById('confirmPayment');
-                const originalText = confirmBtn.innerHTML;
-                confirmBtn.innerHTML = '<span class="material-symbols-outlined">pending</span> Traitement...';
-                confirmBtn.disabled = true;
-                
-                setTimeout(() => {
-                    const accessCode = generateAccessCode(currentCourse.title);
-                    document.getElementById('generatedCode').textContent = accessCode;
-                    
-                    confirmBtn.innerHTML = originalText;
-                    confirmBtn.disabled = false;
-                    
-                    document.getElementById('paymentModal').style.display = 'none';
-                    document.getElementById('successModal').style.display = 'flex';
-                    
-                    alert(`Félicitations! Vous avez acheté le cours "${currentCourse.title}".`);
-                }, 2000);
-            };
-        }
-
-        // Close success modal
-        const closeSuccessModal = document.getElementById('closeSuccessModal');
-        if (closeSuccessModal) {
-            closeSuccessModal.onclick = () => {
-                document.getElementById('successModal').style.display = 'none';
-                document.body.style.overflow = 'auto';
-                
-                window.location.href = 'my-courses.html';
-            };
-        }
-
-        // Close modals when clicking outside
-        window.onclick = (e) => {
-            if (e.target === document.getElementById('paymentModal')) {
-                document.getElementById('paymentModal').style.display = 'none';
-                document.body.style.overflow = 'auto';
+                console.log(`📄 PDF trouvé: ${fileName} - ${pdfUrl}`);
+                break;
             }
-            if (e.target === document.getElementById('successModal')) {
-                document.getElementById('successModal').style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
+        }
+        
+        // Si aucune URL trouvée, créer une URL par défaut
+        if (!pdfUrl) {
+            fileName = course.title
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '_')
+                .replace(/_+/g, '_') + '.pdf';
+            
+            // Essayer différentes URLs possibles
+            const baseUrl = window.location.origin;
+            const possibleUrls = [
+                `${baseUrl}/media/course_documents/${fileName}`,
+                `${baseUrl}/media/pdfs/${fileName}`,
+                `${baseUrl}/static/courses/${fileName}`,
+                `http://127.0.0.1:8002/media/course_documents/${fileName}`,
+                `http://localhost:8000/media/course_documents/${fileName}`
+            ];
+            
+            pdfUrl = possibleUrls[0];
+            console.log(`📄 URL par défaut: ${pdfUrl}`);
+        }
+        
+        // Assurer que l'URL est absolue
+        if (pdfUrl && !pdfUrl.startsWith('http')) {
+            pdfUrl = window.location.origin + (pdfUrl.startsWith('/') ? pdfUrl : '/' + pdfUrl);
+        }
+        
+        return {
+            url: pdfUrl,
+            fileName: fileName || course.title + '.pdf'
         };
     }
+
+    function closePdfModal() {
+        const modal = document.getElementById('pdfModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Nettoyer le conteneur
+            const pdfContainer = document.getElementById('pdfContainer');
+            if (pdfContainer) {
+                pdfContainer.innerHTML = '';
+            }
+        }
+    }
+
+    function showSuccessMessage(message) {
+        // Créer une notification de succès
+        const successDiv = document.createElement('div');
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius-1);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            z-index: 4000;
+            max-width: 350px;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        `;
+        
+        successDiv.innerHTML = `
+            <span class="material-symbols-outlined" style="font-size: 1.5rem;">check_circle</span>
+            <div>
+                <div style="font-weight: 600; margin-bottom: 0.3rem;">Succès !</div>
+                <div style="font-size: 0.9rem;">${message}</div>
+            </div>
+        `;
+        
+        document.body.appendChild(successDiv);
+        
+        // Ajouter animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Supprimer après 5 secondes
+        setTimeout(() => {
+            successDiv.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => successDiv.remove(), 300);
+        }, 5000);
+    }
+
+    // ========== FONCTIONS DE RAFRAÎCHISSEMENT ==========
+    function refreshCourses() {
+        console.log('🔄 Rafraîchissement des cours...');
+        loadCourses();
+        
+        // Afficher un message temporaire
+        const refreshMsg = document.createElement('div');
+        refreshMsg.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--border-radius-1);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            z-index: 3000;
+            animation: fadeInUp 0.3s ease;
+        `;
+        
+        refreshMsg.textContent = 'Cours rafraîchis';
+        document.body.appendChild(refreshMsg);
+        
+        setTimeout(() => {
+            refreshMsg.remove();
+        }, 2000);
+    }
+
+    // Ajouter l'animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
 </script>
 </body>
 </html>

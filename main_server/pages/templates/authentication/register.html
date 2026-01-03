@@ -14,6 +14,8 @@
             --secondary: #8b5cf6;
             --accent: #ec4899;
             --success: #10b981;
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
             --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --glass-bg: rgba(255, 255, 255, 0.1);
             --glass-border: rgba(255, 255, 255, 0.2);
@@ -225,20 +227,10 @@
             grid-column: span 2;
         }
         
-        .floating-label {
-            position: absolute;
-            left: 20px;
-            top: 18px;
-            color: var(--text-light);
-            font-size: 16px;
-            pointer-events: none;
-            transition: var(--transition);
-            background: transparent;
-            padding: 0 8px;
-        }
-        
-        .input-field,
-        .select-field {
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group select {
             width: 100%;
             padding: 20px;
             background: rgba(255, 255, 255, 0.08);
@@ -252,7 +244,7 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        .select-field {
+        .form-group select {
             appearance: none;
             cursor: pointer;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.5)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -262,17 +254,31 @@
             padding-right: 50px;
         }
         
-        .input-field:focus,
-        .select-field:focus {
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus,
+        .form-group select:focus {
             border-color: var(--primary-light);
             background: rgba(255, 255, 255, 0.12);
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
         }
         
-        .input-field:focus + .floating-label,
-        .input-field:not(:placeholder-shown) + .floating-label,
-        .select-field:focus + .floating-label,
-        .select-field:valid + .floating-label {
+        .floating-label {
+            position: absolute;
+            left: 20px;
+            top: 18px;
+            color: var(--text-light);
+            font-size: 16px;
+            pointer-events: none;
+            transition: var(--transition);
+            background: transparent;
+            padding: 0 8px;
+        }
+        
+        .form-group input:focus + .floating-label,
+        .form-group input:not(:placeholder-shown) + .floating-label,
+        .form-group select:focus + .floating-label,
+        .form-group select:valid + .floating-label {
             top: -10px;
             left: 12px;
             font-size: 12px;
@@ -282,7 +288,7 @@
             padding: 2px 10px;
         }
         
-        .select-field option {
+        .form-group select option {
             background: #1f2937;
             color: var(--white);
             padding: 10px;
@@ -296,9 +302,33 @@
             transition: var(--transition);
         }
         
-        .input-field:focus ~ .input-icon,
-        .select-field:focus ~ .input-icon {
+        .form-group input:focus ~ .input-icon,
+        .form-group select:focus ~ .input-icon {
             color: var(--primary-light);
+        }
+        
+        .error-message {
+            color: #fecaca;
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .success-message {
+            color: #a7f3d0;
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .error-message i,
+        .success-message i {
+            font-size: 14px;
         }
         
         .password-strength {
@@ -313,7 +343,6 @@
         .strength-bar {
             height: 100%;
             width: 0%;
-            background: var(--error);
             border-radius: 2px;
             transition: var(--transition);
         }
@@ -516,22 +545,15 @@
             transform: translateX(5px);
         }
         
-        .error-message {
-            color: #fecaca;
-            font-size: 12px;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .success-message {
-            color: #a7f3d0;
-            font-size: 12px;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         @media (max-width: 768px) {
@@ -603,77 +625,112 @@
             <div class="step">3</div>
         </div>
         
-        <form method="POST" id="registerForm">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if form.errors %}
+        <div class="messages">
+            <div class="message error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Veuillez corriger les erreurs ci-dessous</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="" id="registerForm">
             {% csrf_token %}
             
             <div class="form-grid">
-                <div class="form-group">
+                <!-- Nom d'utilisateur -->
+                <div class="form-group full-width">
                     <input type="text" 
                            name="username" 
                            id="id_username" 
                            class="input-field" 
                            placeholder=" "
+                           value="{{ form.username.value|default_if_none:'' }}"
                            required>
-                    <label class="floating-label">Nom d'utilisateur</label>
+                    <label class="floating-label">Nom d'utilisateur *</label>
                     <div class="input-icon">
                         <i class="fas fa-user"></i>
                     </div>
-                    <div class="success-message" id="username-check">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Disponible</span>
+                    {% if form.username.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.username.errors.0 }}
                     </div>
+                    {% endif %}
                 </div>
                 
-                <div class="form-group">
+                <!-- Email -->
+                <div class="form-group full-width">
                     <input type="email" 
                            name="email" 
                            id="id_email" 
                            class="input-field" 
                            placeholder=" "
+                           value="{{ form.email.value|default_if_none:'' }}"
                            required>
-                    <label class="floating-label">Adresse email</label>
+                    <label class="floating-label">Adresse email *</label>
                     <div class="input-icon">
                         <i class="fas fa-envelope"></i>
                     </div>
+                    {% if form.email.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.email.errors.0 }}
+                    </div>
+                    {% endif %}
                 </div>
                 
+                <!-- Prénom -->
                 <div class="form-group">
                     <input type="text" 
                            name="first_name" 
                            id="id_first_name" 
                            class="input-field" 
-                           placeholder=" ">
-                    <label class="floating-label">Prénom (optionnel)</label>
+                           placeholder=" "
+                           value="{{ form.first_name.value|default_if_none:'' }}">
+                    <label class="floating-label">Prénom</label>
                     <div class="input-icon">
                         <i class="fas fa-user-circle"></i>
                     </div>
                 </div>
                 
+                <!-- Nom -->
                 <div class="form-group">
                     <input type="text" 
                            name="last_name" 
                            id="id_last_name" 
                            class="input-field" 
-                           placeholder=" ">
-                    <label class="floating-label">Nom (optionnel)</label>
+                           placeholder=" "
+                           value="{{ form.last_name.value|default_if_none:'' }}">
+                    <label class="floating-label">Nom</label>
                     <div class="input-icon">
                         <i class="fas fa-user-circle"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="form-group">
-                <select name="user_type" id="id_user_type" class="select-field" required>
-                    <option value="" selected disabled></option>
-                    <option value="etudiant">🎓 Étudiant</option>
-                    <option value="admin">⚙️ Administrateur</option>
-                </select>
-                <label class="floating-label">Type de compte</label>
-                <div class="input-icon">
-                    <i class="fas fa-user-tag"></i>
-                </div>
-            </div>
+            <!-- Type d'utilisateur -->
+            <!-- Message informatif -->
+<div class="form-group full-width" style="text-align: center; padding: 15px; background: rgba(99, 102, 241, 0.1); border-radius: 12px; margin-bottom: 25px;">
+    <i class="fas fa-graduation-cap" style="font-size: 24px; color: #818cf8; margin-bottom: 10px;"></i>
+    <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 14px; line-height: 1.5;">
+        <strong>Compte étudiant</strong><br>
+        Tous les comptes créés via cette page sont des comptes étudiants.
+    </p>
+</div>
             
+            <!-- Mot de passe 1 -->
             <div class="form-group">
                 <input type="password" 
                        name="password1" 
@@ -681,7 +738,7 @@
                        class="input-field" 
                        placeholder=" "
                        required>
-                <label class="floating-label">Mot de passe</label>
+                <label class="floating-label">Mot de passe *</label>
                 <div class="input-icon">
                     <i class="fas fa-lock"></i>
                 </div>
@@ -689,8 +746,15 @@
                     <div class="strength-bar" id="password-strength-bar"></div>
                 </div>
                 <div class="strength-text" id="password-strength-text">Force du mot de passe</div>
+                {% if form.password1.errors %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.password1.errors.0 }}
+                </div>
+                {% endif %}
             </div>
             
+            <!-- Mot de passe 2 -->
             <div class="form-group">
                 <input type="password" 
                        name="password2" 
@@ -698,19 +762,26 @@
                        class="input-field" 
                        placeholder=" "
                        required>
-                <label class="floating-label">Confirmer le mot de passe</label>
+                <label class="floating-label">Confirmer le mot de passe *</label>
                 <div class="input-icon">
                     <i class="fas fa-lock"></i>
                 </div>
-                <div class="success-message" id="password-match">
+                <div class="success-message" id="password-match" style="display: none;">
                     <i class="fas fa-check-circle"></i>
                     <span>Les mots de passe correspondent</span>
                 </div>
+                {% if form.password2.errors %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.password2.errors.0 }}
+                </div>
+                {% endif %}
             </div>
             
+            <!-- Conditions d'utilisation -->
             <div class="terms-container">
                 <label class="checkbox-container">
-                    <input type="checkbox" name="remember_me" id="terms" required>
+                    <input type="checkbox" name="accept_terms" id="terms" required>
                     <span class="checkmark"></span>
                 </label>
                 <div class="terms-text">
@@ -727,7 +798,7 @@
         </form>
         
         <div class="auth-links">
-            <a href="{% url 'login_html' %}" class="auth-link">
+            <a href="{% url 'login' %}" class="auth-link">
                 <i class="fas fa-sign-in-alt"></i>
                 Déjà un compte ? Se connecter
             </a>
@@ -819,31 +890,34 @@
             const btn = this.querySelector('.btn-register');
             const btnContent = btn.querySelector('.btn-content');
             
-            btnContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Création du compte...</span>';
-            btn.disabled = true;
-            
-            // Mettre à jour les étapes de progression
-            document.querySelectorAll('.step').forEach((step, index) => {
-                setTimeout(() => {
-                    step.classList.add('completed');
-                    if (index < 2) {
-                        step.nextElementSibling?.classList.add('active');
-                    }
-                }, index * 500);
-            });
+            if (btnContent) {
+                btnContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Création du compte...</span>';
+                btn.disabled = true;
+                
+                // Mettre à jour les étapes de progression
+                document.querySelectorAll('.step').forEach((step, index) => {
+                    setTimeout(() => {
+                        step.classList.add('completed');
+                        if (index < 2) {
+                            step.nextElementSibling?.classList.add('active');
+                        }
+                    }, index * 500);
+                });
+            }
         });
 
-        // Animation des champs obligatoires
-        const requiredFields = document.querySelectorAll('[required]');
-        requiredFields.forEach(field => {
-            field.addEventListener('invalid', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#ef4444';
-                this.style.animation = 'shake 0.5s';
-                
-                setTimeout(() => {
-                    this.style.animation = '';
-                }, 500);
+        // Animation pour les champs invalides
+        document.addEventListener('DOMContentLoaded', function() {
+            const invalidFields = document.querySelectorAll('.error-message').forEach(error => {
+                const field = error.closest('.form-group').querySelector('input, select');
+                if (field) {
+                    field.style.borderColor = '#ef4444';
+                    field.style.animation = 'shake 0.5s';
+                    
+                    setTimeout(() => {
+                        field.style.animation = '';
+                    }, 500);
+                }
             });
         });
 

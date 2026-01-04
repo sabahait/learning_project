@@ -595,17 +595,17 @@ input[type="file"] {
             
             <div class="user-info">
                 <!-- MODIFICATION ICI : Avatar dans la navbar -->
-                <div class="user-avatar" id="navbarAvatar" 
+             <!-- MODIFIEZ l'avatar dans la navbar (ligne ~170) -->
+<div class="user-avatar" id="navbarAvatar" 
      style="background: var(--gradient-purple); cursor: pointer;">
     {% if user.photo_profil %}
         {% with photo_url=user.photo_profil.url|default:'' %}
             {% if photo_url %}
-                <!-- IMPORTANT: Utiliser /media/profile_photos/ pour le proxy main server -->
-                {% with filename=photo_url|cut:'/media/profiles/'|cut:'/media/profile_photos/' %}
-                    <img src="/media/profile_photos/{{ filename }}" 
-                         alt="Photo de profil"
-                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                {% endwith %}
+                <!-- URL COMPLÈTE vers l'auth server -->
+                <img src="http://127.0.0.1:8001{{ photo_url }}" 
+                     alt="Photo de profil"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
             {% else %}
                 {{ user.username|slice:":1"|upper }}
             {% endif %}
@@ -614,12 +614,6 @@ input[type="file"] {
         {{ user.username|slice:":1"|upper }}
     {% endif %}
 </div>
-                <div class="user-details">
-                    <h4>{{ user.username|upper }}</h4>
-                    <p>Étudiant <span class="premium-badge">PREMIUM</span></p>
-                </div>
-            </div>
-        </div>
     </nav>
 
     <!-- Main Content -->
@@ -649,18 +643,18 @@ input[type="file"] {
     <div style="background: var(--bg-white); padding: 1.5rem; border-radius: var(--card-border-radius); text-align: center; box-shadow: var(--shadow-card); border: 1px solid var(--border-color); position: relative;">
         <!-- Photo de profil avec bouton de changement -->
         <div class="user-avatar-container" style="position: relative; display: inline-block; margin-bottom: 0.8rem;">
-           <div class="user-avatar" id="profileAvatar" 
+          <!-- MODIFIEZ l'avatar principal dans le profil (ligne ~252) -->
+<div class="user-avatar" id="profileAvatar" 
      style="width: 8rem; height: 8rem; font-size: 2.5rem; margin: 0 auto; background: var(--gradient-purple); 
             display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;">
     {% if user.photo_profil %}
         {% with photo_url=user.photo_profil.url|default:'' %}
             {% if photo_url %}
-                <!-- IMPORTANT: Utiliser /media/profile_photos/ pour le proxy main server -->
-                {% with filename=photo_url|cut:'/media/profiles/'|cut:'/media/profile_photos/' %}
-                    <img src="/media/profile_photos/{{ filename }}" 
-                         alt="Photo de profil" 
-                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                {% endwith %}
+                <!-- URL COMPLÈTE vers l'auth server -->
+                <img src="http://127.0.0.1:8001{{ photo_url }}" 
+                     alt="Photo de profil"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
             {% else %}
                 {{ user.username|slice:":1"|upper }}
             {% endif %}
@@ -701,7 +695,7 @@ input[type="file"] {
         <div style="margin-bottom: 1.2rem; padding: 1rem; background: var(--bg-light); border-radius: var(--border-radius-1);">
             <div style="font-size: 0.8rem; color: var(--text-light);">Membre depuis</div>
             <div style="font-weight: 600; font-size: 1rem;">
-                {{ user.date_joined|date:"F Y"|default:"Janvier 2024" }}
+                {{ user.date_joined|date:"F Y"|default:"Janvier 2026" }}
             </div>
         </div>
     </div>
@@ -957,6 +951,7 @@ function getAuthToken() {
     return '';
 }
 // Fonction pour uploader une photo de profil
+// Fonction pour uploader une photo de profil - VERSION CORRIGÉE
 async function uploadProfilePhoto(file) {
     try {
         const token = getAuthToken();
@@ -967,8 +962,9 @@ async function uploadProfilePhoto(file) {
         const formData = new FormData();
         formData.append('photo', file);
         
-        console.log('📤 Upload photo vers:', '/api/profile/photo/');
+        console.log('📤 Upload photo vers API main server...');
         
+        // Appeler l'API du main server
         const response = await fetch('/api/profile/photo/', {
             method: 'POST',
             headers: {
@@ -991,39 +987,56 @@ async function uploadProfilePhoto(file) {
         if (response.ok && data.success) {
             console.log('✅ Photo uploadée avec succès:', data);
             
-            // Mettre à jour l'image de profil AVEC L'URL COMPLÈTE
+            // Mettre à jour l'image de profil avec l'URL COMPLÈTE
             if (data.photo_url) {
                 const avatar = document.getElementById('profileAvatar');
                 const navbarAvatar = document.getElementById('navbarAvatar');
                 
-                // Préparer l'URL complète
-                let photoUrl = data.photo_url;
-                if (!photoUrl.startsWith('http')) {
-                    // Ajouter le domaine de l'auth server
-                    photoUrl = 'http://127.0.0.1:8001' + photoUrl;
-                }
+                // IMPORTANT: L'URL retournée est comme /media/profile_photos/filename.jpg
+                // Mais la vraie photo est sur l'auth server: http://127.0.0.1:8001/media/profiles/filename.jpg
                 
-                console.log('🖼️ URL photo:', photoUrl);
+                // Extraire le nom de fichier de l'URL retournée
+                const proxyUrl = data.photo_url; // ex: /media/profile_photos/filename.jpg
+                const filename = proxyUrl.split('/').pop();
+                
+                // Construire l'URL réelle sur l'auth server
+                const realPhotoUrl = `http://127.0.0.1:8001/media/profiles/${filename}`;
+                
+                console.log('🖼️ Mise à jour des avatars avec URL:', realPhotoUrl);
+                
+                // Fonction pour créer une image avec gestion d'erreur
+                const createAvatarHTML = (photoUrl) => `
+                    <img src="${photoUrl}" 
+                         alt="Photo de profil" 
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjEwMCIgZmlsbD0iIzlmNTFlMCIvPgo8dGV4dCB4PSIxMDAiIHk9IjExNSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+CiAgJHt1c2VyLnVzZXJuYW1lLnNsaWNlKCI6MSIpLnRvVXBwZXJDYXNlKCl9CiAgPC90ZXh0Pgo8L3N2Zz4=';"
+                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                `;
                 
                 // Mettre à jour l'avatar principal
                 if (avatar) {
-                    avatar.innerHTML = `
-                        <img src="${photoUrl}" 
-                             alt="Photo de profil" 
-                             onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
-                             style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                    `;
+                    avatar.innerHTML = createAvatarHTML(realPhotoUrl);
                 }
                 
                 // Mettre à jour l'avatar de la navbar
                 if (navbarAvatar) {
-                    navbarAvatar.innerHTML = `
-                        <img src="${photoUrl}" 
-                             alt="Photo de profil"
-                             onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
-                             style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                    `;
+                    navbarAvatar.innerHTML = createAvatarHTML(realPhotoUrl);
                 }
+                
+                // Aussi essayer l'URL proxy (au cas où)
+                setTimeout(() => {
+                    // Tester si l'URL réelle fonctionne, sinon essayer le proxy
+                    const testImage = new Image();
+                    testImage.onerror = function() {
+                        console.log('⚠️ URL réelle échouée, essai avec proxy...');
+                        if (avatar) {
+                            avatar.innerHTML = createAvatarHTML(proxyUrl);
+                        }
+                        if (navbarAvatar) {
+                            navbarAvatar.innerHTML = createAvatarHTML(proxyUrl);
+                        }
+                    };
+                    testImage.src = realPhotoUrl;
+                }, 1000);
             }
             
             return { success: true, message: data.message || 'Photo mise à jour' };

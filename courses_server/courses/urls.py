@@ -1,7 +1,7 @@
 # courses/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+from . import views  # Assurez-vous d'importer toutes les fonctions
 
 # Créer le router
 router = DefaultRouter()
@@ -23,4 +23,10 @@ urlpatterns = [
     path('api/courses/', views.get_courses, name='api_courses'),
     path('api/categories/', views.get_categories, name='api_categories'),
     path('api/create/', views.CourseViewSet.as_view({'post': 'create'}), name='create_course'),
+
+    # APIs d'inscription - CORRECTION: Ajouter "views." devant les fonctions
+    path('api/courses/<int:course_id>/enroll/', views.api_enroll_course, name='api_enroll_course'),
+    path('api/courses/<int:course_id>/check-enrollment/', views.api_check_enrollment, name='api_check_enrollment'),
+    path('api/my-courses/', views.api_my_courses, name='api_my_courses'),
+    path('api/enrollments/<int:enrollment_id>/progress/', views.api_update_progress, name='api_update_progress'),
 ]

@@ -777,3 +777,97 @@ class UploadProfilePhotoAPIView(APIView):
                 'success': False,
                 'error': 'Utilisateur non trouvé'
             }, status=status.HTTP_404_NOT_FOUND)
+
+# Dans auth_server/authentication/views.py
+@method_decorator(csrf_exempt, name='dispatch')
+class UserListAPIView(APIView):
+    """API pour lister tous les utilisateurs (admin seulement)"""
+    
+    def get(self, request):
+        print("=" * 60)
+        print("🔄 [UserListAPIView - AUTH SERVER] DÉBUT")
+        
+        token = request.META.get('HTTP_AUTHORIZATION', '').replace('Bearer ', '')
+        print(f"🔑 Token reçu: {token[:50]}...")
+        
+        if not token:
+            print("❌ Token manquant")
+            return Response({
+                'success': False,
+                'error': 'Token manquant'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            # Vérifier que l'utilisateur est admin
+            user = User.objects.get(api_token=token)
+            print(f"✅ Utilisateur trouvé: {user.username} (ID: {user.id})")
+            
+            if not user.is_token_valid():
+                print("❌ Token expiré")
+                return Response({
+                    'success': False,
+                    'error': 'Token expiré'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            print(f"🔍 Vérification droits: is_superuser={user.is_superuser}, user_type={user.user_type}")
+            
+            if not user.is_superuser and user.user_type != 'admin':
+                print("❌ Accès non autorisé - Pas admin")
+                return Response({
+                    'success': False,
+                    'error': 'Accès non autorisé - Admin seulement'
+                }, status=status.HTTP_403_FORBIDDEN)
+            
+            # Récupérer tous les utilisateurs
+            users = User.objects.all().order_by('-date_joined')
+            print(f"📊 {users.count()} utilisateurs dans la base de données")
+            
+            users_data = []
+            for user_obj in users:
+                user_data = {
+                    'id': user_obj.id,
+                    'username': user_obj.username,
+                    'email': user_obj.email,
+                    'first_name': user_obj.first_name or '',
+                    'last_name': user_obj.last_name or '',
+                    'full_name': f"{user_obj.first_name or ''} {user_obj.last_name or ''}".strip(),
+                    'user_type': user_obj.user_type,
+                    'is_active': user_obj.is_active,
+                    'is_superuser': user_obj.is_superuser,
+                    'is_staff': user_obj.is_staff,
+                    'telephone': user_obj.telephone or '',
+                    'date_joined': user_obj.date_joined.isoformat() if user_obj.date_joined else None,
+                    'last_login': user_obj.last_login.isoformat() if user_obj.last_login else None,
+                    'photo_profil': user_obj.photo_profil.url if user_obj.photo_profil else None,
+                }
+                users_data.append(user_data)
+            
+            print(f"✅ {len(users_data)} utilisateurs retournés")
+            
+            # Debug: afficher quelques utilisateurs
+            for i, u in enumerate(users_data[:3]):
+                print(f"  {i+1}. {u['username']} ({u['email']}) - {u['user_type']}")
+            
+            print("🔄 [UserListAPIView - AUTH SERVER] FIN")
+            print("=" * 60)
+            
+            return Response({
+                'success': True,
+                'count': len(users_data),
+                'users': users_data
+            })
+            
+        except User.DoesNotExist:
+            print("❌ Utilisateur non trouvé pour ce token")
+            return Response({
+                'success': False,
+                'error': 'Utilisateur non trouvé'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"💥 Exception: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

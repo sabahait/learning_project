@@ -1131,70 +1131,98 @@
             <h2><span class="material-symbols-outlined">group</span> Liste des utilisateurs</h2>
             
             <div class="users-table-container">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nom complet</th>
-                            <th>Email</th>
-                            <th>Rôle</th>
-                            <th>Statut</th>
-                            <th>Téléphone</th>
-                            <th>Date d'inscription</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-    {% for user in users %}
-    <tr>
-        <td>{{ user.id }}</td>
-        <td>
-            {% if user.first_name or user.last_name %}
-                {{ user.first_name }} {{ user.last_name }}
-            {% else %}
-                {{ user.username }}
-            {% endif %}
-        </td>
-        <td>{{ user.email }}</td>
-        <td>
-            {% if user.user_type == 'admin' %}
-                <span class="user-role role-admin">Administrateur</span>
-            {% elif user.user_type == 'teacher' %}
-                <span class="user-role role-teacher">Enseignant</span>
-            {% else %}
-                <span class="user-role role-student">Étudiant</span>
-            {% endif %}
-        </td>
-        <td>
-            {% if user.is_active %}
-                <span class="user-status status-active">Actif</span>
-            {% else %}
-                <span class="user-status status-inactive">Inactif</span>
-            {% endif %}
-        </td>
-        <td>{{ user.telephone|default:"Non renseigné" }}</td>
-        <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
-        <td>
-            <div class="action-buttons">
-                <button class="btn btn-warning btn-small edit-btn" data-id="{{ user.id }}">
-                    <span class="material-symbols-outlined">edit</span>
-                </button>
-                <button class="btn btn-danger btn-small delete-btn" data-id="{{ user.id }}">
-                    <span class="material-symbols-outlined">delete</span>
-                </button>
-            </div>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="8" class="no-users">
-            <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">group_off</span>
-            <p>Aucun utilisateur trouvé.</p>
-        </td>
-    </tr>
-    {% endfor %}
-</tbody>
-                </table>
+                <!-- MODIFIEZ la section du tableau des utilisateurs (ligne ~440) -->
+<table class="users-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom complet</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Téléphone</th>
+            <th>Date d'inscription</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="usersTableBody">
+       {% for user in users %}
+<tr>
+    <td>{{ user.id }}</td>
+    <td>
+        {% if user.full_name and user.full_name.strip %}
+            {{ user.full_name }}
+            <br>
+            <small class="text-muted">@{{ user.username }}</small>
+        {% else %}
+            {{ user.username }}
+        {% endif %}
+    </td>
+    <td>{{ user.email }}</td>
+    <td>
+        {% if user.user_type == 'admin' or user.is_superuser %}
+            <span class="user-role role-admin">Administrateur</span>
+        {% elif user.user_type == 'teacher' %}
+            <span class="user-role role-teacher">Enseignant</span>
+        {% else %}
+            <span class="user-role role-student">Étudiant</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if user.is_active %}
+            <span class="user-status status-active">Actif</span>
+        {% else %}
+            <span class="user-status status-inactive">Inactif</span>
+        {% endif %}
+        {% if user.is_staff %}
+            <br><small class="text-muted">Staff</small>
+        {% endif %}
+    </td>
+    <td>{{ user.telephone|default:"-" }}</td>
+    <td>
+        {% if user.date_joined %}
+            {{ user.date_joined|slice:":10"|date:"d/m/Y" }}
+            <br>
+            <small class="text-muted">{{ user.date_joined|slice:"11:16" }}</small>
+        {% else %}
+            -
+        {% endif %}
+    </td>
+    <td>
+        <div class="action-buttons">
+            <button class="btn btn-warning btn-small edit-btn" 
+                    data-id="{{ user.id }}"
+                    data-username="{{ user.username }}"
+                    data-firstname="{{ user.first_name|default:'' }}"
+                    data-lastname="{{ user.last_name|default:'' }}"
+                    data-email="{{ user.email }}"
+                    data-role="{{ user.user_type|default:'student' }}"
+                    data-status="{% if user.is_active %}active{% else %}inactif{% endif %}"
+                    data-phone="{{ user.telephone|default:'' }}">
+                <span class="material-symbols-outlined">edit</span>
+            </button>
+            <button class="btn btn-danger btn-small delete-btn" 
+                    data-id="{{ user.id }}"
+                    data-name="{{ user.full_name|default:user.username }}">
+                <span class="material-symbols-outlined">delete</span>
+            </button>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="8" class="no-users">
+        <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">group_off</span>
+        <p>Aucun utilisateur trouvé dans la base de données.</p>
+        <button class="btn btn-primary" onclick="loadUsers()">
+            <span class="material-symbols-outlined">refresh</span>
+            Rafraîchir la liste
+        </button>
+    </td>
+</tr>
+{% endfor %}
+    </tbody>
+</table>
                 <div id="noUsersMessage" class="no-users" style="display: none;">
                     <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">group_off</span>
                     <p>Aucun utilisateur trouvé.</p>
@@ -1356,563 +1384,209 @@
 </div>
 
 <script>
-    // Données des utilisateurs (simulation avec plus d'utilisateurs pour la pagination)
-    let users = [
-        {
-            id: 1,
-            firstName: "Jean",
-            lastName: "Dupont",
-            email: "jean.dupont@example.com",
-            role: "admin",
-            status: "active",
-            phone: "0123456789",
-            registrationDate: "2024-01-15"
-        },
-        {
-            id: 2,
-            firstName: "Marie",
-            lastName: "Martin",
-            email: "marie.martin@example.com",
-            role: "student",
-            status: "active",
-            phone: "0987654321",
-            registrationDate: "2024-02-20"
-        },
-        {
-            id: 3,
-            firstName: "Pierre",
-            lastName: "Dubois",
-            email: "pierre.dubois@example.com",
-            role: "student",
-            status: "pending",
-            phone: "0654321890",
-            registrationDate: "2024-03-10"
-        },
-        {
-            id: 4,
-            firstName: "Sophie",
-            lastName: "Bernard",
-            email: "sophie.bernard@example.com",
-            role: "student",
-            status: "active",
-            phone: "0789123456",
-            registrationDate: "2024-03-25"
-        },
-        {
-            id: 5,
-            firstName: "Luc",
-            lastName: "Petit",
-            email: "luc.petit@example.com",
-            role: "student",
-            status: "active",
-            phone: "0612345678",
-            registrationDate: "2024-04-05"
-        },
-        {
-            id: 6,
-            firstName: "Emma",
-            lastName: "Roux",
-            email: "emma.roux@example.com",
-            role: "teacher",
-            status: "inactive",
-            phone: "0798765432",
-            registrationDate: "2024-04-10"
-        },
-        {
-            id: 7,
-            firstName: "Thomas",
-            lastName: "Moreau",
-            email: "thomas.moreau@example.com",
-            role: "admin",
-            status: "active",
-            phone: "0678912345",
-            registrationDate: "2024-04-15"
-        },
-        {
-            id: 8,
-            firstName: "Camille",
-            lastName: "Lefevre",
-            email: "camille.lefevre@example.com",
-            role: "student",
-            status: "pending",
-            phone: "0634567890",
-            registrationDate: "2024-04-20"
+// REMPLACEZ la fonction loadUsers() par :
+async function loadUsers() {
+    try {
+        console.log("🔄 Chargement des utilisateurs depuis l'API...");
+        
+        // Afficher l'indicateur de chargement
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <div style="border: 3px solid #f3f3f3; border-top: 3px solid var(--color-primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+                        <p>Chargement des utilisateurs...</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        // Récupérer le token d'authentification
+        const token = "{{ auth_token|escapejs }}";
+        
+        if (!token || token === 'None') {
+            throw new Error('Non authentifié. Veuillez vous reconnecter.');
         }
-    ];
-
-    // Variables pour la gestion des modals et pagination
-    let userToDelete = null;
-    let userToEdit = null;
-    let currentPage = 1;
-    const usersPerPage = 4;
-
-    // Fonction pour obtenir les utilisateurs de la page courante
-    function getCurrentPageUsers(filteredUsers = null) {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const roleFilter = document.getElementById('roleFilter').value;
-        const statusFilter = document.getElementById('statusFilter').value;
         
-        let usersToDisplay = filteredUsers || users;
-        
-        // Appliquer les filtres
-        usersToDisplay = usersToDisplay.filter(user => {
-            // Filtre de recherche
-            const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-            const email = user.email.toLowerCase();
-            const phone = user.phone ? user.phone.toLowerCase() : '';
-            
-            const matchesSearch = !searchTerm || 
-                fullName.includes(searchTerm) || 
-                email.includes(searchTerm) || 
-                phone.includes(searchTerm);
-            
-            // Filtre par rôle
-            const matchesRole = !roleFilter || user.role === roleFilter;
-            
-            // Filtre par statut
-            const matchesStatus = !statusFilter || user.status === statusFilter;
-            
-            return matchesSearch && matchesRole && matchesStatus;
+        // Utiliser l'endpoint API du main server qui fait le proxy vers l'auth server
+        console.log("🌐 Appel API: /api/admin/users/");
+        const response = await fetch('/api/admin/users/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         });
         
-        // Calculer les indices pour la pagination
-        const startIndex = (currentPage - 1) * usersPerPage;
-        const endIndex = startIndex + usersPerPage;
+        console.log("📡 Statut réponse:", response.status);
         
-        return {
-            filteredUsers: usersToDisplay,
-            pageUsers: usersToDisplay.slice(startIndex, endIndex),
-            totalPages: Math.ceil(usersToDisplay.length / usersPerPage),
-            totalUsers: usersToDisplay.length
-        };
-    }
-
-    // Fonction pour afficher les utilisateurs de la page courante
-    function displayUsers() {
-        const tbody = document.getElementById('usersTableBody');
-        const noUsersMessage = document.getElementById('noUsersMessage');
-        const paginationContainer = document.getElementById('paginationContainer');
-        
-        const { filteredUsers, pageUsers, totalPages, totalUsers } = getCurrentPageUsers();
-        
-        tbody.innerHTML = '';
-        
-        if (pageUsers.length === 0) {
-            noUsersMessage.style.display = 'block';
-            paginationContainer.innerHTML = '';
-            return;
+        if (response.ok) {
+            const data = await response.json();
+            console.log("✅ Données reçues:", data);
+            
+            if (data.success) {
+                updateUsersTable(data.users || []);
+                console.log("✅ Tableau mis à jour avec", (data.users || []).length, "utilisateurs");
+            } else {
+                throw new Error(data.error || 'Erreur lors du chargement');
+            }
+        } else {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.error || `Erreur ${response.status}: ${response.statusText}`);
         }
         
-        noUsersMessage.style.display = 'none';
+    } catch (error) {
+        console.error('💥 Erreur chargement utilisateurs:', error);
         
-        pageUsers.forEach(user => {
-            const row = document.createElement('tr');
-            
-            // Formater la date
-            const formattedDate = new Date(user.registrationDate).toLocaleDateString('fr-FR');
-            
-            // Déterminer les classes pour le rôle et le statut
-            const roleClass = `role-${user.role}`;
-            const statusClass = `status-${user.status}`;
-            
-            // Texte du rôle
-            let roleText = '';
-            switch(user.role) {
-                case 'admin': roleText = 'Administrateur'; break;
-                case 'teacher': roleText = 'Enseignant'; break;
-                case 'student': roleText = 'Étudiant'; break;
-            }
-            
-            // Texte du statut
-            let statusText = '';
-            switch(user.status) {
-                case 'active': statusText = 'Actif'; break;
-                case 'inactive': statusText = 'Inactif'; break;
-                case 'pending': statusText = 'En attente'; break;
-            }
-            
-            row.innerHTML = `
+        // Afficher un message d'erreur
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <span class="material-symbols-outlined" style="color: var(--color-danger); font-size: 3rem;">error</span>
+                        <p style="color: var(--color-danger); font-weight: 500;">Erreur lors du chargement</p>
+                        <p style="color: var(--color-info-dark); font-size: 0.9rem;">${error.message}</p>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-primary" onclick="location.reload()">
+                                <span class="material-symbols-outlined">refresh</span>
+                                Recharger la page
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.location.href='{% url 'login' %}'">
+                                <span class="material-symbols-outlined">login</span>
+                                Se reconnecter
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+function updateUsersTable(users) {
+    const tbody = document.getElementById('usersTableBody');
+    const noUsersMessage = document.getElementById('noUsersMessage');
+    
+    if (!users || users.length === 0) {
+        tbody.innerHTML = '';
+        noUsersMessage.style.display = 'block';
+        return;
+    }
+    
+    noUsersMessage.style.display = 'none';
+    
+    let html = '';
+    
+    users.forEach(user => {
+        // Formater la date
+        let formattedDate = '-';
+        if (user.date_joined) {
+            const date = new Date(user.date_joined);
+            formattedDate = `
+                ${date.toLocaleDateString('fr-FR')}
+                <br>
+                <small class="text-muted">${date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</small>
+            `;
+        }
+        
+        // Déterminer le rôle
+        let roleClass = 'role-student';
+        let roleText = 'Étudiant';
+        
+        if (user.user_type === 'admin' || user.is_superuser) {
+            roleClass = 'role-admin';
+            roleText = 'Administrateur';
+        } else if (user.user_type === 'teacher') {
+            roleClass = 'role-teacher';
+            roleText = 'Enseignant';
+        }
+        
+        // Déterminer le statut
+        let statusClass = user.is_active ? 'status-active' : 'status-inactive';
+        let statusText = user.is_active ? 'Actif' : 'Inactif';
+        
+        html += `
+            <tr>
                 <td>${user.id}</td>
-                <td>${user.firstName} ${user.lastName}</td>
+                <td>
+                    ${user.first_name || user.last_name ? 
+                        `${user.first_name || ''} ${user.last_name || ''}<br><small class="text-muted">@${user.username}</small>` : 
+                        user.username}
+                </td>
                 <td>${user.email}</td>
                 <td><span class="user-role ${roleClass}">${roleText}</span></td>
-                <td><span class="user-status ${statusClass}">${statusText}</span></td>
-                <td>${user.phone || 'Non renseigné'}</td>
+                <td>
+                    <span class="user-status ${statusClass}">${statusText}</span>
+                    ${user.is_staff ? '<br><small class="text-muted">Staff</small>' : ''}
+                </td>
+                <td>${user.telephone || '-'}</td>
                 <td>${formattedDate}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-warning btn-small edit-btn" data-id="${user.id}">
+                        <button class="btn btn-warning btn-small edit-btn" 
+                                data-id="${user.id}"
+                                data-username="${user.username}"
+                                data-firstname="${user.first_name || ''}"
+                                data-lastname="${user.last_name || ''}"
+                                data-email="${user.email}"
+                                data-role="${user.user_type || 'student'}"
+                                data-status="${user.is_active ? 'active' : 'inactive'}"
+                                data-phone="${user.telephone || ''}">
                             <span class="material-symbols-outlined">edit</span>
                         </button>
-                        <button class="btn btn-danger btn-small delete-btn" data-id="${user.id}">
+                        <button class="btn btn-danger btn-small delete-btn" 
+                                data-id="${user.id}"
+                                data-name="${user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}` : user.username}">
                             <span class="material-symbols-outlined">delete</span>
                         </button>
                     </div>
                 </td>
-            `;
-            
-            tbody.appendChild(row);
-        });
-        
-        // Ajouter les événements aux boutons
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const userId = parseInt(e.target.closest('.edit-btn').getAttribute('data-id'));
-                editUser(userId);
-            });
-        });
-        
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const userId = parseInt(e.target.closest('.delete-btn').getAttribute('data-id'));
-                showDeleteModal(userId);
-            });
-        });
-        
-        // Générer la pagination
-        generatePagination(totalPages, totalUsers);
-    }
-
-    // Fonction pour générer la pagination
-    function generatePagination(totalPages, totalUsers) {
-        const paginationContainer = document.getElementById('paginationContainer');
-        
-        if (totalPages <= 1) {
-            paginationContainer.innerHTML = `<div class="page-info">${totalUsers} utilisateur(s)</div>`;
-            return;
-        }
-        
-        let paginationHTML = '';
-        
-        // Bouton précédent
-        paginationHTML += `
-            <button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" id="prevPage">
-                <span class="material-symbols-outlined">chevron_left</span>
-            </button>
+            </tr>
         `;
-        
-        // Pages
-        const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-        
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
-        
-        if (startPage > 1) {
-            paginationHTML += `<button class="pagination-btn page-btn" data-page="1">1</button>`;
-            if (startPage > 2) {
-                paginationHTML += `<span class="pagination-dots">...</span>`;
-            }
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-            paginationHTML += `
-                <button class="pagination-btn page-btn ${currentPage === i ? 'active' : ''}" data-page="${i}">
-                    ${i}
-                </button>
-            `;
-        }
-        
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                paginationHTML += `<span class="pagination-dots">...</span>`;
-            }
-            paginationHTML += `<button class="pagination-btn page-btn" data-page="${totalPages}">${totalPages}</button>`;
-        }
-        
-        // Bouton suivant
-        paginationHTML += `
-            <button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" id="nextPage">
-                <span class="material-symbols-outlined">chevron_right</span>
-            </button>
-        `;
-        
-        // Information sur la page courante
-        const startUser = (currentPage - 1) * usersPerPage + 1;
-        const endUser = Math.min(currentPage * usersPerPage, totalUsers);
-        paginationHTML += `<div class="page-info">${startUser}-${endUser} sur ${totalUsers} utilisateur(s)</div>`;
-        
-        paginationContainer.innerHTML = paginationHTML;
-        
-        // Ajouter les événements de pagination
-        document.getElementById('prevPage').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                displayUsers();
-            }
-        });
-        
-        document.getElementById('nextPage').addEventListener('click', () => {
-            const { totalPages } = getCurrentPageUsers();
-            if (currentPage < totalPages) {
-                currentPage++;
-                displayUsers();
-            }
-        });
-        
-        document.querySelectorAll('.page-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const page = parseInt(e.target.getAttribute('data-page'));
-                currentPage = page;
-                displayUsers();
-            });
-        });
-    }
+    });
+    
+    tbody.innerHTML = html;
+    
+    // Re-attacher les événements aux boutons
+    attachUserActionsEvents();
+}
 
-    // Fonction pour ajouter un utilisateur
-    function addUser(userData) {
-        // Générer un nouvel ID
-        const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-        
-        // Créer l'objet utilisateur
-        const newUser = {
-            id: newId,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            email: userData.email,
-            role: userData.role,
-            status: userData.status,
-            phone: userData.phone || '',
-            registrationDate: new Date().toISOString().split('T')[0]
-        };
-        
-        // Ajouter à la liste
-        users.push(newUser);
-        
-        // Recalculer la pagination et afficher la dernière page
-        const { totalPages } = getCurrentPageUsers();
-        currentPage = totalPages;
-        
-        // Mettre à jour l'affichage
-        displayUsers();
-        
-        // Fermer le modal
-        closeModal('addUserModal');
-        
-        // Afficher un message de succès
-        alert(`Utilisateur ${newUser.firstName} ${newUser.lastName} ajouté avec succès !`);
-    }
-
-    // Fonction pour éditer un utilisateur
-    function editUser(userId) {
-        const user = users.find(u => u.id === userId);
-        if (!user) return;
-        
-        userToEdit = user;
-        
-        // Remplir le formulaire d'édition
-        document.getElementById('editUserId').value = user.id;
-        document.getElementById('editFirstName').value = user.firstName;
-        document.getElementById('editLastName').value = user.lastName;
-        document.getElementById('editEmail').value = user.email;
-        document.getElementById('editRole').value = user.role;
-        document.getElementById('editStatus').value = user.status;
-        document.getElementById('editPhone').value = user.phone || '';
-        
-        // Afficher le modal
-        openModal('editModal');
-    }
-
-    // Fonction pour sauvegarder les modifications
-    function saveEdit() {
-        if (!userToEdit) return;
-        
-        // Mettre à jour les données de l'utilisateur
-        userToEdit.firstName = document.getElementById('editFirstName').value;
-        userToEdit.lastName = document.getElementById('editLastName').value;
-        userToEdit.email = document.getElementById('editEmail').value;
-        userToEdit.role = document.getElementById('editRole').value;
-        userToEdit.status = document.getElementById('editStatus').value;
-        userToEdit.phone = document.getElementById('editPhone').value;
-        
-        // Mettre à jour l'affichage
-        displayUsers();
-        
-        // Fermer le modal
-        closeModal('editModal');
-        
-        // Afficher un message de succès
-        alert(`Utilisateur ${userToEdit.firstName} ${userToEdit.lastName} modifié avec succès !`);
-        
-        userToEdit = null;
-    }
-
-    // Fonction pour afficher le modal de suppression
-    function showDeleteModal(userId) {
-        const user = users.find(u => u.id === userId);
-        if (!user) return;
-        
-        userToDelete = userId;
-        document.getElementById('userToDeleteName').textContent = `${user.firstName} ${user.lastName}`;
-        openModal('deleteModal');
-    }
-
-    // Fonction pour supprimer un utilisateur
-    function deleteUser() {
-        if (!userToDelete) return;
-        
-        // Trouver l'index de l'utilisateur
-        const userIndex = users.findIndex(u => u.id === userToDelete);
-        if (userIndex === -1) return;
-        
-        // Sauvegarder le nom pour le message
-        const userName = `${users[userIndex].firstName} ${users[userIndex].lastName}`;
-        
-        // Supprimer l'utilisateur
-        users.splice(userIndex, 1);
-        
-        // Recalculer la pagination si nécessaire
-        const { totalPages } = getCurrentPageUsers();
-        if (currentPage > totalPages && totalPages > 0) {
-            currentPage = totalPages;
-        }
-        
-        // Mettre à jour l'affichage
-        displayUsers();
-        
-        // Fermer le modal
-        closeModal('deleteModal');
-        
-        // Afficher un message de succès
-        alert(`Utilisateur ${userName} supprimé avec succès !`);
-        
-        userToDelete = null;
-    }
-
-    // Fonctions pour gérer les modals
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = 'flex';
+// Fonction pour récupérer le token
+function getAuthToken() {
+    // Essayer différentes sources
+    const djangoToken = "{{ auth_token|escapejs }}";
+    if (djangoToken && djangoToken !== 'None') {
+        return djangoToken;
     }
     
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-        if (modalId === 'addUserModal') {
-            document.getElementById('addUserForm').reset();
+    return localStorage.getItem('auth_token');
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Page gestion utilisateurs chargée');
+    
+    // Ajouter un bouton de rafraîchissement
+    const refreshBtn = document.createElement('button');
+    refreshBtn.className = 'btn btn-secondary';
+    refreshBtn.innerHTML = '<span class="material-symbols-outlined">refresh</span> Rafraîchir';
+    refreshBtn.style.marginLeft = '10px';
+    refreshBtn.onclick = loadUsers;
+    
+    document.querySelector('.users-toolbar').appendChild(refreshBtn);
+    
+    // Charger les utilisateurs au démarrage
+    setTimeout(() => {
+        // Vérifier si le tableau est vide
+        const tbody = document.getElementById('usersTableBody');
+        if (tbody.children.length === 0 || (tbody.children.length === 1 && tbody.children[0].querySelector('.no-users'))) {
+            console.log('📋 Tableau vide, chargement des utilisateurs...');
+            loadUsers();
         }
-    }
-
-    // Gestion du formulaire d'ajout
-    document.getElementById('addUserForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Récupérer les valeurs du formulaire
-        const firstName = document.getElementById('modalFirstName').value;
-        const lastName = document.getElementById('modalLastName').value;
-        const email = document.getElementById('modalEmail').value;
-        const password = document.getElementById('modalPassword').value;
-        const confirmPassword = document.getElementById('modalConfirmPassword').value;
-        const role = document.getElementById('modalRole').value;
-        const status = document.getElementById('modalStatus').value;
-        const phone = document.getElementById('modalPhone').value;
-        
-        // Validation basique
-        if (password !== confirmPassword) {
-            alert('Les mots de passe ne correspondent pas !');
-            return;
-        }
-        
-        // Vérifier si l'email existe déjà
-        if (users.some(u => u.email === email)) {
-            alert('Un utilisateur avec cet email existe déjà !');
-            return;
-        }
-        
-        // Créer l'objet utilisateur
-        const userData = {
-            firstName,
-            lastName,
-            email,
-            role,
-            status,
-            phone
-        };
-        
-        // Ajouter l'utilisateur
-        addUser(userData);
-    });
-
-    // Gestion des événements
-    document.getElementById('addUserBtn').addEventListener('click', () => {
-        openModal('addUserModal');
-    });
-    
-    document.getElementById('closeAddModal').addEventListener('click', () => {
-        closeModal('addUserModal');
-    });
-    
-    document.getElementById('cancelAdd').addEventListener('click', () => {
-        closeModal('addUserModal');
-    });
-    
-    document.getElementById('closeEditModal').addEventListener('click', () => {
-        closeModal('editModal');
-    });
-    
-    document.getElementById('cancelEdit').addEventListener('click', () => {
-        closeModal('editModal');
-    });
-    
-    document.getElementById('saveEdit').addEventListener('click', saveEdit);
-    
-    document.getElementById('closeDeleteModal').addEventListener('click', () => {
-        closeModal('deleteModal');
-    });
-    
-    document.getElementById('cancelDelete').addEventListener('click', () => {
-        closeModal('deleteModal');
-        userToDelete = null;
-    });
-    
-    document.getElementById('confirmDelete').addEventListener('click', deleteUser);
-    
-    // Recherche en temps réel
-    document.getElementById('searchInput').addEventListener('input', () => {
-        currentPage = 1; // Retour à la première page lors d'une recherche
-        displayUsers();
-    });
-    
-    // Filtres
-    document.getElementById('roleFilter').addEventListener('change', () => {
-        currentPage = 1; // Retour à la première page lors d'un filtre
-        displayUsers();
-    });
-    
-    document.getElementById('statusFilter').addEventListener('change', () => {
-        currentPage = 1; // Retour à la première page lors d'un filtre
-        displayUsers();
-    });
-    
-    // Fermer les modals en cliquant en dehors
-    window.addEventListener('click', (e) => {
-        const modals = ['addUserModal', 'editModal', 'deleteModal'];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (e.target === modal) {
-                closeModal(modalId);
-                if (modalId === 'deleteModal') userToDelete = null;
-                if (modalId === 'editModal') userToEdit = null;
-            }
-        });
-    });
-
-    // Menu & theme
-    const sideMenu = document.querySelector("aside");
-    const menuBtn = document.getElementById('menu-btn');
-    const closeBtn = document.querySelector("#close-btn");
-    const themeToggler = document.querySelector(".theme-toggler");
-    
-    menuBtn.addEventListener('click',()=>{ sideMenu.style.display='block'; });
-    closeBtn.addEventListener('click',()=>{ sideMenu.style.display='none'; });
-    themeToggler.addEventListener('click',()=>{
-        document.body.classList.toggle('dark-theme-variables');
-        themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
-        themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
-    });
-
-    // Initialiser l'affichage des utilisateurs
-    displayUsers();
+    }, 500);
+});
 </script>
 </body>
 </html>

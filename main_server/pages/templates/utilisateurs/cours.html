@@ -990,9 +990,11 @@
             new Date(course.saved_date).toLocaleDateString('fr-FR') : 
             'Date inconnue';
         
-        // Image du cours
-        const imageUrl = course.cover_photo || 
-                        '/static/images/default-course.jpg';
+        // Afficher le nom du fichier PDF s'il existe
+        const pdfFileName = course.original_pdf_filename || 
+                           course.pdf_file_name || 
+                           course.document_filename ||
+                           'document.pdf';
         
         return `
             <div class="purchased-course-card" data-course-id="${course.id}">
@@ -1016,8 +1018,8 @@
                         <span>${savedDate}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
-                        <span>Instructeur:</span>
-                        <span>${course.instructor_name || 'Non spécifié'}</span>
+                        <span>Fichier PDF:</span>
+                        <span style="font-family: monospace; font-size: 0.75rem;">${pdfFileName}</span>
                     </div>
                 </div>
                 
@@ -1042,181 +1044,298 @@
         `;
     }
     
-// Accéder à un cours sauvegardé
-// Accéder à un cours sauvegardé
-function accessSavedCourse(courseId) {
-    const course = mySavedCourses.find(c => c.id === courseId);
-    if (!course) {
-        showMessage('Cours non trouvé');
-        return;
+    // Accéder à un cours sauvegardé - VERSION CORRIGÉE
+    function accessSavedCourse(courseId) {
+        const course = mySavedCourses.find(c => c.id === courseId);
+        if (!course) {
+            showMessage('Cours non trouvé', 'error');
+            return;
+        }
+        
+        console.log(`🎓 Accès au cours sauvegardé: ${course.title}`);
+        console.log('📋 Données du cours:', course);
+        
+        // Mettre à jour la progression
+        updateCourseProgress(courseId);
+        
+        // Récupérer l'URL du PDF - VERSION SIMPLIFIÉE ET CORRIGÉE
+        const pdfUrl = getCorrectPdfUrl(course);
+        console.log(`📄 URL PDF générée: ${pdfUrl}`);
+        
+        // Afficher le PDF dans la modale
+        if (pdfUrl) {
+            showPdfModal(course, pdfUrl);
+        } else {
+            showMessage('PDF non disponible pour ce cours', 'error');
+        }
     }
-    
-    console.log(`🎓 Accès au cours sauvegardé: ${course.title}`);
-    
-    // Mettre à jour la progression
-    updateCourseProgress(courseId);
-    
-    // Récupérer l'URL du PDF avec le bon port
-    let pdfUrl = getCorrectPdfUrl(course);
-    
-    // Afficher le PDF dans la modale
-    if (pdfUrl) {
-        showPdfModal(course, pdfUrl);
-    } else {
-        alert('PDF non disponible pour ce cours');
-    }
-}
 
-// Fonction pour générer l'URL correcte avec port 8002
-// Fonction pour générer l'URL correcte
-function getCorrectPdfUrl(course) {
-    console.log('🔍 Recherche URL PDF pour le cours:', course.title);
+    // FONCTION CORRIGÉE POUR OBTENIR L'URL DU PDF
+// FONCTION POUR TROUVER LE VRAI NOM DU PDF
+function findRealPdfFileName(course) {
+    console.log('🔍 Recherche du vrai nom PDF pour:', course.title);
     
-    // 1. Vérifier si le cours a une URL PDF directe
-    if (course.pdf_url && course.pdf_url.trim() !== '') {
-        console.log(`📄 URL PDF trouvée dans pdf_url: ${course.pdf_url}`);
-        // Corriger le port si nécessaire
-        return course.pdf_url.replace(':8000', ':8002');
-    }
-    
-    // 2. Vérifier les autres champs
-    const possibleUrls = [
-        course.document_file,
-        course.document_url,
-        course.pdf_file
+    // 1. Chercher dans les champs spécifiques
+    const fileNameFields = [
+        'document_filename',
+        'pdf_filename', 
+        'original_filename',
+        'file_name',
+        'filename'
     ];
     
-    for (const url of possibleUrls) {
-        if (url && url.trim() !== '') {
-            console.log(`📄 URL trouvée: ${url}`);
-            return url.replace(':8000', ':8002');
+    for (const field of fileNameFields) {
+        if (course[field] && typeof course[field] === 'string') {
+            const value = course[field].trim();
+            if (value.includes('.pdf') || value.includes('.PDF')) {
+                console.log(`✅ Nom trouvé dans ${field}: ${value}`);
+                return value;
+            }
         }
     }
     
-    // 3. Chercher dans les cours disponibles sauvegardés
-    const allCoursesFromAvailable = JSON.parse(localStorage.getItem('available_courses') || '[]');
-    console.log(`📋 ${allCoursesFromAvailable.length} cours disponibles dans localStorage`);
-    
-    const originalCourse = allCoursesFromAvailable.find(c => c.id === course.id);
-    
-    if (originalCourse) {
-        console.log('🎯 Cours original trouvé:', originalCourse.title);
-        const pdfInfo = getCoursePdfUrl(originalCourse);
-        if (pdfInfo && pdfInfo.url) {
-            console.log(`✅ URL PDF récupérée depuis cours original: ${pdfInfo.url}`);
-            return pdfInfo.url;
+    // 2. Extraire de l'URL document_file
+    if (course.document_file) {
+        const url = course.document_file.toString();
+        console.log(`🔗 URL document_file: ${url}`);
+        
+        // Extraire le nom de fichier de l'URL
+        const parts = url.split(/[\\/]/);
+        if (parts.length > 0) {
+            const fileName = parts[parts.length - 1];
+            if (fileName && (fileName.includes('.pdf') || fileName.includes('.PDF'))) {
+                console.log(`📁 Nom extrait de l'URL: ${fileName}`);
+                return fileName;
+            }
         }
     }
     
-    // 4. Fallback : essayer de construire l'URL avec le vrai nom de fichier
-    if (course.original_pdf_filename) {
-        const fileName = course.original_pdf_filename;
-        const fallbackUrl = `http://127.0.0.1:8002/media/course_documents/${fileName}`;
-        console.log(`🔄 Fallback avec nom de fichier original: ${fallbackUrl}`);
-        return fallbackUrl;
+    // 3. Chercher dans l'objet file
+    if (course.file && typeof course.file === 'object') {
+        if (course.file.name) {
+            console.log(`📁 Nom dans objet file: ${course.file.name}`);
+            return course.file.name;
+        }
     }
     
-    // 5. Dernier recours : utiliser le titre du cours
-    const fileName = course.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '_')
-        .replace(/_+/g, '_') + '.pdf';
+    // 4. Générer un nom intelligent basé sur le titre
+    console.log('⚠️ Aucun nom trouvé, génération basée sur le titre');
     
-    const defaultUrl = `http://127.0.0.1:8002/media/course_documents/${fileName}`;
-    console.warn(`⚠️ Utilisation URL par défaut: ${defaultUrl}`);
-    return defaultUrl;
-}
-// Fonction pour afficher le PDF dans une modale
-function showPdfModal(course, pdfUrl) {
-    console.log(`📄 Affichage du PDF pour: ${course.title}`);
+    let fileName = course.title
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9_\-.]/g, '')
+        .replace(/_{2,}/g, '_');
     
-    // Remplir les informations du modal
-    document.getElementById('pdfModalTitle').textContent = course.title;
-    
-    // Configurer les boutons
-    const downloadLink = document.getElementById('pdfDownloadLink');
-    if (downloadLink) {
-        downloadLink.href = pdfUrl;
-        downloadLink.download = course.title + '.pdf';
+    // Ajouter .pdf si non présent
+    if (!fileName.toLowerCase().endsWith('.pdf')) {
+        fileName += '.pdf';
     }
     
-    const openInNewTabBtn = document.getElementById('openInNewTabBtn');
-    if (openInNewTabBtn) {
-        openInNewTabBtn.onclick = function() {
-            window.open(pdfUrl, '_blank');
-        };
-    }
-    
-    // Afficher le contenu PDF
-    const pdfContainer = document.getElementById('pdfContainer');
-    
-    if (pdfContainer) {
-        pdfContainer.innerHTML = `
-            <div style="text-align: center; padding: 3rem; height: 500px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="margin-bottom: 2rem;">
-                    <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary-blue);">
-                        picture_as_pdf
-                    </span>
-                    <h3 style="margin: 1rem 0; color: var(--text-dark);">Document PDF disponible</h3>
-                    <p style="color: var(--text-light); line-height: 1.5; max-width: 500px;">
-                        Le document <strong>${course.title}.pdf</strong> est prêt à être consulté.
-                        <br><span style="color: var(--accent-teal);">✓ Ce cours est dans vos cours</span>
-                    </p>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px;">
-                    <a href="${pdfUrl}" target="_blank" class="btn btn-primary" style="width: 100%; text-decoration: none; text-align: center;">
-                        <span class="material-symbols-outlined">open_in_new</span>
-                        Ouvrir le PDF
-                    </a>
-                    
-                    <a href="${pdfUrl}" download="${course.title}.pdf" class="btn btn-secondary" style="width: 100%; text-decoration: none; text-align: center;">
-                        <span class="material-symbols-outlined">download</span>
-                        Télécharger le PDF
-                    </a>
-                    
-                    <button onclick="closePdfModal()" class="btn btn-outline" style="width: 100%;">
-                        <span class="material-symbols-outlined">close</span>
-                        Fermer
-                    </button>
-                </div>
-                
-                <div style="margin-top: 2rem; padding: 1rem; background: var(--light-blue); border-radius: var(--border-radius-1); max-width: 500px;">
-                    <p style="margin: 0; color: var(--text-light); font-size: 0.85rem; line-height: 1.4;">
-                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1rem;">lightbulb</span>
-                        <strong>Conseil :</strong> Vous pouvez aussi ouvrir le PDF dans un nouvel onglet en cliquant sur "Ouvrir PDF" ci-dessus.
-                    </p>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Afficher le modal
-    const pdfModal = document.getElementById('pdfModal');
-    if (pdfModal) {
-        pdfModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    } else {
-        console.error('❌ Modal PDF non trouvé');
-        window.open(pdfUrl, '_blank');
-    }
+    console.log(`📁 Nom généré: ${fileName}`);
+    return fileName;
 }
 
-// Fonction pour fermer la modale PDF
-function closePdfModal() {
-    const modal = document.getElementById('pdfModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+// MODIFIEZ la fonction getCorrectPdfUrl pour utiliser la nouvelle fonction
+function getCorrectPdfUrl(course) {
+    console.log('🔍 Recherche PDF pour cours:', course.id, course.title);
+    
+    // 1. Chercher le vrai nom du fichier
+    const realFileName = findRealPdfFileName(course);
+    
+    // 2. Construire l'URL
+    const pdfUrl = `http://127.0.0.1:8002/media/course_documents/${realFileName}`;
+    
+    console.log(`✅ URL PDF: ${pdfUrl}`);
+    return pdfUrl;
+}// Fonction utilitaire pour extraire le nom de fichier d'une URL
+function extractFileNameFromUrl(url) {
+    if (!url) return null;
+    const parts = url.split(/[\\/]/);
+    return parts[parts.length - 1];
+}
+ // Fonction pour extraire le nom de fichier d'une URL/chemin
+    function extractFileNameFromUrl(url) {
+        if (!url) return null;
         
-        // Nettoyer le conteneur
+        // Nettoyer l'URL
+        const cleanUrl = url.trim();
+        
+        // Extraire la dernière partie après / ou \
+        const parts = cleanUrl.split(/[\\/]/);
+        if (parts.length > 0) {
+            let fileName = parts[parts.length - 1];
+            
+            // Nettoyer les paramètres de requête
+            if (fileName.includes('?')) {
+                fileName = fileName.split('?')[0];
+            }
+            
+            // Nettoyer les fragments
+            if (fileName.includes('#')) {
+                fileName = fileName.split('#')[0];
+            }
+            
+            if (fileName && fileName.includes('.')) {
+                return fileName;
+            }
+        }
+        
+        return null;
+    }
+
+    // Deviner le nom du fichier PDF basé sur le titre
+    function guessPdfFileName(title) {
+        if (!title) return 'document.pdf';
+        
+        // Remplacer les espaces par des underscores
+        let fileName = title.replace(/\s+/g, '_');
+        
+        // Supprimer les caractères spéciaux
+        fileName = fileName.replace(/[^a-zA-Z0-9_\-.]/g, '');
+        
+        // Limiter la longueur
+        if (fileName.length > 50) {
+            fileName = fileName.substring(0, 50);
+        }
+        
+        return fileName;
+    }
+
+    // S'assurer que le fichier a l'extension .pdf
+    function ensurePdfExtension(fileName) {
+        if (!fileName) return 'document.pdf';
+        
+        if (!fileName.toLowerCase().endsWith('.pdf')) {
+            return fileName + '.pdf';
+        }
+        
+        return fileName;
+    }
+
+    // Fonction pour afficher le PDF dans une modale - VERSION AMÉLIORÉE
+    function showPdfModal(course, pdfUrl) {
+        console.log(`📊 Affichage du PDF: ${pdfUrl}`);
+        
+        // Extraire le nom de fichier de l'URL
+        const fileName = pdfUrl.split('/').pop();
+        
+        // Remplir les informations du modal
+        document.getElementById('pdfModalTitle').textContent = course.title;
+        
+        // Configurer les boutons AVEC LE BON NOM DE FICHIER
+        const downloadLink = document.getElementById('pdfDownloadLink');
+        if (downloadLink) {
+            downloadLink.href = pdfUrl;
+            downloadLink.download = fileName; // Utiliser le vrai nom de fichier
+            console.log(`⬇️ Téléchargement configuré: ${fileName}`);
+        }
+        
+        const openInNewTabBtn = document.getElementById('openInNewTabBtn');
+        if (openInNewTabBtn) {
+            openInNewTabBtn.onclick = function() {
+                console.log(`🌐 Ouverture dans nouvel onglet: ${pdfUrl}`);
+                window.open(pdfUrl, '_blank');
+            };
+        }
+        
+        // Afficher le contenu PDF avec informations détaillées
         const pdfContainer = document.getElementById('pdfContainer');
+        
         if (pdfContainer) {
-            pdfContainer.innerHTML = '';
+            pdfContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem; height: 500px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="margin-bottom: 2rem;">
+                        <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary-blue);">
+                            picture_as_pdf
+                        </span>
+                        <h3 style="margin: 1rem 0; color: var(--text-dark);">${course.title}</h3>
+                        
+                        <div style="background: var(--light-blue); padding: 1rem; border-radius: var(--border-radius-1); margin: 1rem 0; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--primary-blue);">description</span>
+                                <strong>Document PDF:</strong>
+                            </div>
+                            
+                        </div>
+                        
+                        <p style="color: var(--text-light); font-size: 0.9rem;">
+                            Sélectionnez comment vous souhaitez accéder au document:
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 350px;">
+                        <a href="${pdfUrl}" target="_blank" 
+                           class="btn btn-primary" 
+                           style="width: 100%; text-decoration: none; text-align: center;">
+                            <span class="material-symbols-outlined">open_in_new</span>
+                            Ouvrir le PDF (${fileName})
+                        </a>
+                        
+                        <a href="${pdfUrl}" download="${fileName}"
+                           class="btn btn-secondary" 
+                           style="width: 100%; text-decoration: none; text-align: center;">
+                            <span class="material-symbols-outlined">download</span>
+                            Télécharger "${fileName}"
+                        </a>
+                        
+                        <button onclick="closePdfModal()" 
+                                class="btn btn-outline" 
+                                style="width: 100%; background: #f8f9fa;">
+                            <span class="material-symbols-outlined">close</span>
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Afficher le modal
+        const pdfModal = document.getElementById('pdfModal');
+        if (pdfModal) {
+            pdfModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        } else {
+            console.error('❌ Modal PDF non trouvé');
+            window.open(pdfUrl, '_blank');
         }
     }
-}
-// Mettre à jour la progression
+
+    // Tester si l'URL du PDF est accessible
+    function testPdfUrl(url) {
+        console.log(`🧪 Test de l'URL: ${url}`);
+        
+        showMessage('Test de l\'URL en cours...', 'info');
+        
+        fetch(url, { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    showMessage('✅ L\'URL est accessible!', 'success');
+                } else {
+                    showMessage(`❌ Erreur ${response.status}: ${response.statusText}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erreur test URL:', error);
+                showMessage('❌ Impossible d\'accéder à l\'URL', 'error');
+            });
+    }
+
+    // Fonction pour fermer la modale PDF
+    function closePdfModal() {
+        const modal = document.getElementById('pdfModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Nettoyer le conteneur
+            const pdfContainer = document.getElementById('pdfContainer');
+            if (pdfContainer) {
+                pdfContainer.innerHTML = '';
+            }
+        }
+    }
+    
+    // Mettre à jour la progression
     function updateCourseProgress(courseId) {
         const courseIndex = mySavedCourses.findIndex(c => c.id === courseId);
         if (courseIndex !== -1) {
@@ -1264,7 +1383,7 @@ function closePdfModal() {
         loadMySavedCourses();
         
         // Afficher message de confirmation
-        showMessage(`Le cours "${course.title}" a été retiré de votre liste.`);
+        showMessage(`Le cours "${course.title}" a été retiré de votre liste.`, 'success');
     }
     
     // Retirer du serveur
@@ -1288,36 +1407,87 @@ function closePdfModal() {
     // Rafraîchir la liste
     function refreshMyCourses() {
         loadMySavedCourses();
-        showMessage('Liste des cours rafraîchie');
+        showMessage('Liste des cours rafraîchie', 'info');
     }
     
     // Fonction utilitaire pour afficher des messages
-    function showMessage(message) {
+    function showMessage(message, type = 'info') {
+        const colors = {
+            'info': 'var(--primary-blue)',
+            'success': 'var(--accent-teal)',
+            'error': '#FF6B6B',
+            'warning': '#FFA500'
+        };
+        
+        const icons = {
+            'info': 'info',
+            'success': 'check_circle',
+            'error': 'error',
+            'warning': 'warning'
+        };
+        
         const msgDiv = document.createElement('div');
         msgDiv.style.cssText = `
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
-            background: var(--primary-blue);
+            background: ${colors[type] || colors.info};
             color: white;
-            padding: 0.8rem 1.2rem;
+            padding: 1rem 1.5rem;
             border-radius: var(--border-radius-1);
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             z-index: 3000;
-            animation: fadeInUp 0.3s ease;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         `;
         
-        msgDiv.textContent = message;
+        msgDiv.innerHTML = `
+            <span class="material-symbols-outlined" style="font-size: 1.2rem;">
+                ${icons[type] || icons.info}
+            </span>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 0.3rem; font-size: 0.9rem;">
+                    ${type === 'error' ? 'Erreur' : type === 'success' ? 'Succès' : 'Information'}
+                </div>
+                <div style="font-size: 0.85rem;">${message}</div>
+            </div>
+        `;
+        
         document.body.appendChild(msgDiv);
         
+        // Supprimer après 5 secondes
         setTimeout(() => {
-            msgDiv.remove();
-        }, 3000);
+            msgDiv.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => msgDiv.remove(), 300);
+        }, 5000);
     }
     
-    // Ajoutez l'animation CSS
+    // Ajoutez les animations CSS
     const style = document.createElement('style');
     style.textContent = `
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -1374,124 +1544,166 @@ function closePdfModal() {
             }
         }
     }
-// Sauvegarder dans localStorage
-// Dans la page cours_available.html, modifiez la fonction saveToLocalStorage
-function saveToLocalStorage(course) {
-    const savedCourses = JSON.parse(localStorage.getItem('my_courses') || '[]');
-    
-    const isAlreadySaved = savedCourses.some(c => c.id === course.id);
-    
-    if (!isAlreadySaved) {
-        // RÉCUPÉRER L'URL DU PDF AVEC LA BONNE MÉTHODE
-        const pdfInfo = getCoursePdfUrl(course);
-        
-        // Utiliser l'URL exacte du PDF au lieu de générer un nom
-        const courseToSave = {
-            id: course.id,
-            title: course.title,
-            description: course.description || course.short_description,
-            category: course.category?.name || 'Autres',
-            cover_photo: course.cover_photo,
-            saved_date: new Date().toISOString(),
-            progress: 0,
-            status: 'not_started',
-            access_code: generateCourseAccessCode(),
-            instructor_name: course.instructor_name || 'Admin',
-            pages: course.pages || 0,
-            duration_hours: course.duration_hours || 0,
-            level: course.level || 'beginner',
-            media_type: course.media_type || 'pdf',
-            // SAUVEGARDER L'URL EXACTE DU PDF
-            pdf_url: pdfInfo.url,  // URL complète avec le bon chemin
-            document_file: course.document_file || '',
-            document_url: course.document_url || '',
-            // SAUVEGARDER LE VRAI NOM DE FICHIER
-            original_pdf_filename: pdfInfo.fileName || course.title + '.pdf'
-        };
-        
-        savedCourses.push(courseToSave);
-        localStorage.setItem('my_courses', JSON.stringify(savedCourses));
-        console.log(`✅ Cours ${course.id} sauvegardé avec PDF: ${pdfInfo.fileName}`);
-    }
-}
-// Fonction pour générer un code d'accès (si non définie)
-function generateCourseAccessCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return `COURS-${code}`;
-}
 
-// Fonction pour obtenir l'URL du PDF (identique à celle de courses_available.html)
-function getCoursePdfUrl(course) {
-    let pdfUrl = null;
-    let fileName = null;
-    
-    // Essayer différentes sources de PDF
-    const possibleSources = [
-        course.document_file,
-        course.document_url,
-        course.pdf_file,
-        course.file_url,
-        course.content_url,
-        course.pdf_url  // Ajouter aussi pdf_url au cas où
-    ];
-    
-    for (const source of possibleSources) {
-        if (source && typeof source === 'string' && source.trim() !== '') {
-            pdfUrl = source.trim();
-            
-            // Extraire le nom de fichier
-            const urlParts = pdfUrl.split('/');
-            fileName = urlParts[urlParts.length - 1];
-            
-            // Assurer que c'est un PDF
-            if (!fileName.toLowerCase().endsWith('.pdf')) {
-                fileName += '.pdf';
-            }
-            
-            console.log(`📄 PDF trouvé: ${fileName} - ${pdfUrl}`);
-            break;
+    // Fonction pour déboguer - à appeler depuis la console
+    function debugCourse(courseId) {
+        const course = mySavedCourses.find(c => c.id === courseId);
+        if (!course) {
+            console.error('❌ Cours non trouvé');
+            return;
         }
-    }
-    
-    // Si aucune URL trouvée, créer une URL par défaut
-    if (!pdfUrl) {
-        fileName = course.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '_')
-            .replace(/_+/g, '_') + '.pdf';
         
-        // Essayer différentes URLs possibles
-        const baseUrl = window.location.origin;
-        const possibleUrls = [
-            `${baseUrl}/media/course_documents/${fileName}`,
-            `${baseUrl}/media/pdfs/${fileName}`,
-            `${baseUrl}/static/courses/${fileName}`,
-            `http://127.0.0.1:8002/media/course_documents/${fileName}`,
-            `http://localhost:8000/media/course_documents/${fileName}`
+        console.log('=== DÉBOGAGE COURS ===');
+        console.log('ID:', course.id);
+        console.log('Titre:', course.title);
+        console.log('=== CHAMPS DE NOM DE FICHIER ===');
+        
+        const fileNameFields = [
+            'original_pdf_filename',
+            'document_filename',
+            'pdf_filename', 
+            'file_name',
+            'document_file_name',
+            'pdf_file_name'
         ];
         
-        pdfUrl = possibleUrls[0];
-        console.log(`📄 URL par défaut: ${pdfUrl}`);
+        fileNameFields.forEach(field => {
+            console.log(`${field}:`, course[field] || 'NON DÉFINI');
+        });
+        
+        console.log('=== URLS/ CHEMINS ===');
+        const urlFields = [
+            'pdf_url',
+            'document_url',
+            'document_file',
+            'pdf_file',
+            'file_url',
+            'content_url'
+        ];
+        
+        urlFields.forEach(field => {
+            console.log(`${field}:`, course[field] || 'NON DÉFINI');
+        });
+        
+        console.log('=== URL GÉNÉRÉE ===');
+        const generatedUrl = getCorrectPdfUrl(course);
+        console.log('URL:', generatedUrl);
+        
+        // Ouvrir l'URL pour tester
+        window.open(generatedUrl, '_blank');
     }
+
+
+function loadMySavedCourses() {
+    console.log('🔄 Chargement des cours sauvegardés...');
     
-    // Assurer que l'URL est absolue
-    if (pdfUrl && !pdfUrl.startsWith('http')) {
-        pdfUrl = window.location.origin + (pdfUrl.startsWith('/') ? pdfUrl : '/' + pdfUrl);
+    // Afficher état de chargement
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('savedCoursesContainer').innerHTML = '';
+    
+    // 1. D'ABORD vérifier localStorage (priorité)
+    const localCourses = JSON.parse(localStorage.getItem('my_courses') || '[]');
+    console.log(`💾 ${localCourses.length} cours dans localStorage`);
+    
+    // 2. Ensuite essayer l'API serveur
+    loadCoursesFromServer().then(serverCourses => {
+        console.log(`🌐 ${serverCourses.length} cours depuis serveur API`);
+        
+        // 3. Fusionner : d'abord localStorage, puis serveur (sans doublons)
+        let allCourses = [...localCourses];
+        
+        // Ajouter les cours du serveur qui ne sont pas déjà dans localStorage
+        serverCourses.forEach(serverCourse => {
+            const exists = localCourses.some(lc => lc.id === serverCourse.id);
+            if (!exists) {
+                allCourses.push(serverCourse);
+            }
+        });
+        
+        console.log(`📚 Total après fusion: ${allCourses.length} cours`);
+        
+        // Mettre à jour la variable globale
+        mySavedCourses = allCourses;
+        
+        // Mettre à jour le compteur
+        document.getElementById('savedCoursesCount').textContent = 
+            `${mySavedCourses.length} cours`;
+        
+        // Cacher l'état de chargement
+        document.getElementById('loadingState').style.display = 'none';
+        
+        // Afficher les cours
+        if (mySavedCourses.length === 0) {
+            document.getElementById('emptyState').style.display = 'block';
+            // Ajouter un message d'instructions
+            document.getElementById('emptyState').innerHTML += `
+                <div style="margin-top: 1rem; padding: 1rem; background: var(--light-blue); border-radius: var(--border-radius-1); max-width: 500px;">
+                    <p style="margin: 0; font-size: 0.9rem; color: var(--text-light);">
+                        <strong>💡 Conseil :</strong> 
+                        Pour ajouter des cours à cette liste, allez dans 
+                        <a href="/courses/" style="color: var(--primary-blue); font-weight: 600;">Cours disponibles</a> 
+                        et cliquez sur "Sauvegarder ce cours".
+                    </p>
+                </div>
+            `;
+        } else {
+            displaySavedCourses(mySavedCourses);
+        }
+        
+    }).catch(error => {
+        console.error('❌ Erreur chargement serveur:', error);
+        
+        // Utiliser seulement localStorage
+        mySavedCourses = localCourses;
+        document.getElementById('savedCoursesCount').textContent = 
+            `${mySavedCourses.length} cours`;
+        document.getElementById('loadingState').style.display = 'none';
+        
+        if (mySavedCourses.length === 0) {
+            document.getElementById('emptyState').style.display = 'block';
+        } else {
+            displaySavedCourses(mySavedCourses);
+        }
+    });
+}
+
+// Fonction améliorée pour charger depuis le serveur
+async function loadCoursesFromServer() {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            console.warn('⚠️ Pas de token, utilisation localStorage seulement');
+            return [];
+        }
+        
+        console.log('🌐 Appel API my-courses...');
+        const response = await fetch('/api/my-courses/', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('📦 Données API:', data);
+            
+            if (data.success) {
+                return data.courses || [];
+            } else {
+                console.warn('⚠️ API retourne success: false');
+                return [];
+            }
+        } else {
+            console.warn(`⚠️ Erreur API ${response.status}`);
+            return [];
+        }
+        
+    } catch (error) {
+        console.error('💥 Erreur API:', error);
+        return [];
     }
-    
-    // CORRIGER LE PORT : remplacer :8000 par :8002
-    if (pdfUrl) {
-        pdfUrl = pdfUrl.replace(':8000', ':8002');
-    }
-    
-    return {
-        url: pdfUrl,
-        fileName: fileName || course.title + '.pdf'
-    };
 }
 </script>
 </body>

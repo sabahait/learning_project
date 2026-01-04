@@ -11,6 +11,14 @@ import requests
 import json
 from django.http import JsonResponse
 from pages.services import AuthService, CoursesService
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+from urllib.parse import unquote
+import os
+from django.http import HttpResponse
 @csrf_exempt
 def api_upload_file(request):
     """Upload un fichier - CSRF exempt car utilisée par API"""
@@ -295,6 +303,7 @@ def auth_callback(request):
     print("➡️  Redirection vers home (échec)")
     print("=" * 60)
     return redirect('home')
+
 @csrf_exempt
 @login_required_api
 def admin_courses(request):
@@ -698,11 +707,210 @@ def api_get_categories(request):
             {'id': 4, 'name': 'Business'},
         ]
         return JsonResponse({'categories': default_categories})
+
+
+def get_test_users():
+    """Retourne des utilisateurs de test pour debug"""
+    return [
+        {
+            'id': 1,
+            'username': 'admin',
+            'email': 'admin@example.com',
+            'first_name': 'Admin',
+            'last_name': 'System',
+            'user_type': 'admin',
+            'is_active': True,
+            'telephone': '0123456789',
+            'date_joined': '2024-01-01T10:00:00Z',
+            'is_superuser': True,
+            'is_staff': True,
+            'photo_profil': None
+        },
+        {
+            'id': 2,
+            'username': 'jean.dupont',
+            'email': 'jean.dupont@example.com',
+            'first_name': 'Jean',
+            'last_name': 'Dupont',
+            'user_type': 'etudiant',
+            'is_active': True,
+            'telephone': '0987654321',
+            'date_joined': '2024-01-15T14:30:00Z',
+            'is_superuser': False,
+            'is_staff': False,
+            'photo_profil': None
+        },
+        {
+            'id': 3,
+            'username': 'marie.martin',
+            'email': 'marie.martin@example.com',
+            'first_name': 'Marie',
+            'last_name': 'Martin',
+            'user_type': 'etudiant',
+            'is_active': True,
+            'telephone': '0654321890',
+            'date_joined': '2024-02-10T09:15:00Z',
+            'is_superuser': False,
+            'is_staff': False,
+            'photo_profil': None
+        },
+        {
+            'id': 4,
+            'username': 'pierre.dubois',
+            'email': 'pierre.dubois@example.com',
+            'first_name': 'Pierre',
+            'last_name': 'Dubois',
+            'user_type': 'etudiant',
+            'is_active': False,
+            'telephone': '0789123456',
+            'date_joined': '2024-02-20T16:45:00Z',
+            'is_superuser': False,
+            'is_staff': False,
+            'photo_profil': None
+        },
+        {
+            'id': 5,
+            'username': 'sophie.bernard',
+            'email': 'sophie.bernard@example.com',
+            'first_name': 'Sophie',
+            'last_name': 'Bernard',
+            'user_type': 'etudiant',
+            'is_active': True,
+            'telephone': '0612345678',
+            'date_joined': '2024-03-05T11:20:00Z',
+            'is_superuser': False,
+            'is_staff': False,
+            'photo_profil': None
+        }
+    ]
+# MODIFIEZ la fonction admin_users
 @csrf_exempt
 @login_required_api
 def admin_users(request):
-    return render(request, 'administrateur/admin_users.html')
+    """Page de gestion des utilisateurs - Récupère depuis auth server"""
+    print("=" * 60)
+    print("🔄 [admin_users] DÉBUT - Récupération depuis auth server")
     
+    token = request.session.get('auth_token', '')
+    if not token:
+        print("❌ Pas de token d'authentification")
+        messages.error(request, 'Non authentifié')
+        return redirect('login')
+    
+    users_list = []
+    
+    try:
+        # Récupérer depuis l'auth server
+        print(f"🌐 Appel à l'auth server pour les utilisateurs")
+        auth_service_url = settings.AUTH_SERVICE_URL.rstrip('/')
+        
+        # URL CORRECTE : http://127.0.0.1:8001/api/auth/users/
+        url = f"{auth_service_url}/api/auth/users/"
+        
+        print(f"🌐 URL appelée: {url}")
+        print(f"🔑 Token utilisé: {token[:50]}...")
+        
+        response = requests.get(
+            url,
+            headers={'Authorization': f'Bearer {token}'},
+            timeout=10
+        )
+        
+        print(f"📡 Réponse auth server: {response.status_code}")
+        print(f"📦 Contenu: {response.text[:200]}...")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"✅ Succès: {data.get('success')}")
+            print(f"✅ Nombre: {data.get('count')}")
+            
+            users_list = data.get('users', [])
+            print(f"✅ {len(users_list)} utilisateurs récupérés depuis auth server")
+            
+            # Debug: afficher les premiers utilisateurs
+            for i, user in enumerate(users_list[:3]):
+                print(f"  User {i+1}: {user.get('username')} ({user.get('email')})")
+        
+        else:
+            print(f"❌ Erreur auth server: {response.status_code}")
+            print(f"❌ Message: {response.text}")
+            
+            # Fallback: base locale
+            users_list = get_users_from_local_db()
+            print(f"⚠️ Utilisation base locale: {len(users_list)} utilisateurs")
+            
+    except requests.exceptions.ConnectionError as e:
+        print(f"❌ Connection error: {e}")
+        users_list = get_users_from_local_db()
+        print(f"⚠️ Utilisation base locale après erreur connexion: {len(users_list)} utilisateurs")
+        
+    except Exception as e:
+        print(f"❌ Exception récupération auth server: {e}")
+        import traceback
+        traceback.print_exc()
+        users_list = get_users_from_local_db()
+        print(f"⚠️ Utilisation base locale après exception: {len(users_list)} utilisateurs")
+    
+    # Contexte
+    user_data = request.session.get('user_data', {})
+    
+    context = {
+        'user': user_data,
+        'users': users_list,
+        'users_count': len(users_list),
+        'auth_token': token,
+        'active_users_count': len([u for u in users_list if u.get('is_active', True)]),
+        'admin_users_count': len([u for u in users_list if u.get('is_superuser') or u.get('user_type') == 'admin']),
+    }
+    
+    print(f"📊 Statistiques: {len(users_list)} total, {context['active_users_count']} actifs, {context['admin_users_count']} admins")
+    print("🔄 [admin_users] FIN")
+    print("=" * 60)
+    
+    return render(request, 'administrateur/admin_users.html', context)
+# AJOUTEZ CETTE VUE dans views.py
+@csrf_exempt
+@require_http_methods(["GET"])
+def api_admin_users(request):
+    """API endpoint pour récupérer tous les utilisateurs depuis la base locale"""
+    print("=" * 60)
+    print("🔄 [api_admin_users] DÉBUT - Base locale")
+    
+    try:
+        # Récupérer depuis la base de données locale
+        users_list = get_users_from_local_db()
+        
+        print(f"✅ {len(users_list)} utilisateurs récupérés depuis base locale")
+        
+        # Debug: afficher quelques utilisateurs
+        if users_list:
+            for i, user in enumerate(users_list[:3]):
+                print(f"  User {i+1}: {user.get('username')} ({user.get('email')})")
+        
+        return JsonResponse({
+            'success': True,
+            'count': len(users_list),
+            'users': users_list,
+            'message': 'Données récupérées depuis la base de données locale'
+        })
+        
+    except Exception as e:
+        print(f"💥 Exception dans api_admin_users: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Retourner des utilisateurs de test en cas d'erreur
+        test_users = get_test_users()
+        return JsonResponse({
+            'success': True,
+            'count': len(test_users),
+            'users': test_users,
+            'message': f'Données de test (erreur base locale: {str(e)})'
+        })
+    
+    finally:
+        print("🔄 [api_admin_users] FIN")
+        print("=" * 60)
 @login_required_api
 def admin_dashboard(request):
     return render(request, 'administrateur/admin_dashboard.html')
@@ -864,7 +1072,10 @@ def profil(request):
 
 @login_required_api
 def cours(request):
+    """Page HTML pour 'Mes cours'"""
     user_data = request.session.get('user_data', {})
+    
+    # Format user info
     default_user = {
         'username': 'Utilisateur',
         'first_name': 'John',
@@ -874,21 +1085,26 @@ def cours(request):
     }
     user_info = {**default_user, **user_data}
     
-    # Récupérer les cours inscrits depuis la session
-    user_enrollments = []
+    # Récupérer le token pour les appels API JavaScript
+    auth_token = request.session.get('auth_token', '')
+    
+    # Compter les cours inscrits depuis la session
     enrollments = request.session.get('enrollments', [])
-    if user_data.get('id'):
-        user_id = user_data.get('id')
-        user_enrollments = [
-            e for e in enrollments 
-            if e.get('user_id') == user_id
-        ]
+    user_enrollments = [
+        e for e in enrollments 
+        if e.get('user_id') == user_data.get('id')
+    ] if user_data.get('id') else []
+    
+    print(f"📚 Page cours - Utilisateur: {user_info['username']}")
+    print(f"📚 Token: {auth_token[:30] if auth_token else 'N/A'}...")
+    print(f"📚 Cours inscrits: {len(user_enrollments)}")
     
     context = {
         'user': user_info,
-        'auth_token': request.session.get('auth_token', ''),
+        'auth_token': auth_token,  # TRÈS IMPORTANT : passer le token au template
         'enrollments_count': len(user_enrollments),
         'courses_service_url': settings.COURSES_SERVICE_URL,
+        'user_id': user_data.get('id', 0),
     }
     
     return render(request, 'utilisateurs/cours.html', context)
@@ -1931,17 +2147,17 @@ def serve_course_pdf(request, pdf_name):
         return HttpResponse(error_html, status=500, content_type='text/html')
 @csrf_exempt
 def proxy_profile_image(request, image_path):
+    """Proxy pour les images de profil depuis l'auth server"""
     try:
         # Décoder le chemin
         image_path = unquote(image_path)
         print(f"🖼️ Proxy photo profil: {image_path}")
         
-        # Nettoyer le chemin - ENLEVEZ 'profile_photos/' si présent
+        # Nettoyer le chemin
         if image_path.startswith('profile_photos/'):
             image_path = image_path.replace('profile_photos/', '', 1)
         
         # URL CORRECTE pour l'auth server
-        # Les photos sont dans /media/profiles/ sur l'auth server
         image_url = f"http://127.0.0.1:8001/media/profiles/{image_path}"
         
         print(f"🌐 Récupération depuis auth server: {image_url}")
@@ -1952,19 +2168,7 @@ def proxy_profile_image(request, image_path):
         print(f"📡 Réponse auth server: {response.status_code}")
         
         if response.status_code == 200:
-            # Déterminer le content-type
-            content_type = response.headers.get('Content-Type')
-            if not content_type:
-                # Deviner à partir de l'extension
-                ext = os.path.splitext(image_path)[1].lower()
-                if ext in ['.jpg', '.jpeg']:
-                    content_type = 'image/jpeg'
-                elif ext == '.png':
-                    content_type = 'image/png'
-                elif ext == '.gif':
-                    content_type = 'image/gif'
-                else:
-                    content_type = 'image/jpeg'  # Par défaut
+            content_type = response.headers.get('Content-Type', 'image/jpeg')
             
             # Ajouter des headers pour éviter le cache
             headers = {
@@ -1982,16 +2186,10 @@ def proxy_profile_image(request, image_path):
             )
         else:
             print(f"⚠️ Erreur {response.status_code} pour {image_url}")
-            print(f"⚠️ Contenu réponse: {response.text[:200]}")
             return serve_default_profile_image()
                 
-    except requests.exceptions.ConnectionError as e:
-        print(f"❌ Connection error: {e}")
-        return serve_default_profile_image()
     except Exception as e:
         print(f"💥 Erreur proxy photo profil: {e}")
-        import traceback
-        traceback.print_exc()
         return serve_default_profile_image()
 
 def serve_default_profile_image():
@@ -2012,11 +2210,13 @@ def serve_default_profile_image():
     return HttpResponseNotFound("Default profile image not found")
 
 # views.py - Ajoutez cette fonction
+# Dans views.py du main server, modifiez api_enroll_course
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def api_enroll_course(request, course_id):
-    """API endpoint pour s'inscrire/sauvegarder un cours - Version sans modèle"""
-    print(f"🎓 Demande d'inscription au cours ID: {course_id}")
+    """API endpoint pour s'inscrire/sauvegarder un cours - Version qui appelle le serveur de cours"""
+    print(f"🎓 [MAIN SERVER] Demande d'inscription au cours ID: {course_id}")
     
     # Récupérer le token
     auth_header = request.headers.get('Authorization', '')
@@ -2033,7 +2233,7 @@ def api_enroll_course(request, course_id):
         }, status=401)
     
     try:
-        # Vérifier le token
+        # Vérifier le token avec auth server
         is_valid, user_data = AuthService.verify_token(token)
         if not is_valid:
             print("❌ Token invalide")
@@ -2045,106 +2245,67 @@ def api_enroll_course(request, course_id):
         user_id = user_data.get('id')
         username = user_data.get('username', 'Utilisateur')
         
-        if not user_id:
-            print("❌ Pas d'ID utilisateur")
-            return JsonResponse({
-                'success': False,
-                'error': 'User ID not found'
-            }, status=400)
-        
         print(f"✅ Utilisateur {username} (ID: {user_id}) veut s'inscrire au cours {course_id}")
         
-        # Vérifier si le cours existe dans le serveur de cours
+        # ========== APPELER LE SERVEUR DE COURS ==========
         courses_service_url = settings.COURSES_SERVICE_URL.rstrip('/')
-        course_response = requests.get(
-            f"{courses_service_url}/api/courses/{course_id}/",
+        enroll_url = f"{courses_service_url}/api/courses/{course_id}/enroll/"
+        
+        print(f"🌐 Appel serveur de cours: {enroll_url}")
+        
+        # Envoyer la requête au serveur de cours
+        response = requests.post(
+            enroll_url,
             headers={'Authorization': f'Bearer {token}'},
-            timeout=5
+            timeout=10
         )
         
-        if course_response.status_code != 200:
-            print(f"❌ Cours {course_id} non trouvé sur serveur de cours")
+        print(f"📡 Réponse serveur de cours: {response.status_code}")
+        
+        if response.status_code in [200, 201]:
+            data = response.json()
+            print(f"✅ Inscription réussie sur serveur de cours: {data}")
+            
+            # Aussi sauvegarder dans la session du main server
+            if 'enrollments' not in request.session:
+                request.session['enrollments'] = []
+            
+            enrollments = request.session['enrollments']
+            
+            # Vérifier si déjà dans la session
+            existing = [e for e in enrollments if e.get('user_id') == user_id and e.get('course_id') == course_id]
+            if not existing:
+                enrollment_data = {
+                    'user_id': user_id,
+                    'username': username,
+                    'course_id': course_id,
+                    'course_title': data.get('enrollment', {}).get('course_title', 'Cours'),
+                    'enrollment_date': timezone.now().isoformat(),
+                    'progress': 0,
+                    'status': 'not_started',
+                    'access_code': data.get('enrollment', {}).get('access_code', '')
+                }
+                
+                enrollments.append(enrollment_data)
+                request.session['enrollments'] = enrollments
+                request.session.modified = True
+                print(f"💾 Inscription aussi sauvegardée dans la session du main server")
+            
+            return JsonResponse(data)
+            
+        else:
+            # Essayer de lire l'erreur
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('error', f'Erreur {response.status_code}')
+            except:
+                error_msg = f'Erreur serveur de cours: {response.status_code}'
+            
+            print(f"❌ Erreur serveur de cours: {error_msg}")
             return JsonResponse({
                 'success': False,
-                'error': 'Cours non trouvé'
-            }, status=404)
-        
-        course_data = course_response.json()
-        print(f"✅ Cours trouvé: {course_data.get('title')}")
-        
-        # ========== GESTION DES INSCRIPTIONS DANS LA SESSION ==========
-        
-        # Initialiser la liste des inscriptions si elle n'existe pas
-        if 'enrollments' not in request.session:
-            request.session['enrollments'] = []
-        
-        # Vérifier si l'utilisateur est déjà inscrit à ce cours
-        enrollments = request.session['enrollments']
-        
-        # Trouver les inscriptions de cet utilisateur
-        user_enrollments = [
-            e for e in enrollments 
-            if e.get('user_id') == user_id and e.get('course_id') == course_id
-        ]
-        
-        if user_enrollments:
-            print(f"⚠️ Utilisateur déjà inscrit à ce cours")
-            return JsonResponse({
-                'success': False,
-                'error': 'Vous êtes déjà inscrit à ce cours'
-            }, status=400)
-        
-        # Créer une nouvelle inscription
-        enrollment_data = {
-            'user_id': user_id,
-            'username': username,
-            'course_id': course_id,
-            'course_title': course_data.get('title', 'Cours sans titre'),
-            'course_type': course_data.get('course_type', 'free'),
-            'enrollment_date': timezone.now().isoformat(),
-            'progress': 0,
-            'status': 'not_started',
-            'last_accessed': timezone.now().isoformat(),
-            'media_type': course_data.get('media_type', 'pdf'),
-            'pages': course_data.get('pages', 0),
-            'duration_hours': course_data.get('duration_hours', 0),
-            'cover_photo': course_data.get('cover_photo', ''),
-            'instructor_name': course_data.get('instructor_name', 'Admin')
-        }
-        
-        # Ajouter à la session
-        enrollments.append(enrollment_data)
-        request.session['enrollments'] = enrollments
-        request.session.modified = True
-        
-        print(f"✅ Inscription sauvegardée dans la session")
-        print(f"📊 Total d'inscriptions: {len(enrollments)}")
-        
-        # Récupérer également les détails du cours pour les stocker séparément
-        if 'my_courses' not in request.session:
-            request.session['my_courses'] = {}
-        
-        # Stocker les informations du cours
-        request.session['my_courses'][str(course_id)] = {
-            'title': course_data.get('title'),
-            'description': course_data.get('description'),
-            'short_description': course_data.get('short_description'),
-            'media_type': course_data.get('media_type', 'pdf'),
-            'pages': course_data.get('pages', 0),
-            'duration_hours': course_data.get('duration_hours', 0),
-            'cover_photo': course_data.get('cover_photo', ''),
-            'instructor_name': course_data.get('instructor_name', 'Admin'),
-            'enrolled_at': timezone.now().isoformat()
-        }
-        
-        request.session.modified = True
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Cours ajouté à votre liste avec succès',
-            'enrollment': enrollment_data,
-            'course': course_data
-        })
+                'error': error_msg
+            }, status=response.status_code)
         
     except requests.exceptions.ConnectionError:
         print("❌ Serveur de cours indisponible")
@@ -2161,64 +2322,539 @@ def api_enroll_course(request, course_id):
             'error': str(e)
         }, status=500)
 
-
-
 @csrf_exempt
 @require_http_methods(["GET"])
 def api_get_my_courses(request):
     """API pour récupérer les cours de l'utilisateur"""
+    print("=" * 60)
+    print("🔄 [api_get_my_courses] DÉBUT")
+    
     token = get_token_from_request(request)
     
     if not token:
+        print("❌ Pas de token")
         return JsonResponse({'error': 'Authentication required'}, status=401)
     
-    is_valid, user_data = AuthService.verify_token(token)
-    if not is_valid:
-        return JsonResponse({'error': 'Invalid token'}, status=401)
+    print(f"🔑 Token reçu: {token[:30]}...")
     
-    user_id = user_data.get('id')
-    
-    # Récupérer les inscriptions depuis la session
-    enrollments = request.session.get('enrollments', [])
-    user_enrollments = [
-        e for e in enrollments 
-        if e.get('user_id') == user_id
-    ]
-    
-    print(f"📚 Cours de l'utilisateur {user_id}: {len(user_enrollments)} inscriptions")
-    
-    # Pour chaque inscription, récupérer les détails du cours
-    courses_with_details = []
-    
-    for enrollment in user_enrollments:
-        course_id = enrollment.get('course_id')
+    try:
+        # Vérifier le token
+        is_valid, user_data = AuthService.verify_token(token)
+        print(f"✅ Token valide: {is_valid}, User: {user_data.get('username')}")
         
-        try:
-            # Récupérer les détails du cours
-            course_info = get_course_info(course_id, token)
+        if not is_valid:
+            return JsonResponse({'error': 'Invalid token'}, status=401)
+        
+        user_id = user_data.get('id')
+        username = user_data.get('username')
+        
+        if not user_id:
+            return JsonResponse({'error': 'User ID not found'}, status=400)
+        
+        print(f"👤 Utilisateur: {username} (ID: {user_id})")
+        
+        # ========== 1. RÉCUPÉRER DEPUIS LA SESSION ==========
+        enrollments = request.session.get('enrollments', [])
+        user_enrollments = [
+            e for e in enrollments 
+            if e.get('user_id') == user_id
+        ]
+        
+        print(f"📚 {len(user_enrollments)} inscriptions trouvées dans la session")
+        
+        # ========== 2. SI PAS D'INSCRIPTIONS, CHERCHER DANS LOCALSTORAGE ==========
+        if not user_enrollments:
+            print("⚠️ Pas d'inscriptions dans la session")
             
-            if course_info:
-                course_with_enrollment = {
-                    **course_info,
-                    'enrollment': enrollment,
-                    'is_enrolled': True,
-                    'user_progress': enrollment.get('progress', 0),
-                    'user_status': enrollment.get('status', 'not_started')
-                }
-                courses_with_details.append(course_with_enrollment)
+            # ESSAYER DE RÉCUPÉRER LES COURS DIRECTEMENT DEPUIS LE SERVEUR DE COURS
+            # Vérifier d'abord si l'utilisateur a des cours sur le serveur de cours
+            courses_service_url = settings.COURSES_SERVICE_URL.rstrip('/')
+            
+            try:
+                print(f"🌐 Tentative de récupération cours depuis serveur de cours...")
                 
-        except Exception as e:
-            print(f"⚠️ Erreur récupération cours {course_id}: {e}")
-            # Ajouter quand même avec les infos de base
-            courses_with_details.append({
-                'id': course_id,
-                'title': enrollment.get('course_title', f'Cours #{course_id}'),
-                'enrollment': enrollment,
-                'is_enrolled': True
+                # OPTION 1: Vérifier si l'API de cours a un endpoint pour les cours de l'utilisateur
+                user_courses_response = requests.get(
+                    f"{courses_service_url}/api/user-courses/",
+                    headers={'Authorization': f'Bearer {token}'},
+                    timeout=10
+                )
+                
+                if user_courses_response.status_code == 200:
+                    user_courses = user_courses_response.json()
+                    print(f"✅ Cours récupérés depuis serveur de cours: {len(user_courses)}")
+                    
+                    # Convertir en format d'inscription
+                    for course in user_courses:
+                        enrollment = {
+                            'user_id': user_id,
+                            'username': username,
+                            'course_id': course.get('id'),
+                            'course_title': course.get('title', 'Sans titre'),
+                            'course_type': course.get('course_type', 'free'),
+                            'enrollment_date': course.get('created_at', timezone.now().isoformat()),
+                            'progress': course.get('user_progress', 0),
+                            'status': course.get('user_status', 'not_started'),
+                            'last_accessed': timezone.now().isoformat(),
+                            'media_type': course.get('media_type', 'pdf'),
+                            'pages': course.get('pages', 0),
+                            'duration_hours': course.get('duration_hours', 0),
+                            'cover_photo': course.get('cover_photo', ''),
+                            'instructor_name': course.get('instructor_name', 'Admin')
+                        }
+                        user_enrollments.append(enrollment)
+                        
+                        # Sauvegarder dans la session pour la prochaine fois
+                        request.session['enrollments'].append(enrollment)
+                    
+                    print(f"✅ {len(user_enrollments)} inscriptions créées depuis serveur de cours")
+                    
+                else:
+                    print(f"⚠️ Pas d'endpoint user-courses sur le serveur de cours")
+                    
+            except Exception as e:
+                print(f"⚠️ Erreur récupération serveur de cours: {e}")
+        
+        # ========== 3. FALLBACK : CHERCHER DANS LOCALSTORAGE DU FRONTEND ==========
+        # On ne peut pas accéder au localStorage du frontend depuis le serveur,
+        # donc on retourne un message pour que le frontend gère son propre localStorage
+        
+        courses_with_details = []
+        
+        if user_enrollments:
+            # Si on a des inscriptions, récupérer les détails
+            for enrollment in user_enrollments:
+                course_id = enrollment.get('course_id')
+                
+                try:
+                    # Récupérer les détails du cours
+                    courses_service_url = settings.COURSES_SERVICE_URL.rstrip('/')
+                    
+                    response = requests.get(
+                        f"{courses_service_url}/api/courses/{course_id}/",
+                        headers={'Authorization': f'Bearer {token}'},
+                        timeout=10
+                    )
+                    
+                    if response.status_code == 200:
+                        course_data = response.json()
+                        
+                        # IMPORTANT : Extraire le vrai nom du fichier PDF
+                        document_filename = extract_pdf_filename(course_data)
+                        
+                        merged_course = {
+                            **course_data,
+                            'document_filename': document_filename,
+                            'enrollment_info': {
+                                'progress': enrollment.get('progress', 0),
+                                'status': enrollment.get('status', 'not_started'),
+                                'enrolled_at': enrollment.get('enrollment_date'),
+                                'last_accessed': enrollment.get('last_accessed')
+                            },
+                            'is_enrolled': True,
+                            'user_progress': enrollment.get('progress', 0),
+                            'user_status': enrollment.get('status', 'not_started')
+                        }
+                        
+                        courses_with_details.append(merged_course)
+                        print(f"✅ Cours {course_id} récupéré: {course_data.get('title')}")
+                        
+                    else:
+                        print(f"⚠️ Cours {course_id} non trouvé, utilisation données d'inscription")
+                        courses_with_details.append({
+                            'id': course_id,
+                            'title': enrollment.get('course_title', f'Cours #{course_id}'),
+                            'enrollment_info': enrollment,
+                            'is_enrolled': True
+                        })
+                        
+                except Exception as e:
+                    print(f"⚠️ Erreur récupération cours {course_id}: {e}")
+                    courses_with_details.append({
+                        'id': course_id,
+                        'title': enrollment.get('course_title', f'Cours #{course_id}'),
+                        'enrollment_info': enrollment,
+                        'is_enrolled': True
+                    })
+        
+        # ========== 4. SAUVEGARDER LA SESSION ==========
+        if user_enrollments:
+            request.session['enrollments'] = enrollments
+            request.session.modified = True
+            print(f"💾 Session sauvegardée avec {len(enrollments)} inscriptions")
+        
+        # ========== 5. RETOURNER LA RÉPONSE ==========
+        if not courses_with_details:
+            print("⚠️ Aucun cours trouvé, retour des cours de test")
+            
+            # Retourner un message pour que le frontend utilise son localStorage
+            return JsonResponse({
+                'success': True,
+                'count': 0,
+                'courses': [],
+                'message': 'Aucun cours dans la session serveur',
+                'instruction': 'Le frontend doit utiliser localStorage pour les cours sauvegardés localement'
             })
+        
+        print(f"✅ Total cours à retourner: {len(courses_with_details)}")
+        
+        return JsonResponse({
+            'success': True,
+            'count': len(courses_with_details),
+            'courses': courses_with_details
+        })
+        
+    except Exception as e:
+        print(f"💥 Exception dans api_get_my_courses: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
     
-    return JsonResponse({
-        'success': True,
-        'count': len(courses_with_details),
-        'courses': courses_with_details
-    })
+    finally:
+        print("🔄 [api_get_my_courses] FIN")
+        print("=" * 60)
+
+def extract_pdf_filename(course_data):
+    """Extrait le vrai nom du fichier PDF des données du cours"""
+    # Chercher dans document_filename
+    if course_data.get('document_filename'):
+        return course_data['document_filename']
+    
+    # Chercher dans pdf_filename
+    if course_data.get('pdf_filename'):
+        return course_data['pdf_filename']
+    
+    # Extraire de document_file
+    if course_data.get('document_file'):
+        doc_file = course_data['document_file']
+        if isinstance(doc_file, str):
+            parts = doc_file.split('/')
+            if parts:
+                filename = parts[-1]
+                if filename and ('.pdf' in filename.lower() or '.PDF' in filename):
+                    return filename
+    
+    # Extraire de file si c'est un objet
+    if course_data.get('file') and isinstance(course_data['file'], dict):
+        if course_data['file'].get('name'):
+            return course_data['file']['name']
+    
+    # Générer depuis le titre
+    title = course_data.get('title', 'document')
+    return f"{title.replace(' ', '_')}.pdf"
+
+
+@csrf_exempt
+@api_view(['GET'])
+def api_my_courses(request):
+    """API pour récupérer les cours de l'utilisateur - Compatible avec DRF"""
+    print("=" * 60)
+    print("🔄 [api_my_courses] DÉBUT")
+    
+    # Récupérer le token
+    token = get_token_from_request(request)
+    
+    if not token:
+        print("❌ Pas de token")
+        return JsonResponse({
+            'success': False,
+            'error': 'Authentication required'
+        }, status=401)
+    
+    print(f"🔑 Token reçu: {token[:30]}..." if token else "❌ Pas de token")
+    
+    try:
+        # Vérifier le token
+        is_valid, user_data = AuthService.verify_token(token)
+        print(f"✅ Token valide: {is_valid}, User: {user_data.get('username') if user_data else 'N/A'}")
+        
+        if not is_valid:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid token'
+            }, status=401)
+        
+        user_id = user_data.get('id')
+        username = user_data.get('username')
+        
+        if not user_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'User ID not found'
+            }, status=400)
+        
+        print(f"👤 Récupération cours pour utilisateur: {username} (ID: {user_id})")
+        
+        # ========== RÉCUPÉRATION DES INSCRIPTIONS ==========
+        
+        # 1. Récupérer depuis la session
+        enrollments = request.session.get('enrollments', [])
+        user_enrollments = [
+            e for e in enrollments 
+            if e.get('user_id') == user_id
+        ]
+        
+        print(f"📚 {len(user_enrollments)} inscriptions trouvées dans la session")
+        
+        # 2. Si pas d'inscriptions dans la session, vérifier dans le localStorage du navigateur
+        if not user_enrollments:
+            print("⚠️ Pas d'inscriptions dans la session, vérification localStorage")
+            # Ici vous pourriez vérifier localStorage via une autre méthode
+        
+        # 3. Pour chaque inscription, récupérer les détails complets du cours
+        courses_with_details = []
+        
+        for enrollment in user_enrollments:
+            course_id = enrollment.get('course_id')
+            
+            try:
+                # Récupérer les détails du cours depuis le serveur de cours
+                courses_service_url = settings.COURSES_SERVICE_URL.rstrip('/')
+                
+                response = requests.get(
+                    f"{courses_service_url}/api/courses/{course_id}/",
+                    headers={'Authorization': f'Bearer {token}'},
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    course_data = response.json()
+                    
+                    # Fusionner les données du cours avec l'inscription
+                    merged_course = {
+                        **course_data,
+                        'enrollment_info': {
+                            'progress': enrollment.get('progress', 0),
+                            'status': enrollment.get('status', 'not_started'),
+                            'enrolled_at': enrollment.get('enrollment_date'),
+                            'last_accessed': enrollment.get('last_accessed')
+                        },
+                        'is_enrolled': True,
+                        'user_progress': enrollment.get('progress', 0),
+                        'user_status': enrollment.get('status', 'not_started')
+                    }
+                    
+                    # ========== CORRECTION IMPORTANTE ==========
+                    # Assurez-vous que le champ document_file est présent et formaté correctement
+                    if 'document_file' in course_data and course_data['document_file']:
+                        doc_file = course_data['document_file']
+                        # S'assurer que c'est une URL complète
+                        if doc_file and not doc_file.startswith('http'):
+                            merged_course['document_file'] = f"{courses_service_url}{doc_file}"
+                    
+                    courses_with_details.append(merged_course)
+                    
+                    print(f"✅ Cours {course_id}: {course_data.get('title', 'Sans titre')}")
+                    
+                else:
+                    print(f"⚠️ Cours {course_id} non trouvé sur serveur de cours")
+                    # Ajouter quand même avec les infos de base
+                    courses_with_details.append({
+                        'id': course_id,
+                        'title': enrollment.get('course_title', f'Cours #{course_id}'),
+                        'enrollment_info': enrollment,
+                        'is_enrolled': True
+                    })
+                    
+            except Exception as e:
+                print(f"⚠️ Erreur récupération cours {course_id}: {e}")
+                # Ajouter quand même avec les infos de base
+                courses_with_details.append({
+                    'id': course_id,
+                    'title': enrollment.get('course_title', f'Cours #{course_id}'),
+                    'enrollment_info': enrollment,
+                    'is_enrolled': True
+                })
+        
+        # ========== RETOURNER LA RÉPONSE ==========
+        
+        if not courses_with_details:
+            print("⚠️ Aucun cours trouvé pour l'utilisateur")
+            # Retourner des cours de test pour le debug
+            test_courses = get_test_enrolled_courses()
+            print(f"📚 Retourne {len(test_courses)} cours de test")
+            
+            return JsonResponse({
+                'success': True,
+                'count': len(test_courses),
+                'courses': test_courses,
+                'message': 'Données de test - Aucun cours trouvé'
+            })
+        
+        print(f"✅ Total cours récupérés: {len(courses_with_details)}")
+        
+        # Debug: afficher le premier cours
+        if courses_with_details:
+            first_course = courses_with_details[0]
+            print(f"📋 Premier cours: ID={first_course.get('id')}, Title={first_course.get('title')}")
+            print(f"📋 Document file: {first_course.get('document_file')}")
+            print(f"📋 Enrollment: {first_course.get('enrollment_info', {})}")
+        
+        return JsonResponse({
+            'success': True,
+            'count': len(courses_with_details),
+            'courses': courses_with_details
+        })
+        
+    except Exception as e:
+        print(f"💥 Exception dans api_my_courses: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+    
+    finally:
+        print("🔄 [api_my_courses] FIN")
+        print("=" * 60)
+
+def get_token_from_request(request):
+    """Extrait le token de la requête"""
+    # D'abord depuis l'en-tête Authorization
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        return auth_header.split(' ')[1]
+    
+    # Ensuite depuis GET/POST
+    token = request.GET.get('token') or request.POST.get('token')
+    if token:
+        return token
+    
+    # Enfin depuis la session
+    return request.session.get('auth_token', '')
+
+def get_test_enrolled_courses():
+    """Retourne des cours de test pour debug"""
+    return [
+        {
+            'id': 12,
+            'title': 'sabah',
+            'description': 'fffffhhhhhhhhhhhhhhhhttuu',
+            'category': {'id': 2, 'name': 'Data Science'},
+            'cover_photo': 'http://127.0.0.1:8002/media/course_covers/cours.png',
+            'price': 0.00,
+            'course_type': 'free',
+            'level': 'beginner',
+            'media_type': 'pdf',
+            'instructor_name': 'Admin',
+            'document_file': 'http://127.0.0.1:8002/media/course_documents/Atelier_1_DataMining.pdf',
+            'document_filename': 'Atelier_1_DataMining.pdf',
+            'enrollment_info': {
+                'progress': 10,
+                'status': 'in_progress',
+                'enrolled_at': '2024-01-01T10:00:00Z',
+                'last_accessed': '2024-01-02T14:30:00Z'
+            },
+            'is_enrolled': True,
+            'user_progress': 10,
+            'user_status': 'in_progress'
+        },
+        {
+            'id': 5,
+            'title': 'Data Mining Avancé',
+            'description': 'Techniques avancées de data mining',
+            'category': {'id': 2, 'name': 'Data Science'},
+            'cover_photo': 'http://127.0.0.1:8002/media/course_covers/datamining.jpg',
+            'price': 49.99,
+            'course_type': 'paid',
+            'level': 'advanced',
+            'media_type': 'pdf',
+            'instructor_name': 'Expert',
+            'document_file': 'http://127.0.0.1:8002/media/course_documents/DataMining_Advanced.pdf',
+            'document_filename': 'DataMining_Advanced.pdf',
+            'enrollment_info': {
+                'progress': 0,
+                'status': 'not_started',
+                'enrolled_at': '2024-01-01T12:00:00Z',
+                'last_accessed': '2024-01-01T12:00:00Z'
+            },
+            'is_enrolled': True,
+            'user_progress': 0,
+            'user_status': 'not_started'
+        }
+    ]
+
+
+def get_users_from_local_db():
+    """Récupère les utilisateurs depuis la base de données locale"""
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Créer un superutilisateur de test si la base est vide
+        if User.objects.count() == 0:
+            print("⚠️ Base vide, création d'utilisateur de test...")
+            try:
+                # Créer un superadmin
+                User.objects.create_superuser(
+                    username='admin',
+                    email='admin@example.com',
+                    password='admin123',
+                    first_name='Admin',
+                    last_name='System',
+                    user_type='admin',
+                    telephone='0123456789'
+                )
+                print("✅ Superadmin créé")
+                
+                # Créer un utilisateur normal
+                User.objects.create_user(
+                    username='john.doe',
+                    email='john@example.com',
+                    password='john123',
+                    first_name='John',
+                    last_name='Doe',
+                    user_type='student',
+                    telephone='0987654321'
+                )
+                print("✅ Utilisateur normal créé")
+            except Exception as e:
+                print(f"⚠️ Erreur création utilisateurs de test: {e}")
+        
+        users = User.objects.all().order_by('-date_joined')
+        users_list = []
+        
+        for user in users:
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name or '',
+                'last_name': user.last_name or '',
+                'full_name': f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username,
+                'is_active': user.is_active,
+                'is_superuser': user.is_superuser,
+                'is_staff': user.is_staff,
+                'user_type': getattr(user, 'user_type', 'admin' if user.is_superuser else 'student'),
+            }
+            
+            # Ajouter les champs optionnels s'ils existent
+            if hasattr(user, 'telephone'):
+                user_data['telephone'] = user.telephone or ''
+            
+            if hasattr(user, 'date_joined'):
+                user_data['date_joined'] = user.date_joined.isoformat() if user.date_joined else ''
+            
+            if hasattr(user, 'last_login'):
+                user_data['last_login'] = user.last_login.isoformat() if user.last_login else ''
+            
+            if hasattr(user, 'photo_profil') and user.photo_profil:
+                try:
+                    user_data['photo_profil'] = user.photo_profil.url
+                except:
+                    user_data['photo_profil'] = None
+            
+            users_list.append(user_data)
+        
+        print(f"✅ {len(users_list)} utilisateurs récupérés depuis base de données")
+        return users_list
+        
+    except Exception as e:
+        print(f"❌ Erreur récupération base locale: {e}")
+        import traceback
+        traceback.print_exc()
+        return []

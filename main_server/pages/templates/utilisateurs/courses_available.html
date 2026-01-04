@@ -913,6 +913,21 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Enrollment Success Modal Styles */
+#enrollmentSuccessModal .modal-content {
+    animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
     </style>
 </head>
 <body>
@@ -1256,6 +1271,49 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<!-- Enrollment Success Modal -->
+<div id="enrollmentSuccessModal" class="modal">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 2rem;">
+        <div style="margin-bottom: 1.5rem;">
+            <div style="width: 70px; height: 70px; background: var(--gradient-teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                <span class="material-symbols-outlined" style="font-size: 2.5rem; color: white;">check_circle</span>
+            </div>
+            <h3 style="margin-bottom: 0.8rem;">Inscription réussie !</h3>
+            <p id="enrollmentSuccessMessage" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                Vous êtes maintenant inscrit au cours.
+            </p>
+        </div>
+        
+        <div style="background: var(--light-blue); padding: 1.2rem; border-radius: var(--border-radius-1); margin-bottom: 1.5rem; text-align: left;">
+            <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Informations du cours</h4>
+            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-light);">Cours:</span>
+                    <span id="enrolledCourseTitle" style="font-weight: 600;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-light);">Date d'inscription:</span>
+                    <span id="enrollmentDate"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-light);">Statut:</span>
+                    <span style="color: var(--accent-teal); font-weight: 600;">Inscrit</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <button id="goToMyCoursesBtn" class="btn btn-primary">
+                <span class="material-symbols-outlined">school</span>
+                Voir dans Mes Cours
+            </button>
+            <button id="closeEnrollmentModalBtn" class="btn btn-outline">
+                <span class="material-symbols-outlined">close</span>
+                Continuer à explorer
+            </button>
         </div>
     </div>
 </div>
@@ -2119,95 +2177,102 @@
     }
 
     // FONCTION : Affiche le PDF avec bouton "Sauvegarder"
-    function showPdfModalWithSaveButton(course, pdfUrl, fileName) {
-        console.log(`📄 Affichage du PDF avec bouton Sauvegarder: ${fileName}`);
-        
-        // Vérifier si l'utilisateur a déjà sauvegardé ce cours
-        const isAlreadySaved = checkIfCourseIsSaved(course.id);
-        
-        // Remplir les informations du modal
-        document.getElementById('pdfModalTitle').textContent = course.title;
-        
-        // Configurer les boutons
-        const downloadLink = document.getElementById('pdfDownloadLink');
-        if (downloadLink) {
-            downloadLink.href = pdfUrl;
-            downloadLink.download = fileName || course.title + '.pdf';
-        }
-        
-        const openInNewTabBtn = document.getElementById('openInNewTabBtn');
-        if (openInNewTabBtn) {
-            openInNewTabBtn.onclick = function() {
-                window.open(pdfUrl, '_blank');
-            };
-        }
-        
-        // Afficher le contenu PDF avec bouton "Sauvegarder"
-        const pdfContainer = document.getElementById('pdfContainer');
-        
-        if (pdfContainer) {
-            pdfContainer.innerHTML = `
-                <div style="text-align: center; padding: 3rem; height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary-blue);">
-                            picture_as_pdf
-                        </span>
-                        <h3 style="margin: 1rem 0; color: var(--text-dark);">Document PDF disponible</h3>
-                        <p style="color: var(--text-light); line-height: 1.5; max-width: 500px;">
-                            Le document <strong>${fileName || 'PDF'}</strong> est prêt à être consulté.
-                            ${isAlreadySaved ? '<br><span style="color: var(--accent-teal);">✓ Ce cours est déjà dans vos cours</span>' : ''}
-                        </p>
-                    </div>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px;">
-                        <a href="${pdfUrl}" target="_blank" class="btn btn-primary" style="width: 100%; text-decoration: none; text-align: center;">
-                            <span class="material-symbols-outlined">open_in_new</span>
-                            Ouvrir le PDF
-                        </a>
-                        
-                        <a href="${pdfUrl}" download="${fileName || 'document.pdf'}" class="btn btn-secondary" style="width: 100%; text-decoration: none; text-align: center;">
-                            <span class="material-symbols-outlined">download</span>
-                            Télécharger le PDF
-                        </a>
-                        
-                        ${!isAlreadySaved ? `
-                            <button onclick="saveCourseToMyCourses(${course.id})" class="btn btn-primary" style="width: 100%; background: var(--gradient-teal);">
-                                <span class="material-symbols-outlined">save</span>
-                                Sauvegarder ce cours
-                            </button>
-                        ` : `
-                            <button class="btn btn-outline" style="width: 100%;" disabled>
-                                <span class="material-symbols-outlined">check_circle</span>
-                                Déjà dans vos cours
-                            </button>
-                        `}
-                        
-                        <button onclick="closePdfModal()" class="btn btn-outline" style="width: 100%;">
-                            <span class="material-symbols-outlined">close</span>
-                            Fermer
-                        </button>
-                    </div>
-                    
-                    <div style="margin-top: 2rem; padding: 1rem; background: var(--light-blue); border-radius: var(--border-radius-1); max-width: 500px;">
-                        <p style="margin: 0; color: var(--text-light); font-size: 0.85rem; line-height: 1.4;">
-                            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1rem;">lightbulb</span>
-                            <strong>Conseil :</strong> Cliquez sur "Sauvegarder ce cours" pour l'ajouter à votre liste de cours personnels.
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Afficher le modal
-        const pdfModal = document.getElementById('pdfModal');
-        if (pdfModal) {
-            pdfModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        } else {
-            console.error('❌ Modal PDF non trouvé');
-            window.open(pdfUrl, '_blank');
-        }
+// FONCTION : Affiche le PDF avec bouton "S'inscrire"
+function showPdfModalWithSaveButton(course, pdfUrl, fileName) {
+    console.log(`📄 Affichage du PDF avec bouton S'inscrire: ${fileName}`);
+    
+    // Vérifier si l'étudiant est déjà inscrit à ce cours
+    const isAlreadyEnrolled = checkIfUserIsEnrolled(course.id);
+    
+    // Remplir les informations du modal
+    document.getElementById('pdfModalTitle').textContent = course.title;
+    
+    // Configurer les boutons
+    const downloadLink = document.getElementById('pdfDownloadLink');
+    if (downloadLink) {
+        downloadLink.href = pdfUrl;
+        downloadLink.download = fileName || course.title + '.pdf';
     }
+    
+    const openInNewTabBtn = document.getElementById('openInNewTabBtn');
+    if (openInNewTabBtn) {
+        openInNewTabBtn.onclick = function() {
+            window.open(pdfUrl, '_blank');
+        };
+    }
+    
+    // Afficher le contenu PDF avec bouton "S'inscrire"
+    const pdfContainer = document.getElementById('pdfContainer');
+    
+    if (pdfContainer) {
+        pdfContainer.innerHTML = `
+            <div style="text-align: center; padding: 3rem; height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="margin-bottom: 2rem;">
+                    <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary-blue);">
+                        picture_as_pdf
+                    </span>
+                    <h3 style="margin: 1rem 0; color: var(--text-dark);">Document PDF disponible</h3>
+                    <p style="color: var(--text-light); line-height: 1.5; max-width: 500px;">
+                        Le document <strong>${fileName || 'PDF'}</strong> est prêt à être consulté.
+                        ${isAlreadyEnrolled ? '<br><span style="color: var(--accent-teal);">✓ Vous êtes déjà inscrit à ce cours</span>' : ''}
+                    </p>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px;">
+                    <a href="${pdfUrl}" target="_blank" class="btn btn-primary" style="width: 100%; text-decoration: none; text-align: center;">
+                        <span class="material-symbols-outlined">open_in_new</span>
+                        Ouvrir le PDF
+                    </a>
+                    
+                    <a href="${pdfUrl}" download="${fileName || 'document.pdf'}" class="btn btn-secondary" style="width: 100%; text-decoration: none; text-align: center;">
+                        <span class="material-symbols-outlined">download</span>
+                        Télécharger le PDF
+                    </a>
+                    
+                    ${!isAlreadyEnrolled ? `
+                        <button onclick="enrollUserToCourse(${course.id})" class="btn btn-primary" style="width: 100%; background: var(--gradient-teal);">
+                            <span class="material-symbols-outlined">person_add</span>
+                            S'inscrire à ce cours
+                        </button>
+                    ` : `
+                        <button class="btn btn-outline" style="width: 100%; background: var(--accent-teal);" disabled>
+                            <span class="material-symbols-outlined">check_circle</span>
+                            Déjà inscrit
+                        </button>
+                    `}
+                    
+                    <button onclick="closePdfModal()" class="btn btn-outline" style="width: 100%;">
+                        <span class="material-symbols-outlined">close</span>
+                        Fermer
+                    </button>
+                </div>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: var(--light-blue); border-radius: var(--border-radius-1); max-width: 500px;">
+                    <p style="margin: 0; color: var(--text-light); font-size: 0.85rem; line-height: 1.4;">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1rem;">lightbulb</span>
+                        <strong>Conseil :</strong> Cliquez sur "S'inscrire à ce cours" pour l'ajouter à votre liste de cours personnels.
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Afficher le modal
+    const pdfModal = document.getElementById('pdfModal');
+    if (pdfModal) {
+        pdfModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('❌ Modal PDF non trouvé');
+        window.open(pdfUrl, '_blank');
+    }
+}
+// FONCTION pour vérifier si l'utilisateur est déjà inscrit au cours
+function checkIfUserIsEnrolled(courseId) {
+    // Vérifier dans localStorage
+    const enrolledCourses = JSON.parse(localStorage.getItem('enrolled_courses') || '[]');
+    return enrolledCourses.some(course => course.id === courseId);
+}
 
     // FONCTION pour vérifier si le cours est déjà sauvegardé
     function checkIfCourseIsSaved(courseId) {
@@ -2255,36 +2320,103 @@
     }
 
     // Sauvegarder dans localStorage
-// Dans cours_available.html - Fonction pour sauvegarder le cours
+// MODIFIEZ la fonction saveToLocalStorage dans cours_available.js
 function saveToLocalStorage(course) {
     const savedCourses = JSON.parse(localStorage.getItem('my_courses') || '[]');
     
     const isAlreadySaved = savedCourses.some(c => c.id === course.id);
     
     if (!isAlreadySaved) {
-        // RÉCUPÉRER L'URL DU PDF AVEC LA BONNE MÉTHODE
-        const pdfInfo = getCoursePdfUrl(course);
+        console.log('💾 Sauvegarde du cours:', course.title);
         
-        // Sauvegarder TOUTES les données du cours
+        // TROUVER LE VRAI NOM DU PDF
+        let realPdfFileName = null;
+        
+        // 1. Chercher dans les champs du cours
+        const fileNameFields = [
+            'document_filename', 'pdf_filename', 'original_filename',
+            'file_name', 'filename', 'original_pdf_filename'
+        ];
+        
+        for (const field of fileNameFields) {
+            if (course[field] && course[field].includes('.pdf')) {
+                realPdfFileName = course[field];
+                console.log(`✅ Vrai nom trouvé dans ${field}: ${realPdfFileName}`);
+                break;
+            }
+        }
+        
+        // 2. Si pas trouvé, extraire d'une URL
+        if (!realPdfFileName) {
+            const urlFields = ['pdf_url', 'document_url', 'document_file'];
+            for (const field of urlFields) {
+                if (course[field] && typeof course[field] === 'string') {
+                    const parts = course[field].split(/[\\/]/);
+                    if (parts.length > 0) {
+                        const fileName = parts[parts.length - 1];
+                        if (fileName && fileName.includes('.pdf')) {
+                            realPdfFileName = fileName;
+                            console.log(`✅ Nom extrait de ${field}: ${realPdfFileName}`);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 3. Si toujours pas trouvé, utiliser une convention intelligente
+        if (!realPdfFileName) {
+            // Essayez de deviner basé sur le titre
+            if (course.title.includes('Data Mining')) {
+                realPdfFileName = 'Atelier_1_DataMining.pdf';
+            } else {
+                // Créer un nom propre
+                realPdfFileName = course.title
+                    .replace(/\s+/g, '_')
+                    .replace(/[^\w_\-.]/g, '') + '.pdf';
+            }
+            console.log(`⚠️ Nom généré: ${realPdfFileName}`);
+        }
+        
+        // 4. SAUVEGARDER LA RÉFÉRENCE (TRÈS IMPORTANT !)
+        saveCourseReference(course.id, realPdfFileName);
+        
+        // Sauvegarder le cours
         const courseToSave = {
-            ...course,  // Copier toutes les propriétés du cours original
+            ...course,
             saved_date: new Date().toISOString(),
             progress: 0,
             status: 'not_started',
             access_code: generateCourseAccessCode(),
-            // Ajouter les informations PDF explicitement
-            pdf_url: pdfInfo.url,
-            original_pdf_filename: pdfInfo.fileName || course.title + '.pdf'
+            
+            // FORCER LE VRAI NOM
+            original_pdf_filename: realPdfFileName,
+            pdf_url: `http://127.0.0.1:8002/media/course_documents/${realPdfFileName}`
         };
         
         savedCourses.push(courseToSave);
         localStorage.setItem('my_courses', JSON.stringify(savedCourses));
         
-        // SAUVEGARDER AUSSI LA LISTE DES COURS DISPONIBLES
-        localStorage.setItem('available_courses', JSON.stringify(allCourses));
-        
-        console.log(`✅ Cours ${course.id} sauvegardé avec toutes les données`);
+        console.log(`✅ Cours sauvegardé avec: ${realPdfFileName}`);
     }
+}
+
+// Fonction pour sauvegarder la référence (ajoutez-la)
+function saveCourseReference(courseId, pdfFileName) {
+    try {
+        const references = JSON.parse(localStorage.getItem('course_pdf_references') || '{}');
+        references[courseId] = pdfFileName;
+        localStorage.setItem('course_pdf_references', JSON.stringify(references));
+        console.log(`📚 Référence sauvegardée: ${courseId} -> ${pdfFileName}`);
+    } catch (error) {
+        console.error('Erreur sauvegarde référence:', error);
+    }
+}
+
+function extractFileNameFromUrl(url) {
+    if (!url) return null;
+    const parts = url.split(/[\\/]/);
+    return parts[parts.length - 1];
 }
 
     // Générer un code d'accès pour les cours
@@ -2351,68 +2483,120 @@ function saveToLocalStorage(course) {
         }
     }
 
-    function getCoursePdfUrl(course) {
-        let pdfUrl = null;
-        let fileName = null;
-        
-        // Essayer différentes sources de PDF
-        const possibleSources = [
-            course.document_file,
-            course.document_url,
-            course.pdf_file,
-            course.file_url,
-            course.content_url
+function getCoursePdfUrl(course) {
+    console.log('🔍 Recherche PDF pour:', course.title);
+    console.log('📋 Données complètes du cours:', course);
+    
+    let pdfUrl = null;
+    let fileName = null;
+    
+    // 1. D'abord, chercher le VRAI nom du fichier dans les données du cours
+    // Le serveur DOIT envoyer le vrai nom du fichier PDF
+    const possibleFileNameFields = [
+        'document_filename',
+        'pdf_filename', 
+        'original_filename',
+        'file_name',
+        'filename'
+    ];
+    
+    for (const field of possibleFileNameFields) {
+        if (course[field] && typeof course[field] === 'string' && course[field].trim() !== '') {
+            fileName = course[field].trim();
+            console.log(`✅ Vrai nom trouvé dans ${field}: ${fileName}`);
+            break;
+        }
+    }
+    
+    // 2. Si pas de nom trouvé, essayer d'extraire des URLs
+    if (!fileName) {
+        const possibleUrlFields = [
+            'document_file',
+            'document_url',
+            'pdf_file',
+            'pdf_url',
+            'file_url',
+            'content_url'
         ];
         
-        for (const source of possibleSources) {
-            if (source && typeof source === 'string' && source.trim() !== '') {
-                pdfUrl = source.trim();
+        for (const field of possibleUrlFields) {
+            if (course[field] && typeof course[field] === 'string' && course[field].trim() !== '') {
+                const url = course[field].trim();
+                console.log(`🔗 URL trouvée dans ${field}: ${url}`);
                 
-                // Extraire le nom de fichier
-                const urlParts = pdfUrl.split('/');
-                fileName = urlParts[urlParts.length - 1];
-                
-                // Assurer que c'est un PDF
-                if (!fileName.toLowerCase().endsWith('.pdf')) {
-                    fileName += '.pdf';
+                // Extraire le nom de fichier de l'URL
+                const extractedName = extractFileNameFromUrl(url);
+                if (extractedName) {
+                    fileName = extractedName;
+                    pdfUrl = url;
+                    console.log(`📁 Nom extrait: ${fileName}`);
+                    break;
                 }
-                
-                console.log(`📄 PDF trouvé: ${fileName} - ${pdfUrl}`);
-                break;
             }
         }
-        
-        // Si aucune URL trouvée, créer une URL par défaut
-        if (!pdfUrl) {
-            fileName = course.title
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, '_')
-                .replace(/_+/g, '_') + '.pdf';
-            
-            // Essayer différentes URLs possibles
-            const baseUrl = window.location.origin;
-            const possibleUrls = [
-                `${baseUrl}/media/course_documents/${fileName}`,
-                `${baseUrl}/media/pdfs/${fileName}`,
-                `${baseUrl}/static/courses/${fileName}`,
-                `http://127.0.0.1:8002/media/course_documents/${fileName}`,
-                `http://localhost:8000/media/course_documents/${fileName}`
-            ];
-            
-            pdfUrl = possibleUrls[0];
-            console.log(`📄 URL par défaut: ${pdfUrl}`);
-        }
-        
-        // Assurer que l'URL est absolue
-        if (pdfUrl && !pdfUrl.startsWith('http')) {
-            pdfUrl = window.location.origin + (pdfUrl.startsWith('/') ? pdfUrl : '/' + pdfUrl);
-        }
-        
-        return {
-            url: pdfUrl,
-            fileName: fileName || course.title + '.pdf'
-        };
     }
+    
+    // 3. Si toujours pas trouvé, utiliser une convention
+    if (!fileName) {
+        // ICI EST LE PROBLÈME : On utilise le titre au lieu du vrai nom
+        // On va plutôt chercher le vrai nom via une API
+        fileName = 'document.pdf'; // Temporaire
+        console.log(`⚠️ Aucun nom trouvé, utilisation temporaire: ${fileName}`);
+    }
+    
+    // S'assurer que c'est un PDF
+    fileName = ensurePdfExtension(fileName);
+    
+    // Construire l'URL
+    if (!pdfUrl) {
+        // Construire l'URL Django standard
+        pdfUrl = `http://127.0.0.1:8002/media/course_documents/${fileName}`;
+    }
+    
+    console.log(`🎯 Résultat: ${fileName} - ${pdfUrl}`);
+    
+    return {
+        url: pdfUrl,
+        fileName: fileName
+    };
+}
+
+function extractFileNameFromUrl(url) {
+    if (!url) return null;
+    
+    // Nettoyer l'URL
+    const cleanUrl = url.trim();
+    
+    // Extraire le nom de fichier
+    const parts = cleanUrl.split(/[\\/]/);
+    if (parts.length > 0) {
+        let fileName = parts[parts.length - 1];
+        
+        // Nettoyer les paramètres
+        if (fileName.includes('?')) {
+            fileName = fileName.split('?')[0];
+        }
+        if (fileName.includes('#')) {
+            fileName = fileName.split('#')[0];
+        }
+        
+        if (fileName && fileName.includes('.')) {
+            return fileName;
+        }
+    }
+    
+    return null;
+}
+
+function ensurePdfExtension(fileName) {
+    if (!fileName) return 'document.pdf';
+    
+    if (!fileName.toLowerCase().endsWith('.pdf')) {
+        return fileName + '.pdf';
+    }
+    
+    return fileName;
+}
 
     function closePdfModal() {
         const modal = document.getElementById('pdfModal');
@@ -2539,6 +2723,265 @@ function saveToLocalStorage(course) {
     `;
     document.head.appendChild(style);
 
+// FONCTION PRINCIPALE : Inscrire l'utilisateur au cours
+// FONCTION PRINCIPALE : Inscrire l'utilisateur au cours
+// Dans votre JavaScript frontend, modifiez la fonction enrollUserToCourse
+
+async function enrollUserToCourse(courseId) {
+    const course = allCourses.find(c => c.id === courseId);
+    if (!course) {
+        showErrorMessage('Cours non trouvé');
+        return;
+    }
+    
+    console.log(`📝 Inscription au cours: ${course.title}`);
+    
+    try {
+        // 1. Appeler l'API du main server (qui appellera le serveur de cours)
+        const token = getAuthToken();
+        
+        const response = await fetch(`/api/courses/${courseId}/enroll/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // 2. Sauvegarder localement dans localStorage
+            saveToLocalStorage(course, data.enrollment);
+            
+            // 3. Afficher la modal de confirmation
+            showEnrollmentSuccessModal(course, data.enrollment);
+            
+            // 4. Mettre à jour l'interface
+            updateUIAfterEnrollment(courseId);
+            
+            // 5. Fermer le modal PDF
+            closePdfModal();
+            
+        } else {
+            showErrorMessage(data.error || 'Erreur lors de l\'inscription');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur inscription:', error);
+        showErrorMessage('Erreur lors de l\'inscription: ' + error.message);
+    }
+}
+
+// Afficher la modal de confirmation d'inscription
+function showEnrollmentSuccessModal(course) {
+    const modal = document.getElementById('enrollmentSuccessModal');
+    const message = document.getElementById('enrollmentSuccessMessage');
+    const courseTitle = document.getElementById('enrolledCourseTitle');
+    const enrollmentDate = document.getElementById('enrollmentDate');
+    
+    // Remplir les informations
+    courseTitle.textContent = course.title || 'Cours sans titre';
+    enrollmentDate.textContent = new Date().toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    message.innerHTML = `
+        Félicitations ! Vous êtes maintenant inscrit à <strong>"${course.title}"</strong>.
+        <br>Le cours a été ajouté à votre liste personnelle.
+    `;
+    
+    // Configurer les boutons
+    const goToMyCoursesBtn = document.getElementById('goToMyCoursesBtn');
+    const closeEnrollmentModalBtn = document.getElementById('closeEnrollmentModalBtn');
+    
+    // Rediriger vers "Mes cours"
+    goToMyCoursesBtn.onclick = function() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        window.location.href = "{% url 'cours' %}";
+    };
+    
+    // Fermer la modal et rester sur la page actuelle
+    closeEnrollmentModalBtn.onclick = function() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        // Rafraîchir la page actuelle si nécessaire
+        window.location.reload();
+    };
+    
+    // Afficher la modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Fermer en cliquant à l'extérieur
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    };
+}
+// Fonction pour l'inscription via API dans le système distribué
+// Vérifiez cette URL dans votre JavaScript
+async function enrollViaAPI(courseId) {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Veuillez vous connecter'
+            };
+        }
+        
+        // DEBUG: Affichez l'URL pour vérification
+        const apiUrl = 'http://127.0.0.1:8002/api/courses/enroll/';
+        console.log(`🌐 Appel API: ${apiUrl}`);
+        console.log(`🔑 Token: ${token.substring(0, 30)}...`);
+        console.log(`📋 Course ID: ${courseId}`);
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                course_id: courseId,
+                enrollment_date: new Date().toISOString()
+            })
+        });
+        
+        // DEBUG: Affichez la réponse brute
+        console.log(`📡 Status: ${response.status}`);
+        console.log(`📡 OK: ${response.ok}`);
+        
+        // Lisez d'abord la réponse en texte
+        const responseText = await response.text();
+        console.log(`📦 Réponse texte (premiers 500 chars):`, responseText.substring(0, 500));
+        
+        // Essayez de parser en JSON
+        try {
+            const data = JSON.parse(responseText);
+            console.log(`✅ JSON parsé:`, data);
+            
+            if (response.ok) {
+                return {
+                    success: true,
+                    data: data
+                };
+            } else {
+                return {
+                    success: false,
+                    error: data.error || 'Erreur serveur'
+                };
+            }
+        } catch (jsonError) {
+            console.error(`❌ Erreur parsing JSON:`, jsonError);
+            console.error(`📋 Réponse HTML reçue:`, responseText.substring(0, 500));
+            
+            // Si c'est du HTML, c'est probablement une erreur 404/500
+            return {
+                success: false,
+                error: 'Erreur serveur: réponse non-JSON reçue',
+                rawResponse: responseText.substring(0, 200),
+                status: response.status
+            };
+        }
+        
+    } catch (error) {
+        console.error('💥 Erreur réseau:', error);
+        return {
+            success: false,
+            error: 'Erreur de connexion: ' + error.message
+        };
+    }
+}
+
+// Fonction alternative pour l'inscription
+async function tryAlternativeEnrollment(courseId, token) {
+    try {
+        // Essayer avec l'API du serveur principal
+        const response = await fetch('/api/courses/enroll/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                course_id: courseId,
+                action: 'enroll'
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ Inscription alternative réussie:`, data);
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('💥 Erreur inscription alternative:', error);
+        return false;
+    }
+}
+// Sauvegarder l'inscription localement
+function saveEnrollmentLocally(course) {
+    const enrolledCourses = JSON.parse(localStorage.getItem('enrolled_courses') || '[]');
+    
+    const isAlreadyEnrolled = enrolledCourses.some(c => c.id === course.id);
+    
+    if (!isAlreadyEnrolled) {
+        console.log('💾 Sauvegarde inscription locale:', course.title);
+        
+        const enrollmentData = {
+            ...course,
+            enrolled_date: new Date().toISOString(),
+            progress: 0,
+            status: 'enrolled',
+            last_accessed: null,
+            completed: false,
+            completion_date: null
+        };
+        
+        enrolledCourses.push(enrollmentData);
+        localStorage.setItem('enrolled_courses', JSON.stringify(enrolledCourses));
+        
+        console.log(`✅ Inscription sauvegardée localement`);
+    }
+}
+// Mettre à jour l'interface après inscription
+function updateUIAfterEnrollment(courseId) {
+    // Mettre à jour la carte du cours
+    const courseCard = document.querySelector(`.course-card[data-id="${courseId}"]`);
+    if (courseCard) {
+        const accessBtn = courseCard.querySelector('.btn-secondary, .btn-primary');
+        if (accessBtn) {
+            accessBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Déjà inscrit';
+            accessBtn.classList.remove('btn-secondary', 'btn-primary');
+            accessBtn.classList.add('btn-outline');
+            accessBtn.disabled = true;
+            accessBtn.onclick = null;
+        }
+    }
+    
+    // Mettre à jour le bouton dans le modal
+    const enrollBtn = document.querySelector('button[onclick^="enrollUserToCourse"]');
+    if (enrollBtn) {
+        enrollBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Déjà inscrit';
+        enrollBtn.classList.remove('btn-primary');
+        enrollBtn.classList.add('btn-outline');
+        enrollBtn.disabled = true;
+        enrollBtn.onclick = null;
+    }
+}
 </script>
 </body>
 </html>

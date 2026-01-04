@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (
     RegisterAPIView, LoginAPIView, LogoutAPIView,
     VerifyTokenAPIView, RefreshTokenAPIView, UserProfileAPIView,
-    CheckAuthAPIView, UpdateProfileAPIView, UpdatePasswordAPIView, UploadProfilePhotoAPIView
+    CheckAuthAPIView, UpdateProfileAPIView, UpdatePasswordAPIView, UploadProfilePhotoAPIView,UserListAPIView
 )
 
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path('refresh/', RefreshTokenAPIView.as_view(), name='api_refresh'),
     path('profile/', UserProfileAPIView.as_view(), name='api_profile'),
     path('check/', CheckAuthAPIView.as_view(), name='api_check_auth'),
+   path('users/', UserListAPIView.as_view(), name='api_users'),
 
     # VÉRIFIEZ QUE CES 3 LIGNES SONT BIEN PRÉSENTES :
     path('profile/update/', UpdateProfileAPIView.as_view(), name='api_profile_update'),

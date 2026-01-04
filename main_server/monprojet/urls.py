@@ -11,7 +11,8 @@ from pages.views import (
     api_create_course, api_get_categories, api_get_courses,
     api_upload_file, api_update_course, api_delete_course,
     serve_course_image,proxy_profile_image,
-    api_update_profile, api_update_password, api_upload_profile_photo,serve_course_pdf,api_unenroll_course,api_get_my_courses# <-- CES fonctions existent déjà
+    api_update_profile, api_update_password, api_upload_profile_photo,serve_course_pdf,api_unenroll_course,api_get_my_courses
+    ,api_my_courses,api_enroll_course,api_unenroll_course,api_admin_users# <-- CES fonctions existent déjà
 )
 
 urlpatterns = [
@@ -50,6 +51,11 @@ urlpatterns = [
     # urls.py - Ajoutez cette ligne dans urlpatterns
 path('api/courses/<int:course_id>/unenroll/', api_unenroll_course, name='api_unenroll_course'),
     path('api/my-courses/', api_get_my_courses, name='api_get_my_courses'),
+     path('api/my-courses/',api_my_courses, name='api_my_courses'),
+     path('api/courses/<int:course_id>/enroll/',api_enroll_course, name='api_enroll_course'),
+#path('api/courses/enroll/<int:course_id>/',api_enroll_course, name='api_enroll_course'),
+    path('api/courses/unenroll/<int:course_id>/',api_unenroll_course, name='api_unenroll_course'),
+   path('api/admin/users/', api_admin_users, name='api_admin_users'),
     
     # PAGES UTILISATEUR
     path('dashboard/', dashboard, name='utilisateur_dashboard'),

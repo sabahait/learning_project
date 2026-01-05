@@ -11,7 +11,6 @@ router.register(r'categories', views.CategoryViewSet)  # Assurez-vous que Catego
 urlpatterns = [
     # API REST (pour l'admin)
     path('api/', include(router.urls)),
-    
     # APIs simples (pour le frontend)
     path('', views.get_courses, name='get_courses'),
     path('categories/', views.get_categories, name='get_categories'),

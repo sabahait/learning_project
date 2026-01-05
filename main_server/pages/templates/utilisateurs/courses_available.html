@@ -953,10 +953,6 @@
                     <span class="material-symbols-outlined">school</span>
                     Mes cours
                 </a>
-                <a href="{% url 'historique' %}" class="nav-item">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    Historique
-                </a>
                 <a href="{% url 'profil' %}" class="nav-item">
                     <span class="material-symbols-outlined">account_circle</span>
                     Profil
@@ -2980,6 +2976,24 @@ function updateUIAfterEnrollment(courseId) {
         enrollBtn.classList.add('btn-outline');
         enrollBtn.disabled = true;
         enrollBtn.onclick = null;
+    }
+}
+
+async function confirmerPaiement(id, nom, prix) {
+    const response = await fetch('http://127.0.0.1:8003/api/payment/process/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            user_id: localStorage.getItem('user_id'),
+            course_id: id,
+            course_name: nom, // ✅ Important pour l'historique
+            amount: prix
+        })
+    });
+    const res = await response.json();
+    if(res.status === 'success') {
+        alert("Paiement validé ! Code : " + res.code);
+        window.location.href = "/mes-cours/"; // Redirection automatique
     }
 }
 </script>

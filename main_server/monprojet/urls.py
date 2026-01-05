@@ -6,13 +6,13 @@ from django.conf.urls.static import static
 import json 
 from pages.views import (
     home, login_view, register_view, logout_view,
-    admin_courses, admin_users, admin_dashboard,
+    admin_courses, admin_users, administrateur_dashboard,
     dashboard, courses_available, profil, cours, historique,
     api_create_course, api_get_categories, api_get_courses,
     api_upload_file, api_update_course, api_delete_course,
     serve_course_image,proxy_profile_image,
-    api_update_profile, api_update_password, api_upload_profile_photo,serve_course_pdf,api_unenroll_course,api_get_my_courses
-    ,api_my_courses,api_enroll_course,api_unenroll_course,api_admin_users# <-- CES fonctions existent déjà
+    api_update_profile, api_update_password, api_upload_profile_photo,serve_course_pdf,api_get_my_courses
+    ,api_my_courses,api_enroll_course,api_unenroll_course,api_admin_users,api_admin_stats,api_admin_recent_orders# <-- CES fonctions existent déjà
 )
 
 urlpatterns = [
@@ -25,11 +25,16 @@ urlpatterns = [
     
     # Pages principales
     path('', home, name='home'),
+
+
+    
     
     # PAGES ADMINISTRATEUR
     path('administrateur/courses/', admin_courses, name='administrateur_courses'),
     path('administrateur/users/', admin_users, name='administrateur_users'),
-    path('administrateur/dashboard/', admin_dashboard, name='administrateur_dashboard'),
+    path('administrateur/dashboard/', administrateur_dashboard, name='administrateur_dashboard'),
+     path('api/admin/stats/', api_admin_stats, name='api_admin_stats'),
+    path('api/admin/recent-orders/', api_admin_recent_orders, name='api_admin_recent_orders'),
 
     # API ENDPOINTS POUR PROFIL (proxy vers auth server)
     path('api/profile/update/', api_update_profile, name='api_profile_update'),

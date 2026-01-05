@@ -8,8 +8,20 @@ from django.utils.text import slugify
 from django.db import transaction
 from .models import Course, Category
 from .serializers import CourseSerializer, CategorySerializer
+from django.views.decorators.csrf import csrf_exempt
+
 
 # ==== FONCTIONS SIMPLES ====
+@csrf_exempt
+def unlock_course(request):
+    data = json.loads(request.body)
+    # On ajoute officiellement l'étudiant au cours dans la base 8002
+    Enrollment.objects.get_or_create(
+        user_id=data.get('user_id'), 
+        course_id=data.get('course_id')
+    )
+    return JsonResponse({'status': 'unlocked'})
+
 @require_GET
 def health_check(request):
     """Vérifie l'état du service"""
@@ -533,3 +545,5 @@ def api_update_progress(request, enrollment_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+

@@ -1,4 +1,17 @@
 # courses_server/settings.py
+import pymysql
+# 1. On trompe Django sur la version de mysqlclient
+pymysql.version_info = (2, 4, 3, "final", 0)
+pymysql.install_as_MySQLdb()
+
+# 2. On désactive la commande 'RETURNING' (Syntaxe non supportée par votre MariaDB)
+from django.db.backends.mysql.features import DatabaseFeatures
+DatabaseFeatures.can_return_columns_from_insert = property(lambda self: False)
+DatabaseFeatures.can_return_rows_from_bulk_insert = property(lambda self: False)
+
+# 3. On ignore la vérification de version
+from django.db.backends.base.base import BaseDatabaseWrapper
+BaseDatabaseWrapper.check_database_version_supported = lambda self: None
 import os
 from pathlib import Path
 
@@ -172,3 +185,6 @@ LOGGING = {
         },
     },
 }
+
+CORS_ALLOW_ALL_ORIGINS = True  # Pour autoriser tous les ports pendant le développement
+CORS_ALLOW_CREDENTIALS = True

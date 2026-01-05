@@ -51,6 +51,114 @@
 
     --box-shadow: 0 1.5rem 2.5rem var(--color-light);
 }
+/* Améliorations pour le sélecteur de thème */
+.theme-toggler {
+    background: var(--color-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 1.6rem;
+    width: 4rem;
+    cursor: pointer;
+    border-radius: var(--border-radius-1);
+    transition: all 300ms ease;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-toggler:hover {
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.theme-toggler span {
+    font-size: 1.2rem;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 300ms ease;
+    z-index: 1;
+}
+
+.theme-toggler span.active {
+    color: white;
+}
+
+/* Fond animé pour le sélecteur */
+.theme-toggler::before {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--border-radius-1);
+    transition: all 300ms ease;
+    left: 0;
+}
+
+.theme-toggler.dark::before {
+    left: 50%;
+}
+
+/* Animation pour l'indicateur */
+@keyframes themeSwitch {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.theme-toggler span.active {
+    animation: themeSwitch 0.3s ease;
+}
+
+/* Styles spécifiques pour le mode sombre */
+.dark-theme-variables .theme-toggler {
+    background: var(--color-dark-variant);
+    border-color: var(--color-info-dark);
+}
+
+.dark-theme-variables .theme-toggler:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+}
+
+/* Style pour les icônes dans les deux modes */
+.dark-theme-variables .theme-toggler span:not(.active) {
+    color: var(--color-info-dark);
+}
+
+/* Ajustements pour d'autres éléments en mode sombre */
+.dark-theme-variables aside {
+    background: var(--color-white);
+}
+
+.dark-theme-variables .users-list-container,
+.dark-theme-variables .search-container,
+.dark-theme-variables .modal-content {
+    background: var(--color-white);
+}
+
+.dark-theme-variables .form-input,
+.dark-theme-variables .form-select,
+.dark-theme-variables .filter-select {
+    background: var(--color-background);
+    color: var(--color-dark);
+    border-color: var(--color-dark-variant);
+}
+
+.dark-theme-variables .form-input:focus,
+.dark-theme-variables .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
 
 /* Dark theme */
 .dark-theme-variables{
@@ -60,6 +168,93 @@
     --color-dark-variant: #a3bdcc;
     --color-light: rgba(0, 0, 0, 0.4);
     --box-shadow: 0 1.5rem 2.5rem var(--color-light);
+}
+/* AJOUTEZ À VOTRE SECTION CSS */
+
+/* Style pour les boutons de filtres */
+.filters-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+}
+
+.filter-label {
+    font-size: 0.8rem;
+    color: var(--color-info-dark);
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+}
+
+.filter-select {
+    padding: 0.6rem 0.8rem;
+    background: var(--color-white);
+    border-radius: var(--border-radius-1);
+    color: var(--color-dark);
+    font-family: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--color-light);
+    cursor: pointer;
+    transition: all 300ms ease;
+}
+
+.filter-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+    outline: none;
+}
+
+.filter-select:hover {
+    border-color: var(--color-primary);
+}
+
+/* Style pour le bouton de réinitialisation */
+#resetFiltersBtn {
+    height: fit-content;
+    white-space: nowrap;
+    padding: 0.6rem 1rem;
+}
+
+/* Style pour la recherche */
+.search-container {
+    position: relative;
+}
+
+.search-container .material-symbols-outlined {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-info-dark);
+}
+
+.search-input {
+    padding-left: 3rem;
+    background: var(--color-white);
+    border: 1px solid var(--color-light);
+    border-radius: var(--border-radius-1);
+    transition: all 300ms ease;
+}
+
+.search-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+/* Animation pour les filtres */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.users-table tbody tr {
+    animation: fadeIn 0.3s ease-out;
 }
 
     *{
@@ -1056,11 +1251,6 @@
             <span class="material-symbols-outlined">menu_book</span>
             <h3>Cours</h3>
             </a>
-            <a href="#">
-                <span class="material-symbols-outlined">mail_outline</span>
-                <h3>Messages</h3>
-                <span class="message-count">26</span>
-            </a>
             
             <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
     {% csrf_token %}
@@ -1120,10 +1310,6 @@
                     </select>
                 </div>
             </div>
-            
-            <button id="addUserBtn" class="btn btn-primary">
-                <span class="material-symbols-outlined">person_add</span> Ajouter un utilisateur
-            </button>
         </div>
 
         <!-- Liste des utilisateurs existants -->
@@ -1142,85 +1328,86 @@
             <th>Statut</th>
             <th>Téléphone</th>
             <th>Date d'inscription</th>
-            <th>Actions</th>
+            <th>Actions</th> <!-- AJOUTEZ CETTE COLONNE -->
         </tr>
     </thead>
     <tbody id="usersTableBody">
-       {% for user in users %}
-<tr>
-    <td>{{ user.id }}</td>
-    <td>
-        {% if user.full_name and user.full_name.strip %}
-            {{ user.full_name }}
-            <br>
-            <small class="text-muted">@{{ user.username }}</small>
-        {% else %}
-            {{ user.username }}
-        {% endif %}
-    </td>
-    <td>{{ user.email }}</td>
-    <td>
-        {% if user.user_type == 'admin' or user.is_superuser %}
-            <span class="user-role role-admin">Administrateur</span>
-        {% elif user.user_type == 'teacher' %}
-            <span class="user-role role-teacher">Enseignant</span>
-        {% else %}
-            <span class="user-role role-student">Étudiant</span>
-        {% endif %}
-    </td>
-    <td>
-        {% if user.is_active %}
-            <span class="user-status status-active">Actif</span>
-        {% else %}
-            <span class="user-status status-inactive">Inactif</span>
-        {% endif %}
-        {% if user.is_staff %}
-            <br><small class="text-muted">Staff</small>
-        {% endif %}
-    </td>
-    <td>{{ user.telephone|default:"-" }}</td>
-    <td>
-        {% if user.date_joined %}
-            {{ user.date_joined|slice:":10"|date:"d/m/Y" }}
-            <br>
-            <small class="text-muted">{{ user.date_joined|slice:"11:16" }}</small>
-        {% else %}
-            -
-        {% endif %}
-    </td>
-    <td>
-        <div class="action-buttons">
-            <button class="btn btn-warning btn-small edit-btn" 
-                    data-id="{{ user.id }}"
-                    data-username="{{ user.username }}"
-                    data-firstname="{{ user.first_name|default:'' }}"
-                    data-lastname="{{ user.last_name|default:'' }}"
-                    data-email="{{ user.email }}"
-                    data-role="{{ user.user_type|default:'student' }}"
-                    data-status="{% if user.is_active %}active{% else %}inactif{% endif %}"
-                    data-phone="{{ user.telephone|default:'' }}">
-                <span class="material-symbols-outlined">edit</span>
-            </button>
-            <button class="btn btn-danger btn-small delete-btn" 
-                    data-id="{{ user.id }}"
-                    data-name="{{ user.full_name|default:user.username }}">
-                <span class="material-symbols-outlined">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
-{% empty %}
-<tr>
-    <td colspan="8" class="no-users">
-        <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">group_off</span>
-        <p>Aucun utilisateur trouvé dans la base de données.</p>
-        <button class="btn btn-primary" onclick="loadUsers()">
-            <span class="material-symbols-outlined">refresh</span>
-            Rafraîchir la liste
-        </button>
-    </td>
-</tr>
-{% endfor %}
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>
+                {% if user.full_name and user.full_name.strip %}
+                    {{ user.full_name }}
+                    <br>
+                    <small class="text-muted">@{{ user.username }}</small>
+                {% else %}
+                    {{ user.username }}
+                {% endif %}
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+                {% if user.user_type == 'admin' or user.is_superuser %}
+                    <span class="user-role role-admin">Administrateur</span>
+                {% elif user.user_type == 'teacher' %}
+                    <span class="user-role role-teacher">Enseignant</span>
+                {% else %}
+                    <span class="user-role role-student">Étudiant</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if user.is_active %}
+                    <span class="user-status status-active">Actif</span>
+                {% else %}
+                    <span class="user-status status-inactive">Inactif</span>
+                {% endif %}
+                {% if user.is_staff %}
+                   
+                {% endif %}
+            </td>
+            <td>{{ user.telephone|default:"-" }}</td>
+            <td>
+                {% if user.date_joined %}
+                    {{ user.date_joined|slice:":10"|date:"d/m/Y" }}
+                    <br>
+                    <small class="text-muted">{{ user.date_joined|slice:"11:16" }}</small>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <!-- AJOUTEZ LES ACTIONS -->
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-warning btn-small edit-btn" 
+                            data-id="{{ user.id }}"
+                            data-username="{{ user.username }}"
+                            data-firstname="{{ user.first_name|default:'' }}"
+                            data-lastname="{{ user.last_name|default:'' }}"
+                            data-email="{{ user.email }}"
+                            data-role="{{ user.user_type|default:'student' }}"
+                            data-status="{{ user.is_active|yesno:'active,inactive' }}"
+                            data-phone="{{ user.telephone|default:'' }}">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button class="btn btn-danger btn-small delete-btn" 
+                            data-id="{{ user.id }}"
+                            data-name="{{ user.full_name|default:user.username }}">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" class="no-users">
+                <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">group_off</span>
+                <p>Aucun utilisateur trouvé.</p>
+                <button class="btn btn-primary" onclick="loadUsers()">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Rafraîchir la liste
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
     </tbody>
 </table>
                 <div id="noUsersMessage" class="no-users" style="display: none;">
@@ -1586,6 +1773,335 @@ document.addEventListener('DOMContentLoaded', function() {
             loadUsers();
         }
     }, 500);
+});
+// AJOUTEZ CES FONCTIONS À VOTRE SCRIPT
+
+// Fonction pour filtrer les utilisateurs
+function filterUsers() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        // Vérifier si c'est la ligne "aucun utilisateur"
+        if (row.classList.contains('no-users-row')) {
+            row.style.display = 'none';
+            return;
+        }
+        
+        let showRow = true;
+        
+        // Filtre par recherche
+        if (searchTerm) {
+            const fullName = row.cells[1].textContent.toLowerCase();
+            const email = row.cells[2].textContent.toLowerCase();
+            const username = row.cells[1].querySelector('small')?.textContent.toLowerCase() || '';
+            
+            if (!fullName.includes(searchTerm) && 
+                !email.includes(searchTerm) && 
+                !username.includes(searchTerm)) {
+                showRow = false;
+            }
+        }
+        
+        // Filtre par rôle
+        if (showRow && roleFilter) {
+            const roleCell = row.cells[3];
+            const roleSpan = roleCell.querySelector('.user-role');
+            if (roleSpan) {
+                const roleText = roleSpan.textContent.toLowerCase();
+                let expectedRole = '';
+                
+                switch(roleFilter) {
+                    case 'admin':
+                        expectedRole = 'administrateur';
+                        break;
+                    case 'teacher':
+                        expectedRole = 'enseignant';
+                        break;
+                    case 'student':
+                        expectedRole = 'étudiant';
+                        break;
+                }
+                
+                if (roleText !== expectedRole) {
+                    showRow = false;
+                }
+            }
+        }
+        
+        // Filtre par statut
+        if (showRow && statusFilter) {
+            const statusCell = row.cells[4];
+            const statusSpan = statusCell.querySelector('.user-status');
+            if (statusSpan) {
+                const statusText = statusSpan.textContent.toLowerCase();
+                let expectedStatus = '';
+                
+                switch(statusFilter) {
+                    case 'active':
+                        expectedStatus = 'actif';
+                        break;
+                    case 'inactive':
+                        expectedStatus = 'inactif';
+                        break;
+                    case 'pending':
+                        expectedStatus = 'en attente';
+                        break;
+                }
+                
+                if (statusText !== expectedStatus) {
+                    showRow = false;
+                }
+            }
+        }
+        
+        // Afficher/masquer la ligne
+        row.style.display = showRow ? '' : 'none';
+        if (showRow) visibleCount++;
+    });
+    
+    // Afficher le message "aucun utilisateur" si nécessaire
+    const noUsersMessage = document.getElementById('noUsersMessage');
+    if (visibleCount === 0 && rows.length > 0) {
+        if (!noUsersMessage) {
+            // Créer le message s'il n'existe pas
+            const messageRow = document.createElement('tr');
+            messageRow.id = 'noUsersMessage';
+            messageRow.className = 'no-users-row';
+          
+            document.getElementById('usersTableBody').appendChild(messageRow);
+        } else {
+            noUsersMessage.style.display = '';
+        }
+    } else if (noUsersMessage) {
+        noUsersMessage.style.display = 'none';
+    }
+}
+
+
+
+// Fonction pour initialiser les événements
+function initializeFilters() {
+    // Événements de recherche et filtres
+    document.getElementById('searchInput').addEventListener('input', filterUsers);
+    document.getElementById('roleFilter').addEventListener('change', filterUsers);
+    document.getElementById('statusFilter').addEventListener('change', filterUsers);
+    
+    // Ajouter un bouton pour réinitialiser les filtres
+    const filtersContainer = document.querySelector('.filters-container');
+    if (filtersContainer && !document.getElementById('resetFiltersBtn')) {
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'resetFiltersBtn';
+        resetBtn.className = 'btn btn-secondary btn-small';
+        resetBtn.innerHTML = '<span class="material-symbols-outlined">clear_all</span> Réinitialiser';
+        resetBtn.onclick = resetFilters;
+        filtersContainer.appendChild(resetBtn);
+    }
+}
+
+// Fonction pour gérer les actions (éditer/supprimer)
+function attachUserActionsEvents() {
+    // Boutons d'édition
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const username = this.getAttribute('data-username');
+            const firstName = this.getAttribute('data-firstname');
+            const lastName = this.getAttribute('data-lastname');
+            const email = this.getAttribute('data-email');
+            const role = this.getAttribute('data-role');
+            const status = this.getAttribute('data-status');
+            const phone = this.getAttribute('data-phone');
+            
+            openEditModal({
+                id: userId,
+                username: username,
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+                user_type: role,
+                is_active: status === 'active',
+                telephone: phone
+            });
+        });
+    });
+    
+    // Boutons de suppression
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const userName = this.getAttribute('data-name');
+            
+            openDeleteModal(userId, userName);
+        });
+    });
+}
+
+// Fonction pour ouvrir le modal d'édition
+function openEditModal(user) {
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editFirstName').value = user.first_name || '';
+    document.getElementById('editLastName').value = user.last_name || '';
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editRole').value = user.user_type;
+    document.getElementById('editStatus').value = user.is_active ? 'active' : 'inactive';
+    document.getElementById('editPhone').value = user.telephone || '';
+    
+    // Ouvrir le modal
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+// Fonction pour ouvrir le modal de suppression
+function openDeleteModal(userId, userName) {
+    document.getElementById('userToDeleteName').textContent = `Utilisateur: ${userName} (ID: ${userId})`;
+    document.getElementById('deleteModal').setAttribute('data-user-id', userId);
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+// Modifiez la fin de votre code JavaScript pour initialiser les filtres :
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Page gestion utilisateurs chargée');
+    
+    // Initialiser les filtres
+    initializeFilters();
+    attachUserActionsEvents();
+    
+    // Ajouter un bouton de rafraîchissement
+    const refreshBtn = document.createElement('button');
+    refreshBtn.className = 'btn btn-secondary';
+    refreshBtn.innerHTML = '<span class="material-symbols-outlined">refresh</span> Rafraîchir';
+    refreshBtn.style.marginLeft = '10px';
+    refreshBtn.onclick = loadUsers;
+    
+    document.querySelector('.users-toolbar').appendChild(refreshBtn);
+    
+    // Charger les utilisateurs au démarrage
+    setTimeout(() => {
+        // Vérifier si le tableau est vide
+        const tbody = document.getElementById('usersTableBody');
+        if (tbody.children.length === 0 || (tbody.children.length === 1 && tbody.children[0].querySelector('.no-users'))) {
+            console.log('📋 Tableau vide, chargement des utilisateurs...');
+            loadUsers();
+        }
+    }, 500);
+
+
+
+});
+
+// Ajoutez aussi les fonctions pour fermer les modals :
+document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+    });
+});
+
+// Annuler boutons
+document.getElementById('cancelEdit').addEventListener('click', function() {
+    document.getElementById('editModal').style.display = 'none';
+});
+
+document.getElementById('cancelDelete').addEventListener('click', function() {
+    document.getElementById('deleteModal').style.display = 'none';
+});
+
+// Gestion de la suppression
+document.getElementById('confirmDelete').addEventListener('click', function() {
+    const modal = document.getElementById('deleteModal');
+    const userId = modal.getAttribute('data-user-id');
+    
+    // TODO: Implémenter la suppression via API
+    console.log(`Supprimer l'utilisateur ${userId}`);
+    
+    // Fermer le modal
+    modal.style.display = 'none';
+    alert(`L'utilisateur ${userId} sera supprimé (à implémenter)`);
+});
+// ===== GESTION DU THÈME (MODE SOMBRE/CLAIR) =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser le thème
+    initializeTheme();
+    
+    // Le reste de votre code d'initialisation...
+});
+
+function initializeTheme() {
+    const themeToggler = document.querySelector('.theme-toggler');
+    if (!themeToggler) return;
+    
+    // Vérifier le thème sauvegardé ou préféré
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme === 'system' ? (prefersDark ? 'dark' : 'light') : savedTheme;
+    
+    // Appliquer le thème initial
+    setTheme(initialTheme);
+    
+    // Gérer le clic sur le sélecteur de thème
+    themeToggler.addEventListener('click', toggleTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.body.classList.contains('dark-theme-variables') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    setTheme(newTheme);
+    saveThemePreference(newTheme);
+}
+
+function setTheme(theme) {
+    const themeToggler = document.querySelector('.theme-toggler');
+    if (!themeToggler) return;
+    
+    // Mettre à jour les classes du body
+    document.body.classList.toggle('dark-theme-variables', theme === 'dark');
+    
+    // Mettre à jour les boutons du sélecteur
+    const lightIcon = themeToggler.querySelector('.material-symbols-outlined:nth-child(1)');
+    const darkIcon = themeToggler.querySelector('.material-symbols-outlined:nth-child(2)');
+    
+    if (theme === 'light') {
+        lightIcon.classList.add('active');
+        darkIcon.classList.remove('active');
+    } else {
+        lightIcon.classList.remove('active');
+        darkIcon.classList.add('active');
+    }
+    
+    // Mettre à jour les icônes si nécessaire (changement de couleur)
+    updateIconsForTheme(theme);
+}
+
+function saveThemePreference(theme) {
+    localStorage.setItem('theme', theme);
+}
+
+function updateIconsForTheme(theme) {
+    // Vous pouvez ajouter ici des ajustements pour les icônes spécifiques
+    // qui pourraient nécessiter un changement de couleur
+    const icons = document.querySelectorAll('.material-symbols-outlined');
+    
+    icons.forEach(icon => {
+        if (theme === 'dark') {
+            // Ajustements pour le mode sombre si nécessaire
+            icon.style.filter = 'brightness(0.9)';
+        } else {
+            // Réinitialiser pour le mode clair
+            icon.style.filter = '';
+        }
+    });
+}
+
+// Détecter les changements de préférence système
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'system') {
+        setTheme(e.matches ? 'dark' : 'light');
+    }
 });
 </script>
 </body>

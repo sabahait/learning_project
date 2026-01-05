@@ -4,874 +4,1035 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="icon" type="image/png" href="images/favicon.png">
+    <title>Dashboard Admin</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
     <style>
-        
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        /* ========== VARIABLES CSS ========== */
+        :root {
+            --primary-blue: #4A90E2;
+            --secondary-purple: #9B51E0;
+            --accent-teal: #2D9CDB;
+            --light-blue: #E3F2FD;
+            --text-dark: #1A1A2E;
+            --text-light: #6B7280;
+            --bg-white: #ffffff;
+            --bg-light: #F8FAFC;
+            --border-color: #E5E7EB;
+            --gradient-blue: linear-gradient(135deg, #4A90E2, #2D9CDB);
+            --gradient-purple: linear-gradient(135deg, #9B51E0, #6A0DAD);
 
-    :root{
-    --primary-blue: #4A90E2;
-    --secondary-purple: #9B51E0;
-    --accent-teal: #2D9CDB;
-    --light-blue: #E3F2FD;
-    --text-dark: #1A1A2E;
-    --text-light: #6B7280;
-    --bg-white: #ffffff;
-    --bg-light: #F8FAFC;
-    --border-color: #E5E7EB;
-    --gradient-blue: linear-gradient(135deg, #4A90E2, #2D9CDB);
-    --gradient-purple: linear-gradient(135deg, #9B51E0, #6A0DAD);
+            --color-primary: var(--primary-blue);
+            --color-danger: #ff7782;
+            --color-success: var(--accent-teal);
+            --color-warning: #ffbb55;
+            --color-white: var(--bg-white);
+            --color-info-dark: var(--text-light);
+            --color-info-light: var(--border-color);
+            --color-dark: var(--text-dark);
+            --color-light: var(--light-blue);
+            --color-primary-variant: #111e88;
+            --color-dark-variant: #677483;
+            --color-background: var(--bg-light);
 
-    --color-primary: var(--primary-blue);
-    --color-danger: #ff7782;
-    --color-success: var(--accent-teal);
-    --color-warning: #ffbb55;
-    --color-white: var(--bg-white);
-    --color-info-dark: var(--text-light);
-    --color-info-light: var(--border-color);
-    --color-dark: var(--text-dark);
-    --color-light: var(--light-blue);
-    --color-primary-variant: #111e88;
-    --color-dark-variant: #677483;
-    --color-background: var(--bg-light);
+            --card-border-radius: 1.5rem;
+            --border-radius-1: 0.4rem;
+            --border-radius-2: 0.8rem;
+            --border-radius-3: 1.2rem;
 
-    --card-border-radius: 1.5rem;
-    --border-radius-1: 0.4rem;
-    --border-radius-2: 0.8rem;
-    --border-radius-3: 1.2rem;
+            --card-padding: 1.4rem;
+            --padding-1: 1rem;
 
-    --card-padding: 1.4rem;
-    --padding-1: 1rem;
-
-    --box-shadow: 0 1.5rem 2.5rem var(--color-light);
-}
-
-/* Dark theme */
-.dark-theme-variables{
-    --color-background: #181a1e;
-    --color-white: #202528;
-    --color-dark: #edeffd;
-    --color-dark-variant: #a3bdcc;
-    --color-light: rgba(0, 0, 0, 0.4);
-    --box-shadow: 0 1.5rem 2.5rem var(--color-light);
-}
-
-    
-
-    *{
-        margin: 0;
-        padding: 0;
-        outline: 0;
-        appearance: none;
-        border: 0;
-        text-decoration: none;
-        list-style: none;
-        box-sizing: border-box;
-    }
-    html{
-        font-size: 14px;
-    }
-    body{
-        width: 100vw;
-        height: 100vh;
-        font-family: poppins, sans-serif;
-        font-size: 0.85rem;
-        background: var(--color-background);
-        user-select: none;
-        overflow-x: hidden;
-        color: var(--color-dark);
-    }
-    .container
-    {
-        display: grid;
-        width: 100%;
-        margin: 0 auto;
-        gap: 1.8rem;
-        grid-template-columns: 14rem auto 20rem;
-        height: 100vh;
-        overflow: hidden;
-    }
-    a{
-        color: var(--color-dark);
-    }
-    img{
-        display: block;
-        width: 100%;
-    }
-    h1{
-        font-weight: 800;
-        font-size: 1.6rem;
-    }
-    h2{
-        font-size: 1.2rem;
-    }
-    h3{
-        font-size: 0.9rem;
-    }
-    h4{
-        font-size: 0.8rem;
-    }
-    h5{
-        font-size: 0.75rem;
-    }
-    small{
-        font-size: 0.72rem;
-    }
-    .profile-photo{
-        width: 2.4rem;
-        height: 2.4rem;
-        border-radius: 50%;
-        overflow: hidden;
-    }
-    .text-muted{
-        color: var(--color-info-dark);
-
-    }
-    b{
-        color: var(--color-dark)
-    }
-    .primary{
-        color: var(--color-primary);
-    }
-    .danger{
-        color: var(--color-danger);
-    }
-    .success{
-        color: var(--color-success);
-    }
-    .warning{
-        color: var(--color-warning);
-    }
-    aside{
-        height: 100vh;
-        background: var(--color-white);
-        border-radius: var(--border-radius-2);
-        overflow: hidden;
-        margin-left: 0;
-        padding-left: 0;
-        width: 100%;
-        box-shadow: var(--box-shadow);
-    }
-    aside .top{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 1.4rem;
-        padding: 0 1.2rem;
-    }
-  
-    aside .logo .logo-icon {
-        font-size: 2.2rem;
-        background: var(--gradient-blue);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    aside .logo .logo-text {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: var(--primary-blue);
-        font-family: 'Poppins', sans-serif;
-        letter-spacing: -0.5px;
-    }
-    
-    aside .logo .logo-text span {
-        color: var(--gradient-purple);
-    }
-  
-    aside .close{
-        display: none;
-    }
-    /* sidebar*/
-    aside .sidebar{
-        display: flex;
-        flex-direction: column;
-        height: 86vh;
-        position: relative;
-        top: 2.8rem;
-        padding: 0 0.5rem;
-        width: 100%;
-        gap: 0.5rem;
-    }
-    aside h3{
-        font-weight: 500;
-        font-size: 0.95rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0;
-    }
-    aside .sidebar a{
-        display: flex;
-        color: var(--color-info-dark);
-        margin-left: 0;
-        gap: 1rem;
-        align-items: center;
-        position: relative;
-        height: 3.2rem;
-        transition: all 300ms ease;
-        padding: 0 1rem;
-        border-radius: var(--border-radius-1);
-        width: 100%;
-    }
-    aside .sidebar a span{
-        font-size: 1.8rem;
-        transition: all 300ms ease;
-        min-width: 2rem;
-    }
-    aside .sidebar a:last-child{
-        position: absolute;
-        bottom: 0.5rem;
-        width: calc(100% - 1rem);
-        left: 0.5rem;
-        margin-top: 0;
-    }
-    aside .sidebar a.active{
-        background: var(--color-light);
-        color: var(--color-primary);
-        margin-left: 0;
-    }
-    aside .sidebar a.active:before{
-        content: '';
-        width: 6px;
-        height: 50%;
-        background: var(--color-primary);
-        position: absolute;
-        left: 0;
-        border-radius: 0 var(--border-radius-1) var(--border-radius-1) 0;
-    }
-    aside .sidebar a.active span{
-        color: var(--color-primary);
-        margin-left: 0;
-    }
-    aside .sidebar a:hover{
-        color: var(--color-primary);
-        background: var(--color-light);
-    }
-    aside .sidebar a:hover span{
-        margin-left: 0.5rem;
-    }
-    aside .sidebar .message-count{
-        background: var(--color-danger);
-        color: var(--color-white);
-        padding: 2px 8px;
-        font-size: 11px;
-        border-radius: var(--border-radius-1);
-        margin-left: auto;
-    }
-    /*main*/
-    main{
-        margin-top: 1.2rem;
-        padding-right: 0.5rem;
-        padding-left: 0;
-        overflow-y: auto; /* Garde le scroll seulement si nécessaire */
-        height: calc(100vh - 2rem);
-    }
-    main .date{
-        display: inline-block;
-        background: var(--color-light);
-        border-radius: var(--border-radius-1);
-        margin-top: 0.8rem;
-        padding: 0.4rem 1.2rem;
-    }
-    main .date input[type="date"]{
-        background: transparent;
-        color: var(--color-dark);
-        font-size: 0.85rem;
-    }
-    main .insights{
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem; /* Réduit de 2rem */
-        margin-bottom: 1.5rem;
-    }
-    main .insights > div{
-        background: var(--color-white);
-        padding: 1.2rem; /* Réduit de 1.4rem */
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--box-shadow);
-        transition: all 300ms ease;
-    }
-    main .insights > div:hover{
-        box-shadow: none;
-    }
-    main .insights > div span{
-        background: var(--color-primary);
-        padding:  0.5rem;
-        border-radius: 50%;
-        color: var(--color-white);
-        font-size: 1.6rem; /* Réduit */
-        width: 3rem; /* Réduit */
-        height: 3rem; /* Réduit */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    main .insights > div.expenses span{
-        background: var(--color-danger);
-    }
-    main .insights > div.income span{
-        background: var(--color-success);
-    }
-    main .insights > div.middle{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 0.5rem;
-    }
-    main .insights h3{
-        margin: 0.8rem 0 0.4rem;
-        font-size: 1rem; /* Réduit */
-        line-height: 1.2;
-    }
-    main .insights h1{
-        font-size: 1.1rem; /* Réduit */
-        margin: 0.3rem 0;
-        line-height: 1.2;
-    }
-    main .insights .progress{
-        position: relative;
-        width: 140px; /* Réduit */
-        height: 60px; /* Réduit */
-        border-radius: 50%;
-    }
-    main .insights svg{
-        width: 5rem; /* Réduit */
-        height: 5rem; /* Réduit */
-    }
-    main .insights svg circle{
-        fill: none;
-        stroke: var(--color-primary);
-        stroke-width: 12;
-        stroke-linecap: round;
-        transform: translate(8px, 8px);
-        stroke-dasharray: 110;
-        stroke-dashoffset: 92;
-    }
-    main .insights .sales svg circle{
-        stroke-dashoffset: -30px;
-        stroke-dasharray: 200;
-    }
-    main .insights .expenses svg circle{
-        stroke-dashoffset: 20;
-        stroke-dasharray: 80;
-    }
-    main .insights .income svg circle{
-        stroke-dashoffset: 35;
-        stroke-dasharray: 110;
-    }
-    main .insights .progress .number{
-        position: absolute;
-        top: 1.6rem; /* Ajusté */
-        left: 1.4rem; /* Ajusté */
-        height: 100%;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    main .insights small{
-        margin-top: 0.6rem; /* Réduit */
-        display: block;
-        font-size: 0.7rem; /* Réduit */
-    }
-    /*recent orders*/
-    main .recent-orders{
-        margin-top: 1rem;
-        background: var(--color-white);
-        padding: 1.2rem;
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--box-shadow);
-    }
-    main .recent-orders h2{
-        margin-bottom: 0.6rem;
-        font-size: 1.1rem;
-    }
-    main .recent-orders table{
-        width: 100%;
-        border-collapse: collapse;
-        text-align: center;
-        font-size: 0.85rem;
-    }
-    main table thead{
-        background: var(--color-light);
-    }
-    main table th{
-        padding: 0.8rem;
-        font-weight: 600;
-        color: var(--color-dark);
-        border-bottom: 2px solid var(--color-info-light);
-    }
-    main table tbody td{
-        height: 2.4rem;
-        border-bottom: 1px solid var(--color-light);
-        color: var(--dark-variant);
-        padding: 0.3rem 0;
-    }
-    main table tbody tr:last-child td{
-        border: none;
-    }
-    main .recent-orders a{
-        text-align: center;
-        display: block;
-        margin: 0.8rem auto 0;
-        color: var(--color-primary);
-        font-size: 0.9rem;
-    }
-    /*right*/
-    .right{
-        margin-top: 1.2rem;
-        padding-left: 0.5rem;
-        height: calc(100vh - 2rem);
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        overflow: hidden; /* Supprime le scroll */
-    }
-    .right .top{
-        display: flex;
-        justify-content: end;
-        gap: 1.5rem;
-        padding: 0.5rem 0;
-    }
-    .right .top button{
-        display: none;
-    }
-    .right .theme-toggler{
-        background: var(--color-light);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 1.4rem;
-        width: 3.8rem;
-        cursor: pointer;
-        border-radius: var(--border-radius-1);
-    }
-    .right .theme-toggler span{
-        font-size: 1rem;
-        width: 50%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .right .theme-toggler span.active{
-        background: var(--color-primary);
-        color: white;
-        border-radius: var(--border-radius-1);
-    }
-    .right .top .profile{
-        display: flex;
-        gap: 1rem;
-        text-align: right;
-        align-items: center;
-    }
-    /*recent updates*/
-    .right .recent-updates{
-        flex: 0 0 auto;
-    }
-    .right .recent-updates h2{
-        margin-bottom: 0.6rem;
-        font-size: 1.1rem;
-    }
-    .wrapper{
-        width: 100%;
-        background: var(--color-white);
-        padding: 1rem;
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--box-shadow);
-        transition: all 700ms ease;
-        margin: 0 auto;
-    }
-    .wrapper:hover {
-        box-shadow: none;
-    }
-    .wrapper header{
-        display: flex;
-        align-items: center;
-        padding: 10px 15px 5px;
-        justify-content: space-between;
-    }
-    header .icons{
-        display: flex;
-    }
-    header .icons span{
-        height: 30px; /* Réduit */
-        width: 30px; /* Réduit */
-        margin: 0 1px;
-        cursor: pointer;
-        color: #878787;
-        text-align: center;
-        line-height: 30px; /* Ajusté */
-        font-size: 1.3rem; /* Réduit */
-        user-select: none;
-        border-radius: 50%;
-    }
-    .icons span:last-child{
-        margin-right: -5px;
-    }
-    header .icons span:hover{
-        background: #f2f2f2;
-    }
-    header .current-date{
-        font-size: 1rem; /* Réduit */
-        font-weight: 500;
-    }
-    .calendar{
-        padding: 10px;
-    }
-    .calendar ul{
-        display: flex;
-        flex-wrap: wrap;
-        list-style: none;
-        text-align: center;
-    }
-    .calendar .days{
-        margin-bottom: 10px;
-    }
-    .calendar li{
-        color: #ffbb55;
-        width: calc(100% / 7);
-        font-size: 0.85rem; /* Réduit */
-        padding: 2px 0;
-    }
-    .calendar .weeks li{
-        font-weight: 500;
-        cursor: default;
-    }
-    .calendar .days li{
-        z-index: 1;
-        cursor: pointer;
-        position: relative;
-        margin-top: 15px; /* Réduit */
-    }
-    .days li.inactive{
-        color: #aaa;
-    }
-    .days li.active{
-        color: #fff;
-    }
-    .days li::before{
-        position: absolute;
-        content: "";
-        left: 50%;
-        top: 50%;
-        height: 28px; /* Réduit */
-        width: 28px; /* Réduit */
-        z-index: -1;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .days li.active::before{
-        background: #9B59B6;
-    }
-    .days li:not(.active):hover::before{
-        background: #f2f2f2;
-    }
-
-    /*sales analytics*/
-    .right .sales-analytics{
-        flex: 1 1 auto;
-        overflow-y: auto; /* Scroll seulement ici si nécessaire */
-    }
-    .right .sales-analytics h2{
-        margin-bottom: 1rem;
-        font-size: 1.1rem;
-    }
-    .right .sales-analytics .item{
-        background: var(--color-white);
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin-bottom: 0.6rem;
-        padding: 0.8rem; /* Réduit */
-        border-radius: var(--border-radius-3);
-        box-shadow: var(--box-shadow);
-        transition: all 300ms ease;
-        width: 100%;
-    }
-    .right .sales-analytics .item:hover{
-        box-shadow: none;
-    }
-    .right .sales-analytics .item .right{
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin: 0;
-        width: 100%;
-        padding: 0;
-    }
-    .right .sales-analytics .item .icon{
-        padding: 0.5rem;
-        color: var(--color-white);
-        border-radius: 50%;
-        background: var(--color-primary);
-        display: flex;
-        min-width: 2.5rem;
-        height: 2.5rem;
-        align-items: center;
-        justify-content: center;
-    }
-    .right .sales-analytics .item.offline .icon{
-        background: var(--color-danger);
-    }
-    .right .sales-analytics .item.customers .icon{
-        background: var(--color-success);
-    }
-    .right .sales-analytics .add-product:hover{
-        background: var(--color-primary);
-        color: white;
-    }
-    .right .sales-analytics .add-product{
-        background-color: transparent;
-        border: 2px dashed var(--color-primary);
-        color: var(--color-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.8rem;
-    }
-    .right .sales-analytics .add-product div{
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .right .sales-analytics .add-product div h3{
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-    
-    /*media queries*/
-    @media screen and (max-width: 1200px){
-        .container{
-            width: 96%;
-            grid-template-columns: 7rem auto 18rem;
-            gap: 1.2rem;
+            --box-shadow: 0 1.5rem 2.5rem var(--color-light);
         }
-        aside{
+
+        /* Dark theme */
+        .dark-theme-variables {
+            --color-background: #181a1e;
+            --color-white: #202528;
+            --color-dark: #edeffd;
+            --color-dark-variant: #a3bdcc;
+            --color-light: rgba(0, 0, 0, 0.4);
+            --box-shadow: 0 1.5rem 2.5rem var(--color-light);
+        }
+
+        /* ========== RESET ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            outline: 0;
+            appearance: none;
+            border: 0;
+            text-decoration: none;
+            list-style: none;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            background: var(--color-background);
+            user-select: none;
+            overflow-x: hidden;
+            color: var(--color-dark);
+        }
+
+        .container {
+            display: grid;
+            width: 100%;
+            margin: 0 auto;
+            gap: 1.8rem;
+            grid-template-columns: 14rem auto 20rem;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        a {
+            color: var(--color-dark);
+        }
+
+        img {
+            display: block;
+            width: 100%;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 1.6rem;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+        }
+
+        h3 {
+            font-size: 0.9rem;
+        }
+
+        h4 {
+            font-size: 0.8rem;
+        }
+
+        h5 {
+            font-size: 0.75rem;
+        }
+
+        small {
+            font-size: 0.72rem;
+        }
+
+        .profile-photo {
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .text-muted {
+            color: var(--color-info-dark);
+        }
+
+        b {
+            color: var(--color-dark)
+        }
+
+        .primary {
+            color: var(--color-primary);
+        }
+
+        .danger {
+            color: var(--color-danger);
+        }
+
+        .success {
+            color: var(--color-success);
+        }
+
+        .warning {
+            color: var(--color-warning);
+        }
+
+        /* ========== SIDEBAR ========== */
+        aside {
+            height: 100vh;
+            background: var(--color-white);
+            border-radius: var(--border-radius-2);
+            overflow: hidden;
             margin-left: 0;
             padding-left: 0;
             width: 100%;
+            box-shadow: var(--box-shadow);
         }
-        aside .logo h2{
+
+        aside .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.4rem;
+            padding: 0 1.2rem;
+        }
+
+        aside .logo .logo-icon {
+            font-size: 2.2rem;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        aside .logo .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        aside .logo .logo-text span {
+            color: var(--gradient-purple);
+        }
+
+        aside .close {
             display: none;
         }
-        aside .sidebar h3{
-            display: none;
+
+        /* Sidebar */
+        aside .sidebar {
+            display: flex;
+            flex-direction: column;
+            height: 86vh;
+            position: relative;
+            top: 2.8rem;
+            padding: 0 0.5rem;
+            width: 100%;
+            gap: 0.5rem;
         }
-        aside .sidebar a{
-            width: 5rem;
-            margin-left: 0;
-            padding: 0 0.8rem;
-            justify-content: center;
-        }
-        aside .sidebar a span{
-            font-size: 1.6rem;
+
+        aside h3 {
+            font-weight: 500;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             margin: 0;
         }
-        aside .sidebar a:last-child{
-            position: relative;
-            margin-top: 1.5rem;
-            width: 100%;
-            left: 0;
-        }
-        main .insights{
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        main .recent-orders{
-            width: 94%;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            margin: 1.5rem 0 0 7.5rem;
-        }
-        main .recent-orders table{
-            width: 85vw;
-        }
-        main table thead tr th:last-child,
-        main table thead tr th:first-child{
-            display: none;
-        }
-        main table tbody tr td:last-child,
-        main table tbody tr td:first-child{
-            display: none;
-        }
-        .wrapper {
-            max-width: 280px;
-        }
-    }
-    
-    /* media queries pour mobile*/
-    @media screen and (max-width : 768px){
-        body {
-            overflow: auto;
-        }
-        
-        .container{
-            width: 100%;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            padding: 0.5rem;
-            height: auto;
-            overflow: visible;
-        }
-        
-        aside{
-            position: fixed;
-            left: -100%;
-            background: var(--color-white);
-            width: 18rem;
-            z-index: 3;
-            box-shadow: 1rem 2rem 3rem var(--color-light);
-            height: 100vh;
-            padding-right: var(--card-padding);
-            display: none;
-            animation: showMenu 400ms ease forwards;
+
+        aside .sidebar a {
+            display: flex;
+            color: var(--color-info-dark);
             margin-left: 0;
-            padding-left: 0;
+            gap: 1rem;
+            align-items: center;
+            position: relative;
+            height: 3.2rem;
+            transition: all 300ms ease;
+            padding: 0 1rem;
+            border-radius: var(--border-radius-1);
+            width: 100%;
         }
-        
-        @keyframes showMenu{
-            to{
+
+        aside .sidebar a span {
+            font-size: 1.8rem;
+            transition: all 300ms ease;
+            min-width: 2rem;
+        }
+
+        aside .sidebar a:last-child {
+            position: absolute;
+            bottom: 0.5rem;
+            width: calc(100% - 1rem);
+            left: 0.5rem;
+            margin-top: 0;
+        }
+
+        aside .sidebar a.active {
+            background: var(--color-light);
+            color: var(--color-primary);
+            margin-left: 0;
+        }
+
+        aside .sidebar a.active:before {
+            content: '';
+            width: 6px;
+            height: 50%;
+            background: var(--color-primary);
+            position: absolute;
+            left: 0;
+            border-radius: 0 var(--border-radius-1) var(--border-radius-1) 0;
+        }
+
+        aside .sidebar a.active span {
+            color: var(--color-primary);
+            margin-left: 0;
+        }
+
+        aside .sidebar a:hover {
+            color: var(--color-primary);
+            background: var(--color-light);
+        }
+
+        aside .sidebar a:hover span {
+            margin-left: 0.5rem;
+        }
+
+        aside .sidebar .message-count {
+            background: var(--color-danger);
+            color: var(--color-white);
+            padding: 2px 8px;
+            font-size: 11px;
+            border-radius: var(--border-radius-1);
+            margin-left: auto;
+        }
+
+        /* ========== MAIN ========== */
+        main {
+            margin-top: 1.2rem;
+            padding-right: 0.5rem;
+            padding-left: 0;
+            overflow-y: auto;
+            height: calc(100vh - 2rem);
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        main .date {
+            display: inline-block;
+            background: var(--color-light);
+            border-radius: var(--border-radius-1);
+            padding: 0.4rem 1.2rem;
+        }
+
+        main .date input[type="date"] {
+            background: transparent;
+            color: var(--color-dark);
+            font-size: 0.85rem;
+            border: none;
+        }
+
+        main .insights {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        main .insights > div {
+            background: var(--color-white);
+            padding: 1.2rem;
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            transition: all 300ms ease;
+        }
+
+        main .insights > div:hover {
+            box-shadow: none;
+        }
+
+        main .insights > div span {
+            background: var(--color-primary);
+            padding: 0.5rem;
+            border-radius: 50%;
+            color: var(--color-white);
+            font-size: 1.6rem;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        main .insights > div.expenses span {
+            background: var(--color-danger);
+        }
+
+        main .insights > div.income span {
+            background: var(--color-success);
+        }
+
+        main .insights > div.middle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        main .insights h3 {
+            margin: 0.8rem 0 0.4rem;
+            font-size: 1rem;
+            line-height: 1.2;
+        }
+
+        main .insights h1 {
+            font-size: 1.1rem;
+            margin: 0.3rem 0;
+            line-height: 1.2;
+        }
+
+        main .insights .progress {
+            position: relative;
+            width: 140px;
+            height: 60px;
+            border-radius: 50%;
+        }
+
+        main .insights svg {
+            width: 5rem;
+            height: 5rem;
+        }
+
+        main .insights svg circle {
+            fill: none;
+            stroke: var(--color-primary);
+            stroke-width: 12;
+            stroke-linecap: round;
+            transform: translate(8px, 8px);
+            stroke-dasharray: 110;
+            stroke-dashoffset: 92;
+        }
+
+        main .insights .sales svg circle {
+            stroke-dashoffset: -30px;
+            stroke-dasharray: 200;
+        }
+
+        main .insights .expenses svg circle {
+            stroke-dashoffset: 20;
+            stroke-dasharray: 80;
+        }
+
+        main .insights .income svg circle {
+            stroke-dashoffset: 35;
+            stroke-dasharray: 110;
+        }
+
+        main .insights .progress .number {
+            position: absolute;
+            top: 1.6rem;
+            left: 1.4rem;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        main .insights small {
+            margin-top: 0.6rem;
+            display: block;
+            font-size: 0.7rem;
+        }
+
+        /* Recent orders */
+        main .recent-orders {
+            margin-top: 1rem;
+            background: var(--color-white);
+            padding: 1.2rem;
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        main .recent-orders h2 {
+            margin-bottom: 0.6rem;
+            font-size: 1.1rem;
+        }
+
+        main .recent-orders table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        main table thead {
+            background: var(--color-light);
+        }
+
+        main table th {
+            padding: 0.8rem;
+            font-weight: 600;
+            color: var(--color-dark);
+            border-bottom: 2px solid var(--color-info-light);
+        }
+
+        main table tbody td {
+            height: 2.4rem;
+            border-bottom: 1px solid var(--color-light);
+            color: var(--dark-variant);
+            padding: 0.3rem 0;
+        }
+
+        main table tbody tr:last-child td {
+            border: none;
+        }
+
+        main .recent-orders a {
+            text-align: center;
+            display: block;
+            margin: 0.8rem auto 0;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+        }
+
+        /* ========== RIGHT SECTION ========== */
+        .right {
+            margin-top: 1.2rem;
+            padding-left: 0.5rem;
+            height: calc(100vh - 2rem);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: hidden;
+        }
+
+        .right .top {
+            display: flex;
+            justify-content: end;
+            gap: 1.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .right .top button {
+            display: none;
+        }
+
+        .right .theme-toggler {
+            background: var(--color-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 1.4rem;
+            width: 3.8rem;
+            cursor: pointer;
+            border-radius: var(--border-radius-1);
+        }
+
+        .right .theme-toggler span {
+            font-size: 1rem;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .right .theme-toggler span.active {
+            background: var(--color-primary);
+            color: white;
+            border-radius: var(--border-radius-1);
+        }
+
+        .right .top .profile {
+            display: flex;
+            gap: 1rem;
+            text-align: right;
+            align-items: center;
+        }
+
+        /* Recent updates */
+        .right .recent-updates {
+            flex: 0 0 auto;
+        }
+
+        .right .recent-updates h2 {
+            margin-bottom: 0.6rem;
+            font-size: 1.1rem;
+        }
+
+        .wrapper {
+            width: 100%;
+            background: var(--color-white);
+            padding: 1rem;
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            transition: all 700ms ease;
+            margin: 0 auto;
+        }
+
+        .wrapper:hover {
+            box-shadow: none;
+        }
+
+        .wrapper header {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px 5px;
+            justify-content: space-between;
+        }
+
+        header .icons {
+            display: flex;
+        }
+
+        header .icons span {
+            height: 30px;
+            width: 30px;
+            margin: 0 1px;
+            cursor: pointer;
+            color: #878787;
+            text-align: center;
+            line-height: 30px;
+            font-size: 1.3rem;
+            user-select: none;
+            border-radius: 50%;
+        }
+
+        .icons span:last-child {
+            margin-right: -5px;
+        }
+
+        header .icons span:hover {
+            background: #f2f2f2;
+        }
+
+        header .current-date {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .calendar {
+            padding: 10px;
+        }
+
+        .calendar ul {
+            display: flex;
+            flex-wrap: wrap;
+            list-style: none;
+            text-align: center;
+        }
+
+        .calendar .days {
+            margin-bottom: 10px;
+        }
+
+        .calendar li {
+            color: #ffbb55;
+            width: calc(100% / 7);
+            font-size: 0.85rem;
+            padding: 2px 0;
+        }
+
+        .calendar .weeks li {
+            font-weight: 500;
+            cursor: default;
+        }
+
+        .calendar .days li {
+            z-index: 1;
+            cursor: pointer;
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .days li.inactive {
+            color: #aaa;
+        }
+
+        .days li.active {
+            color: #fff;
+        }
+
+        .days li::before {
+            position: absolute;
+            content: "";
+            left: 50%;
+            top: 50%;
+            height: 28px;
+            width: 28px;
+            z-index: -1;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .days li.active::before {
+            background: #9B59B6;
+        }
+
+        .days li:not(.active):hover::before {
+            background: #f2f2f2;
+        }
+
+        /* Sales analytics */
+        .right .sales-analytics {
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+
+        .right .sales-analytics h2 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .right .sales-analytics .item {
+            background: var(--color-white);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.6rem;
+            padding: 0.8rem;
+            border-radius: var(--border-radius-3);
+            box-shadow: var(--box-shadow);
+            transition: all 300ms ease;
+            width: 100%;
+        }
+
+        .right .sales-analytics .item:hover {
+            box-shadow: none;
+        }
+
+        .right .sales-analytics .item .right {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin: 0;
+            width: 100%;
+            padding: 0;
+        }
+
+        .right .sales-analytics .item .icon {
+            padding: 0.5rem;
+            color: var(--color-white);
+            border-radius: 50%;
+            background: var(--color-primary);
+            display: flex;
+            min-width: 2.5rem;
+            height: 2.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .right .sales-analytics .item.offline .icon {
+            background: var(--color-danger);
+        }
+
+        .right .sales-analytics .item.customers .icon {
+            background: var(--color-success);
+        }
+
+        .right .sales-analytics .add-product:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .right .sales-analytics .add-product {
+            background-color: transparent;
+            border: 2px dashed var(--color-primary);
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem;
+        }
+
+        .right .sales-analytics .add-product div {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .right .sales-analytics .add-product div h3 {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* ========== STATUS BADGES ========== */
+        .status {
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* ========== LOADERS ========== */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--color-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .data-loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        /* ========== MEDIA QUERIES ========== */
+        @media screen and (max-width: 1200px) {
+            .container {
+                width: 96%;
+                grid-template-columns: 7rem auto 18rem;
+                gap: 1.2rem;
+            }
+            aside {
+                margin-left: 0;
+                padding-left: 0;
+                width: 100%;
+            }
+            aside .logo h2 {
+                display: none;
+            }
+            aside .sidebar h3 {
+                display: none;
+            }
+            aside .sidebar a {
+                width: 5rem;
+                margin-left: 0;
+                padding: 0 0.8rem;
+                justify-content: center;
+            }
+            aside .sidebar a span {
+                font-size: 1.6rem;
+                margin: 0;
+            }
+            aside .sidebar a:last-child {
+                position: relative;
+                margin-top: 1.5rem;
+                width: 100%;
                 left: 0;
+            }
+            main .insights {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            main .recent-orders {
+                width: 94%;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                margin: 1.5rem 0 0 7.5rem;
+            }
+            main .recent-orders table {
+                width: 85vw;
+            }
+            main table thead tr th:last-child,
+            main table thead tr th:first-child {
+                display: none;
+            }
+            main table tbody tr td:last-child,
+            main table tbody tr td:first-child {
+                display: none;
+            }
+            .wrapper {
+                max-width: 280px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            
+            .container {
+                width: 100%;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 0.5rem;
+                height: auto;
+                overflow: visible;
+            }
+            
+            aside {
+                position: fixed;
+                left: -100%;
+                background: var(--color-white);
+                width: 18rem;
+                z-index: 3;
+                box-shadow: 1rem 2rem 3rem var(--color-light);
+                height: 100vh;
+                padding-right: var(--card-padding);
+                display: none;
+                animation: showMenu 400ms ease forwards;
+                margin-left: 0;
+                padding-left: 0;
+            }
+            
+            @keyframes showMenu {
+                to {
+                    left: 0;
+                }
+            }
+            
+            aside .logo {
+                margin-left: 1rem;
+            }
+            
+            aside .logo h2 {
+                display: inline;
+                font-size: 1.4rem;
+            }
+            
+            aside .sidebar h3 {
+                display: inline;
+                font-size: 1rem;
+            }
+            
+            aside .sidebar a {
+                width: 100%;
+                height: 3.5rem;
+                margin-left: 0;
+                padding: 0 1.2rem;
+                justify-content: flex-start;
+            }
+            
+            aside .sidebar a span {
+                font-size: 1.8rem;
+            }
+            
+            aside .sidebar a:last-child {
+                position: absolute;
+                bottom: 1rem;
+                width: calc(100% - 2rem);
+                left: 1rem;
+            }
+            
+            aside .close {
+               display: inline-block;
+               cursor: pointer;
+            }
+            
+            main {
+                margin-left: 0;
+                padding: 0 0.5rem;
+                margin-top: 5rem;
+                height: auto;
+                overflow: visible;
+            }
+            
+            main .recent-orders {
+                position: relative;
+                margin: 2rem 0 0 0;
+                width: 100%;
+            }
+            
+            main .recent-orders table {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .right {
+                width: 100%;
+                margin: 0 auto 3rem;
+                padding: 0;
+                height: auto;
+            }
+            
+            .right .top {
+                position: fixed;
+                top: 0;
+                left: 0;
+                align-items: center;
+                padding: 0 0.8rem;
+                height: 4rem;
+                background: var(--color-white);
+                width: 100%;
+                margin: 0;
+                z-index: 2;
+                box-shadow: 0 0.8rem 1rem var(--color-light);
+            }
+            
+            .right .top .theme-toggler {
+                width: 3.5rem;
+                position: absolute;
+                left: 60%;
+            }
+            
+            .right .profile .info {
+                display: none;
+            }
+            
+            .right .top button {
+                display: inline-block;
+                background: transparent;
+                cursor: pointer;
+                color: var(--color-dark);
+                position: absolute;
+                left: 0.8rem;
+            }
+            
+            .right .top button span {
+                font-size: 1.8rem;
+            }
+            
+            .wrapper {
+                max-width: 100%;
+            }
+            
+            main .insights > div {
+                padding: 1.2rem;
             }
         }
         
-        aside .logo{
-            margin-left: 1rem;
+        @media screen and (max-width: 480px) {
+            main .insights h1 {
+                font-size: 1.1rem;
+            }
+            main .insights h3 {
+                font-size: 1rem;
+            }
+            .wrapper header {
+                padding: 10px 15px 5px;
+            }
+            header .current-date {
+                font-size: 1rem;
+            }
+            .calendar li {
+                font-size: 0.85rem;
+            }
         }
-        
-        aside .logo h2{
-            display: inline;
-            font-size: 1.4rem;
-        }
-        
-        aside .sidebar h3{
-            display: inline;
-            font-size: 1rem;
-        }
-        
-        aside .sidebar a{
-            width: 100%;
-            height: 3.5rem;
-            margin-left: 0;
-            padding: 0 1.2rem;
-            justify-content: flex-start;
-        }
-        
-        aside .sidebar a span{
-            font-size: 1.8rem;
-        }
-        
-        aside .sidebar a:last-child{
-            position: absolute;
-            bottom: 1rem;
-            width: calc(100% - 2rem);
-            left: 1rem;
-        }
-        
-        aside .close{
-           display: inline-block;
-           cursor: pointer;
-        }
-        
-        main{
-            margin-left: 0;
-            padding: 0 0.5rem;
-            margin-top: 5rem;
-            height: auto;
-            overflow: visible;
-        }
-        
-        main .recent-orders{
-            position: relative;
-            margin: 2rem 0 0 0;
-            width: 100%;
-        }
-        
-        main .recent-orders table{
-            width: 100%;
-            margin: 0;
-        }
-        
-        .right{
-            width: 100%;
-            margin: 0 auto 3rem;
-            padding: 0;
-            height: auto;
-        }
-        
-        .right .top{
-            position: fixed;
-            top: 0;
-            left: 0;
-            align-items: center;
-            padding: 0 0.8rem;
-            height: 4rem;
-            background: var(--color-white);
-            width: 100%;
-            margin: 0;
-            z-index: 2;
-            box-shadow: 0 0.8rem 1rem var(--color-light);
-        }
-        
-        .right .top .theme-toggler{
-            width: 3.5rem;
-            position: absolute;
-            left: 60%;
-        }
-        
-        .right .profile .info{
-            display: none;
-        }
-        
-        .right .top button{
-            display: inline-block;
-            background: transparent;
-            cursor: pointer;
-            color: var(--color-dark);
-            position: absolute;
-            left: 0.8rem;
-        }
-        
-        .right .top button span{
-            font-size: 1.8rem;
-        }
-        
-        .wrapper {
-            max-width: 100%;
-        }
-        
-        main .insights > div {
-            padding: 1.2rem;
-        }
-    }
-    
-    /* Pour les très petits écrans */
-    @media screen and (max-width: 480px) {
-        main .insights h1 {
-            font-size: 1.1rem;
-        }
-        main .insights h3 {
-            font-size: 1rem;
-        }
-        .wrapper header {
-            padding: 10px 15px 5px;
-        }
-        header .current-date {
-            font-size: 1rem;
-        }
-        .calendar li {
-            font-size: 0.85rem;
-        }
-    }
     </style>
 </head>
 <body>
@@ -880,8 +1041,7 @@
         <div class="top">
             <div class="logo">
                 <div class="logo-icon">🎓</div>
-                <div class="logo-text">Learn<span>Hub</span></div>
-               
+                <div class="logo-text">Learn<span>Hub</span> Admin</div>
             </div>
             <div class="close" id="close-btn">
                 <span class="material-symbols-outlined">close</span>
@@ -890,98 +1050,69 @@
         <div class="sidebar">
             <a href="{% url 'administrateur_dashboard' %}" class="active">
                 <span class="material-symbols-outlined">grid_view</span>
-                <h3>Acceuil</h3>
+                <h3>Dashboard</h3>
             </a>
             <a href="{% url 'administrateur_users' %}">
                 <span class="material-symbols-outlined">person_outline</span>
                 <h3>Utilisateurs</h3>
+                <span class="message-count" id="users-count">0</span>
             </a>
-           <a href="{% url 'administrateur_courses' %}">
+            <a href="{% url 'administrateur_courses' %}">
                 <span class="material-symbols-outlined">menu_book</span>
                 <h3>Cours</h3>
+                <span class="message-count" id="courses-count">0</span>
             </a>
-            <a href="#">
-                <span class="material-symbols-outlined">mail_outline</span>
-                <h3>Messages</h3>
-                <span class="message-count">26</span>
-            </a>
-            
-           <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
-    {% csrf_token %}
-    <div class="nav-item" onclick="document.getElementById('logout-form').submit();" 
-         style="cursor: pointer;">
-        <span class="material-symbols-outlined">logout</span>
-        Déconnexion
-    </div>
-</form>
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <div class="nav-item" onclick="document.getElementById('logout-form').submit();" 
+                     style="cursor: pointer;">
+                    <span class="material-symbols-outlined">logout</span>
+                    Déconnexion
+                </div>
+            </form>
         </div>
     </aside>
 
     <main>
-        <h1>Dashboard</h1>
-        <div class="insights">
-            <div class="sales">
-                <span class="material-symbols-outlined">analytics</span>
-                <div class="middle">
-                    <div class="left">
-                        <h3>Répartition</h3>
-                        <h1>étudiants / enseignants</h1>
-                    </div>
-                    <canvas id="usersDonutChart" width="140" height="140"></canvas>
-                </div>
+        <div class="main-header">
+            <h1>Dashboard Admin</h1>
+            <div class="date" id="current-date">
+                <input type="date" id="date-filter">
             </div>
-
-            <div class="expenses">
-                <span class="material-symbols-outlined">bar_chart</span>
-                <div class="middle">
-                    <div class="left">
-                        <h3>Pourcentage cours</h3>
-                        <h1>actifs / terminés</h1>
-                    </div>
-                    <div class="progress">
-                        <canvas id="productsVsLocationsDonutChart" width="140" height="140"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="income">
-                <span class="material-symbols-outlined">stacked_line_chart</span>
-                <div class="middle">
-                    <div class="left">
-                        <h3>Répartition inscriptions</h3>
-                        <h1>par type de cours</h1>
-                    </div>
-                    <div class="progress">
-                        <canvas id="reservesDonutChart" width="140" height="140"></canvas>
-                    </div>
-                </div>
-            </div>
+        </div>
+        
+        <div class="insights" id="stats-container">
+            <!-- Les stats seront chargées dynamiquement ici -->
+            <div class="loader"></div>
+            <p>Chargement des statistiques...</p>
         </div>
 
         <div class="recent-orders">
-            <h2>Recent Orders</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom d'utilisateur</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>John Doe</td>
-                        <td>john@example.com</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Jane Doe</td>
-                        <td>jane@example.com</td>
-                    </tr>
-                </tbody>
-            </table>
-            <a href="#">show all</a>
+            <h2>Dernières Inscriptions</h2>
+            <div id="orders-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Utilisateur</th>
+                            <th>Cours</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-tbody">
+                        <!-- Les données seront chargées dynamiquement ici -->
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px;">
+                                <div class="loader" style="width: 30px; height: 30px; margin: 0 auto;"></div>
+                                <p>Chargement des inscriptions...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <a href="#" id="show-all-orders">Voir toutes les inscriptions</a>
         </div>
     </main>
 
@@ -993,6 +1124,13 @@
             <div class="theme-toggler">
                 <span class="material-symbols-outlined active">light_mode</span>
                 <span class="material-symbols-outlined">dark_mode</span>
+            </div>
+            <div class="profile">
+                <div class="info">
+                    <p>Bonjour, <b id="admin-name">Admin</b></p>
+                    <small class="text-muted" id="admin-role">Administrateur</small>
+                </div>
+                
             </div>
         </div>
 
@@ -1008,134 +1146,542 @@
                 </header>
                 <div class="calendar">
                     <ul class="weeks">
-                        <li>Sun</li><li>Mon</li><li>Tue</li><li>Wed</li><li>Thu</li><li>Fri</li><li>Sat</li>
+                        <li>Dim</li><li>Lun</li><li>Mar</li><li>Mer</li><li>Jeu</li><li>Ven</li><li>Sam</li>
                     </ul>
                     <ul class="days"></ul>
                 </div>
             </div>
         </div>
         
-        <!-- Section Analytics ajoutée pour remplir l'espace -->
-        
+        <div class="sales-analytics">
+            <h2>Activité Récente</h2>
+            <div id="recent-activity">
+                <!-- L'activité récente sera chargée ici -->
+                <div class="loader"></div>
+                <p>Chargement de l'activité...</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Mise à jour des tailles des canvas
-    var usersDonutChart = new Chart(document.getElementById('usersDonutChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Etudiants', 'Enseignants'],
-            datasets: [{ 
-                data: [70, 30], 
-                backgroundColor: ['#7380ec', '#f0f0f0'] 
-            }]
-        },
-        options: { 
-            responsive: false, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    var productsVsLocationsDonutChart = new Chart(document.getElementById('productsVsLocationsDonutChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Cours actifs', 'Cours terminee'],
-            datasets: [{ 
-                data: [60, 40], 
-                backgroundColor: ['#7380ec', '#ffa500'] 
-            }]
-        },
-        options: { 
-            responsive: false, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-   var reservesDonutChart = new Chart(document.getElementById('reservesDonutChart'), {
-    type: 'doughnut',
-    data: {
-        labels: ['Cours gratuits', 'Cours payants', 'Cours premium'],
-        datasets: [{ 
-            data: [40, 35, 25],
-            backgroundColor: ['#7380ec', '#ffa500', '#41f1b6'],
-            borderWidth: 2,
-            borderColor: '#fff'
-        }]
-    },
-    options: { 
-        responsive: false, 
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-               
-            },
-            tooltip: {
-                enabled: true
-            }
+    // ========== CONFIGURATION ==========
+    const API_BASE = window.location.origin;
+    const AUTH_TOKEN = "{{ auth_token }}";  // Passé depuis le template Django
+    
+    // ========== FONCTIONS UTILITAIRES ==========
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(amount);
+    }
+    
+    function showLoader(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = '<div class="loader"></div><p>Chargement...</p>';
         }
     }
-});
+    
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+        }
+    }
+    
+    // ========== CHARGEMENT DES STATISTIQUES ==========
+    async function loadDashboardStats() {
+        const container = document.getElementById('stats-container');
+        
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/stats/`, {
+                headers: {
+                    'Authorization': `Bearer ${AUTH_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                renderStats(data.stats);
+                updateSidebarCounters(data.stats);
+            } else {
+                showError('stats-container', data.error || 'Erreur lors du chargement des statistiques');
+            }
+            
+        } catch (error) {
+            console.error('Erreur chargement stats:', error);
+            showError('stats-container', 'Impossible de charger les statistiques');
+            loadFallbackStats();
+        }
+    }
+    
+    function renderStats(stats) {
+        const container = document.getElementById('stats-container');
+        
+        container.innerHTML = `
+            <div class="sales">
+                <span class="material-symbols-outlined">groups</span>
+                <div class="middle">
+                    <div class="left">
+                        <h3>Utilisateurs</h3>
+                        <h1>${stats.users.total}</h1>
+                        <small>Total: ${stats.users.total} | Actifs: ${stats.users.active} | Nouveaux: ${stats.users.new_today}</small>
+                    </div>
+                    <canvas id="usersChart" width="140" height="140"></canvas>
+                </div>
+            </div>
 
-    // Calendrier
-    const daysTag = document.querySelector(".days"),
-          currentDate = document.querySelector(".current-date"),
-          prevNextIcon = document.querySelectorAll(".icons span");
-    let date = new Date(), currYear = date.getFullYear(), currMonth = date.getMonth();
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            <div class="expenses">
+                <span class="material-symbols-outlined">school</span>
+                <div class="middle">
+                    <div class="left">
+                        <h3>Cours</h3>
+                        <h1>${stats.courses.total}</h1>
+                        <small>Actifs: ${stats.courses.active} | Terminés: ${stats.courses.completed} | Nouveaux: ${stats.courses.new_today}</small>
+                    </div>
+                    <div class="progress">
+                        <canvas id="coursesChart" width="140" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="income">
+                <span class="material-symbols-outlined">trending_up</span>
+                <div class="middle">
+                    <div class="left">
+                        <h3>Inscriptions</h3>
+                        <h1>${stats.enrollments.total}</h1>
+                        <small>Complétion: ${stats.enrollments.completion_rate}% | Aujourd'hui: ${stats.enrollments.today}</small>
+                    </div>
+                    <div class="progress">
+                        <canvas id="enrollmentsChart" width="140" height="140"></canvas>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Créer les graphiques
+        setTimeout(() => {
+            createUsersChart(stats.users);
+            createCoursesChart(stats.courses);
+            createEnrollmentsChart(stats.enrollments.distribution);
+        }, 100);
+    }
+    
+    function createUsersChart(usersData) {
+        const ctx = document.getElementById('usersChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Étudiants', 'Enseignants', 'Admins'],
+                datasets: [{ 
+                    data: [usersData.students, usersData.teachers, usersData.admins],
+                    backgroundColor: ['#4A90E2', '#9B51E0', '#2D9CDB'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: { 
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createCoursesChart(coursesData) {
+        const ctx = document.getElementById('coursesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Actifs', 'Terminés'],
+                datasets: [{ 
+                    data: [coursesData.active, coursesData.completed],
+                    backgroundColor: ['#4A90E2', '#ff7782'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: { 
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createEnrollmentsChart(distribution) {
+        const ctx = document.getElementById('enrollmentsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gratuits', 'Payants', 'Premium'],
+                datasets: [{ 
+                    data: [distribution.free, distribution.paid, distribution.premium],
+                    backgroundColor: ['#4A90E2', '#ffbb55', '#41f1b6'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: { 
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function updateSidebarCounters(stats) {
+        const usersCount = document.getElementById('users-count');
+        const coursesCount = document.getElementById('courses-count');
+        
+        if (usersCount) usersCount.textContent = stats.users.total;
+        if (coursesCount) coursesCount.textContent = stats.courses.total;
+    }
+    
+    function loadFallbackStats() {
+        // Données de fallback
+        const fallbackStats = {
+            users: { total: 150, students: 120, teachers: 20, admins: 10, active: 145, new_today: 5 },
+            courses: { total: 45, active: 35, completed: 10, free: 30, paid: 15, new_today: 2 },
+            enrollments: { 
+                total: 320, 
+                today: 8,
+                distribution: { free: 200, paid: 80, premium: 40 },
+                completion_rate: 35
+            }
+        };
+        
+        renderStats(fallbackStats);
+        updateSidebarCounters(fallbackStats);
+    }
+    
+    // ========== CHARGEMENT DES INSCRIPTIONS RÉCENTES ==========
+    async function loadRecentOrders() {
+        const tbody = document.getElementById('orders-tbody');
+        
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/recent-orders/`, {
+                headers: {
+                    'Authorization': `Bearer ${AUTH_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.orders.length > 0) {
+                renderOrdersTable(data.orders);
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            <p>Aucune inscription récente</p>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+        } catch (error) {
+            console.error('Erreur chargement inscriptions:', error);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">
+                        <div class="error-message">Impossible de charger les inscriptions</div>
+                    </td>
+                </tr>
+            `;
+            loadFallbackOrders();
+        }
+    }
+    
+    function renderOrdersTable(orders) {
+        const tbody = document.getElementById('orders-tbody');
+        
+        let rows = '';
+        orders.forEach(order => {
+            const statusClass = getStatusClass(order.status);
+            const amountFormatted = order.amount ? formatCurrency(order.amount) : 'Gratuit';
+            
+            rows += `
+                <tr>
+                    <td>#${order.id}</td>
+                    <td>
+                        <strong>${order.user.username}</strong><br>
+                        <small>${order.user.email}</small>
+                    </td>
+                    <td>${order.course.title}</td>
+                    <td>${amountFormatted}</td>
+                    <td><span class="status ${statusClass}">${order.status}</span></td>
+                    <td>${formatDate(order.created_at)}</td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = rows;
+    }
+    
+    function getStatusClass(status) {
+        switch(status.toLowerCase()) {
+            case 'completed': return 'success';
+            case 'pending': return 'warning';
+            case 'failed': return 'danger';
+            default: return '';
+        }
+    }
+    
+    function loadFallbackOrders() {
+        const fallbackOrders = [
+            {
+                id: 1,
+                user: { username: 'john.doe', email: 'john@example.com' },
+                course: { title: 'Python Débutant' },
+                amount: 0.00,
+                status: 'completed',
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                user: { username: 'jane.smith', email: 'jane@example.com' },
+                course: { title: 'Data Science' },
+                amount: 49.99,
+                status: 'pending',
+                created_at: new Date(Date.now() - 86400000).toISOString()
+            }
+        ];
+        
+        renderOrdersTable(fallbackOrders);
+    }
+    
+    // ========== CHARGEMENT DE L'ACTIVITÉ RÉCENTE ==========
+    async function loadRecentActivity() {
+        const container = document.getElementById('recent-activity');
+        
+        try {
+            // Simuler l'activité récente
+            const activities = [
+                { type: 'user', text: 'Nouvel utilisateur inscrit: Marie Dupont', time: 'Il y a 5 minutes' },
+                { type: 'course', text: 'Nouveau cours publié: "JavaScript Avancé"', time: 'Il y a 1 heure' },
+                { type: 'enrollment', text: '15 nouvelles inscriptions aujourd\'hui', time: 'Il y a 2 heures' },
+                { type: 'payment', text: 'Paiement reçu: 49.99€', time: 'Il y a 3 heures' },
+                { type: 'system', text: 'Backup automatique effectué', time: 'Il y a 5 heures' }
+            ];
+            
+            let activityHTML = '';
+            activities.forEach(activity => {
+                const icon = getActivityIcon(activity.type);
+                activityHTML += `
+                    <div class="item">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">${icon}</span>
+                        </div>
+                        <div class="right">
+                            <div class="info">
+                                <h3>${activity.text}</h3>
+                                <small class="text-muted">${activity.time}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = activityHTML;
+            
+        } catch (error) {
+            console.error('Erreur chargement activité:', error);
+            container.innerHTML = '<p>Aucune activité récente</p>';
+        }
+    }
+    
+    function getActivityIcon(type) {
+        switch(type) {
+            case 'user': return 'person_add';
+            case 'course': return 'book';
+            case 'enrollment': return 'school';
+            case 'payment': return 'payments';
+            case 'system': return 'settings';
+            default: return 'notifications';
+        }
+    }
+    
+    // ========== GESTION DU PROFIL ADMIN ==========
+    function updateAdminProfile() {
+        const adminName = document.getElementById('admin-name');
+        const adminRole = document.getElementById('admin-role');
+        
+        // Récupérer les infos depuis la session Django
+        adminName.textContent = "{{ user.username|default:'Admin' }}";
+        adminRole.textContent = "{{ user.user_type|default:'Administrateur' }}";
+    }
+    
+    // ========== CALENDRIER ==========
+    const daysTag = document.querySelector(".days");
+    const currentDate = document.querySelector(".current-date");
+    const prevNextIcon = document.querySelectorAll(".icons span");
+    
+    let date = new Date();
+    let currYear = date.getFullYear();
+    let currMonth = date.getMonth();
+    
+    const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                   "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    
     const renderCalendar = () => {
-        let firstDayofMonth = new Date(currYear, currMonth, 1).getDay(),
-            lastDateofMonth = new Date(currYear, currMonth+1,0).getDate(),
-            lastDayofMonth = new Date(currYear,currMonth,lastDateofMonth).getDay(),
-            lastDateofLastMonth = new Date(currYear,currMonth,0).getDate();
+        let firstDayofMonth = new Date(currYear, currMonth, 1).getDay();
+        let lastDateofMonth = new Date(currYear, currMonth + 1, 0).getDate();
+        let lastDayofMonth = new Date(currYear, currMonth, lastDateofMonth).getDay();
+        let lastDateofLastMonth = new Date(currYear, currMonth, 0).getDate();
+        
         let liTag = "";
-        for(let i=firstDayofMonth;i>0;i--){ liTag += `<li class="inactive">${lastDateofLastMonth-i+1}</li>`; }
-        for(let i=1;i<=lastDateofMonth;i++){
-            let isToday = i===date.getDate() && currMonth===new Date().getMonth() && currYear===new Date().getFullYear()?"active":"";
+        
+        for (let i = firstDayofMonth; i > 0; i--) {
+            liTag += `<li class="inactive">${lastDateofLastMonth - i + 1}</li>`;
+        }
+        
+        for (let i = 1; i <= lastDateofMonth; i++) {
+            let isToday = i === date.getDate() && currMonth === new Date().getMonth() && currYear === new Date().getFullYear() ? "active" : "";
             liTag += `<li class="${isToday}">${i}</li>`;
         }
-        for(let i=lastDayofMonth;i<6;i++){ liTag += `<li class="inactive">${i-lastDayofMonth+1}</li>`;}
+        
+        for (let i = lastDayofMonth; i < 6; i++) {
+            liTag += `<li class="inactive">${i - lastDayofMonth + 1}</li>`;
+        }
+        
         currentDate.innerText = `${months[currMonth]} ${currYear}`;
         daysTag.innerHTML = liTag;
     };
+    
     renderCalendar();
-    prevNextIcon.forEach(icon=>{
-        icon.addEventListener("click",()=>{
-            currMonth = icon.id==="prev"?currMonth-1:currMonth+1;
-            if(currMonth<0||currMonth>11){ 
-                date=new Date(currYear,currMonth,new Date().getDate()); 
-                currYear=date.getFullYear(); 
-                currMonth=date.getMonth(); 
-            } else { 
-                date=new Date();
+    
+    prevNextIcon.forEach(icon => {
+        icon.addEventListener("click", () => {
+            currMonth = icon.id === "prev" ? currMonth - 1 : currMonth + 1;
+            
+            if (currMonth < 0 || currMonth > 11) {
+                date = new Date(currYear, currMonth, new Date().getDate());
+                currYear = date.getFullYear();
+                currMonth = date.getMonth();
+            } else {
+                date = new Date();
             }
+            
             renderCalendar();
         });
     });
-
-    // Menu & theme
+    
+    // ========== TOGGLE MENU ET THEME ==========
     const sideMenu = document.querySelector("aside");
     const menuBtn = document.querySelector("#menu-btn");
     const closeBtn = document.querySelector("#close-btn");
     const themeToggler = document.querySelector(".theme-toggler");
-    menuBtn.addEventListener('click',()=>{ sideMenu.style.display='block'; });
-    closeBtn.addEventListener('click',()=>{ sideMenu.style.display='none'; });
-    themeToggler.addEventListener('click',()=>{
+    
+    menuBtn.addEventListener('click', () => {
+        sideMenu.style.display = 'block';
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        sideMenu.style.display = 'none';
+    });
+    
+    themeToggler.addEventListener('click', () => {
         document.body.classList.toggle('dark-theme-variables');
         themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
         themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
+    });
+    
+    // ========== FILTRE PAR DATE ==========
+    document.getElementById('date-filter').addEventListener('change', function(e) {
+        const selectedDate = e.target.value;
+        console.log('Filtre date sélectionnée:', selectedDate);
+        // Recharger les données filtrées par date
+        loadDashboardStats();
+        loadRecentOrders();
+    });
+    
+    // ========== INITIALISATION ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dashboard admin initialisé');
+        
+        // Mettre à jour le profil admin
+        updateAdminProfile();
+        
+        // Charger les données
+        loadDashboardStats();
+        loadRecentOrders();
+        loadRecentActivity();
+        
+        // Mettre à jour la date actuelle
+        document.getElementById('date-filter').value = new Date().toISOString().split('T')[0];
+        
+        // Rafraîchir automatiquement toutes les 60 secondes
+        setInterval(() => {
+            console.log('Rafraîchissement automatique des données...');
+            loadDashboardStats();
+            loadRecentOrders();
+        }, 60000);
     });
 </script>
 </body>

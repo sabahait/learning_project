@@ -10,10 +10,15 @@ pymysql.install_as_MySQLdb()
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+AUTH_USER_MODEL = 'authentication.User'
 # Configuration des fichiers média
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
 
 SECRET_KEY = 'django-insecure-auth-server-secret-key-change-in-production'
 DEBUG = True
@@ -76,12 +81,13 @@ DATABASES = {
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
+            # NE METTEZ PAS 'use_returning_into' avec pymysql
         }
     }
 }
 
 # User model
-AUTH_USER_MODEL = 'authentication.User'
+
 
 # ========== CORS SETTINGS - AMÉLIORATIONS ==========
 CORS_ALLOW_ALL_ORIGINS = True  # Pour développement seulement

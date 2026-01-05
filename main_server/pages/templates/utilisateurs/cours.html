@@ -731,13 +731,24 @@
     </div>
 </form>
             
-            <div class="user-info">
-                <div class="user-avatar">JD</div>
-                <div class="user-details">
-                    <h4> {{ user.username|upper }}</h4>
-                    <p>Étudiant <span class="premium-badge">PREMIUM</span></p>
-                </div>
-            </div>
+           <div class="user-avatar" id="navbarAvatar" 
+     style="background: var(--gradient-purple); cursor: pointer;">
+    {% if user.photo_profil %}
+        {% with photo_url=user.photo_profil.url|default:'' %}
+            {% if photo_url %}
+                <!-- URL COMPLÈTE vers l'auth server -->
+                <img src="http://127.0.0.1:8001{{ photo_url }}" 
+                     alt="Photo de profil"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            {% else %}
+                {{ user.username|slice:":1"|upper }}
+            {% endif %}
+        {% endwith %}
+    {% else %}
+        {{ user.username|slice:":1"|upper }}
+    {% endif %}
+</div>
         </div>
     </nav>
 
@@ -746,7 +757,7 @@
 <main>
     <div class="page-header">
         <div>
-            <h1>Mes Cours Sauvegardés</h1>
+            <h1>Mes Cours Suivis</h1>
             <p class="text-muted">Vos cours personnels</p>
         </div>
         <div class="header-actions">
@@ -765,7 +776,7 @@
     <div id="loadingState" class="scroll-section" style="display: none; text-align: center; padding: 3rem;">
         <div class="loading-spinner"></div>
         <h3>Chargement de vos cours...</h3>
-        <p class="text-muted">Récupération de vos cours sauvegardés</p>
+        <p class="text-muted">Récupération de vos cours suivis</p>
     </div>
 
     <!-- Empty State -->
@@ -773,7 +784,7 @@
         <div style="margin-bottom: 1.5rem;">
             <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--light-blue);">menu_book</span>
         </div>
-        <h3>Aucun cours sauvegardé</h3>
+        <h3>Mes cours suivis</h3>
         <p class="text-muted" style="margin-bottom: 1.5rem;">
             Vous n'avez pas encore sauvegardé de cours.
         </p>
@@ -790,7 +801,7 @@
                 <div class="section-icon">
                     <span class="material-symbols-outlined">bookmark</span>
                 </div>
-                <h2>Mes Cours Sauvegardés</h2>
+                <h2>Mes Cours Suivis</h2>
             </div>
             <div class="course-count-badge" id="savedCoursesCount" style="background: var(--light-blue); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
                 0 cours

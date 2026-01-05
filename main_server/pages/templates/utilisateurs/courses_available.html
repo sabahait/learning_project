@@ -975,13 +975,24 @@
                 </div>
             </form>
             
-            <div class="user-info">
-                <div class="user-avatar">JD</div>
-                <div class="user-details">
-                    <h4>{{ user.username|upper }}</h4>
-                    <p>Étudiant <span class="premium-badge">PREMIUM</span></p>
-                </div>
-            </div>
+           <div class="user-avatar" id="navbarAvatar" 
+     style="background: var(--gradient-purple); cursor: pointer;">
+    {% if user.photo_profil %}
+        {% with photo_url=user.photo_profil.url|default:'' %}
+            {% if photo_url %}
+                <!-- URL COMPLÈTE vers l'auth server -->
+                <img src="http://127.0.0.1:8001{{ photo_url }}" 
+                     alt="Photo de profil"
+                     onerror="this.onerror=null; this.parentElement.innerHTML='{{ user.username|slice:":1"|upper }}';"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            {% else %}
+                {{ user.username|slice:":1"|upper }}
+            {% endif %}
+        {% endwith %}
+    {% else %}
+        {{ user.username|slice:":1"|upper }}
+    {% endif %}
+</div>
         </div>
     </nav>
 
@@ -1001,14 +1012,30 @@
         </div>
 
         <!-- Course Filters -->
-        <div class="course-filters">
-            <div class="filter-btn active" data-filter="all">Tous les cours</div>
-            <div class="filter-btn" data-filter="development">Développement</div>
-            <div class="filter-btn" data-filter="design">Design</div>
-            <div class="filter-btn" data-filter="business">Business</div>
-            <div class="filter-btn" data-filter="data">Data Science</div>
-            <div class="filter-btn" data-filter="marketing">Marketing</div>
-        </div>
+       <!-- Course Filters -->
+<div class="course-filters">
+    <div class="filter-btn active" data-filter="all">Tous les cours</div>
+    <div class="filter-btn" data-filter="development">
+        Développement
+        <span class="filter-count">0</span>
+    </div>
+    <div class="filter-btn" data-filter="design">
+        Design
+        <span class="filter-count">0</span>
+    </div>
+    <div class="filter-btn" data-filter="business">
+        Business
+        <span class="filter-count">0</span>
+    </div>
+    <div class="filter-btn" data-filter="data">
+        Data Science
+        <span class="filter-count">0</span>
+    </div>
+    <div class="filter-btn" data-filter="marketing">
+        Marketing
+        <span class="filter-count">0</span>
+    </div>
+</div>
 
         <!-- Loading State -->
         <div id="loadingState" class="loading-state" style="display: none;">
@@ -1339,85 +1366,89 @@
     });
 
     // ========== FONCTION POUR CHARGER LES COURS ==========
-    async function loadCourses() {
-        try {
-            console.log('📚 Chargement des cours...');
-            
-            // Afficher l'état de chargement
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('dynamicCoursesContainer').innerHTML = '';
-            document.getElementById('staticContent').style.display = 'none';
-            
-            // Récupérer le token depuis le localStorage ou les cookies
-            const token = getAuthToken();
-            if (!token) {
-                console.error('❌ Pas de token, redirection vers login');
-                window.location.href = '/login/';
-                return;
-            }
-            
-            // Appeler l'API pour récupérer les cours
-            console.log('🌐 Appel API cours...');
-            const response = await fetch('/api/courses/', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            console.log(`📡 Réponse API: ${response.status}`);
-            
-            if (!response.ok) {
-                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            console.log('📦 Données reçues:', data);
-            
-            // Masquer le chargement
-            document.getElementById('loadingState').style.display = 'none';
-            
-            // CORRECTION IMPORTANTE ICI : 
-            // Vérifier si la réponse est directement une liste ou si elle contient une clé 'courses'
-            if (Array.isArray(data)) {
-                // Cas 1: La réponse est directement une liste de cours
-                allCourses = data;
-                console.log(`✅ ${allCourses.length} cours chargés (liste directe)`);
-                
-                // Afficher les cours
-                displayCourses(allCourses);
-                updateFilterCounts(allCourses);
-                
-            } else if (data && data.courses && Array.isArray(data.courses)) {
-                // Cas 2: La réponse contient une clé 'courses' avec la liste
-                allCourses = data.courses;
-                console.log(`✅ ${allCourses.length} cours chargés (dans clé courses)`);
-                
-                // Afficher les cours
-                displayCourses(allCourses);
-                updateFilterCounts(allCourses);
-                
-            } else {
-                console.warn('⚠️ Aucun cours ou format invalide:', data);
-                showEmptyState('Aucun cours disponible pour le moment.');
-            }
-            
-        } catch (error) {
-            console.error('💥 Erreur chargement cours:', error);
-            
-            // Masquer le chargement
-            document.getElementById('loadingState').style.display = 'none';
-            
-            // Afficher l'état vide avec message d'erreur
-            showEmptyState('Impossible de charger les cours. Veuillez vérifier votre connexion et réessayer.');
-            
-            // Afficher des données de test en cas d'erreur
-            setTimeout(() => {
-                showTestData();
-            }, 1000);
+async function loadCourses() {
+    try {
+        console.log('📚 Chargement des cours...');
+        
+        // Afficher l'état de chargement
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('dynamicCoursesContainer').innerHTML = '';
+        document.getElementById('staticContent').style.display = 'none';
+        
+        // Récupérer le token
+        const token = getAuthToken();
+        if (!token) {
+            console.error('❌ Pas de token, redirection vers login');
+            window.location.href = '/login/';
+            return;
         }
+        
+        // Appeler l'API pour récupérer les cours
+        console.log('🌐 Appel API cours...');
+        const response = await fetch('/api/courses/', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log(`📡 Réponse API: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📦 Données reçues. Type:', typeof data);
+        
+        // Masquer le chargement
+        document.getElementById('loadingState').style.display = 'none';
+        
+        // Traiter les données
+        if (Array.isArray(data)) {
+            // Cas 1: La réponse est directement une liste de cours
+            allCourses = data;
+            console.log(`✅ ${allCourses.length} cours chargés (liste directe)`);
+            
+        } else if (data && data.courses && Array.isArray(data.courses)) {
+            // Cas 2: La réponse contient une clé 'courses' avec la liste
+            allCourses = data.courses;
+            console.log(`✅ ${allCourses.length} cours chargés (dans clé courses)`);
+            
+        } else if (data && data.results && Array.isArray(data.results)) {
+            // Cas 3: Pagination
+            allCourses = data.results;
+            console.log(`✅ ${allCourses.length} cours chargés (pagination)`);
+            
+        } else {
+            console.warn('⚠️ Aucun cours ou format invalide:', data);
+            showEmptyState('Aucun cours disponible pour le moment.');
+            return;
+        }
+        
+        // Afficher les catégories trouvées
+        const categories = [...new Set(allCourses.map(c => c.category?.name || 'Autres'))];
+        console.log(`📊 Catégories trouvées: ${categories.join(', ')}`);
+        
+        // Afficher les cours
+        displayCourses(allCourses);
+        
+    } catch (error) {
+        console.error('💥 Erreur chargement cours:', error);
+        
+        // Masquer le chargement
+        document.getElementById('loadingState').style.display = 'none';
+        
+        // Afficher l'état vide avec message d'erreur
+        showEmptyState('Impossible de charger les cours. Veuillez vérifier votre connexion et réessayer.');
+        
+        // Afficher des données de test en cas d'erreur
+        setTimeout(() => {
+            showTestData();
+        }, 1000);
     }
+}
 
     function showEmptyState(message) {
         document.getElementById('emptyState').style.display = 'block';
@@ -1427,91 +1458,168 @@
     }
 
     // ========== FONCTION POUR AFFICHER LES COURS ==========
-    function displayCourses(courses) {
-        const container = document.getElementById('dynamicCoursesContainer');
-        container.innerHTML = '';
-        
-        if (!courses || courses.length === 0) {
-            showEmptyState('Aucun cours disponible dans notre catalogue.');
-            return;
+function displayCourses(courses) {
+    const container = document.getElementById('dynamicCoursesContainer');
+    container.innerHTML = '';
+    
+    if (!courses || courses.length === 0) {
+        showEmptyState('Aucun cours disponible dans notre catalogue.');
+        return;
+    }
+    
+    console.log(`📊 Affichage de ${courses.length} cours`);
+    
+    // ========== AFFICHAGE PAR DÉFAUT : TOUS LES COURS ==========
+    // Créer une section "Tous les cours" avec TOUS les cours
+    const allSection = createCategorySection('all', {
+        name: 'Tous les cours',
+        courses: courses
+    });
+    container.appendChild(allSection);
+    
+    // ========== GROUPER LES COURS PAR CATÉGORIE ==========
+    const coursesByCategory = groupCoursesByCategory(courses);
+    
+    // Créer une section pour chaque catégorie qui a des cours
+    for (const [filterCategory, categoryData] of Object.entries(coursesByCategory)) {
+        if (filterCategory !== 'all' && categoryData.courses.length > 0) {
+            console.log(`📁 Création section ${filterCategory} avec ${categoryData.courses.length} cours`);
+            const section = createCategorySection(filterCategory, categoryData);
+            container.appendChild(section);
         }
+    }
+    
+    // Cacher le contenu statique
+    document.getElementById('staticContent').style.display = 'none';
+    
+    // Mettre à jour les compteurs de filtres
+    updateFilterCounts(coursesByCategory);
+    
+    // Par défaut, afficher uniquement "Tous les cours"
+    // Cacher toutes les autres sections
+    const allSections = document.querySelectorAll('.scroll-section[data-filter]');
+    allSections.forEach(section => {
+        const filter = section.getAttribute('data-filter');
+        if (filter !== 'all') {
+            section.style.display = 'none';
+        }
+    });
+    
+    // Animer les cartes
+    animateCards();
+}
+
+function groupCoursesByCategory(courses) {
+    const groups = {
+        'all': {
+            name: 'Tous les cours',
+            courses: []
+        }
+    };
+    
+    // Map des catégories vers les filtres
+    const categoryToFilter = {
+        'développement': 'development',
+        'programmation': 'development',
+        'web': 'development',
+        'mobile': 'development',
+        'design': 'design',
+        'ui': 'design',
+        'ux': 'design',
+        'data': 'data',
+        'science': 'data',
+        'analyse': 'data',
+        'machine': 'data',
+        'business': 'business',
+        'gestion': 'business',
+        'management': 'business',
+        'marketing': 'marketing',
+        'publicité': 'marketing'
+    };
+    
+    // Parcourir tous les cours
+    courses.forEach(course => {
+        const categoryName = course.category?.name || 'Autres';
+        let filterCategory = 'other';
         
-        // Regrouper les cours par catégorie
-        const coursesByCategory = groupCoursesByCategory(courses);
-        
-        // Créer les sections pour chaque catégorie
-        for (const [categoryName, categoryCourses] of Object.entries(coursesByCategory)) {
-            if (categoryCourses.length > 0) {
-                const section = createCategorySection(categoryName, categoryCourses);
-                container.appendChild(section);
+        // Trouver le filtre correspondant
+        const categoryLower = categoryName.toLowerCase();
+        for (const [keyword, filter] of Object.entries(categoryToFilter)) {
+            if (categoryLower.includes(keyword)) {
+                filterCategory = filter;
+                break;
             }
         }
         
-        // Cacher le contenu statique
-        document.getElementById('staticContent').style.display = 'none';
+        // Créer le groupe s'il n'existe pas
+        if (!groups[filterCategory]) {
+            groups[filterCategory] = {
+                name: getCategoryDisplayName(filterCategory),
+                courses: []
+            };
+        }
         
-        // Animer les cartes
-        animateCards();
-    }
+        // Ajouter le cours au groupe
+        groups[filterCategory].courses.push(course);
+        
+        // Ajouter aussi à "Tous les cours"
+        groups['all'].courses.push(course);
+    });
+    
+    console.log('📊 Groupes créés:', Object.keys(groups));
+    
+    return groups;
+}
 
-    function groupCoursesByCategory(courses) {
-        const groups = {};
-        
-        courses.forEach(course => {
-            const categoryName = course.category?.name || 'Autres';
-            
-            if (!groups[categoryName]) {
-                groups[categoryName] = [];
-            }
-            
-            groups[categoryName].push(course);
-        });
-        
-        return groups;
-    }
-
-    function createCategorySection(categoryName, courses) {
-        const sectionId = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        
-        // Choisir une icône appropriée selon la catégorie
-        const iconMap = {
-            'développement': 'code',
-            'programmation': 'code',
-            'data': 'data_array',
-            'science': 'data_array',
-            'design': 'design_services',
-            'business': 'business_center',
-            'marketing': 'campaign',
-            'autre': 'category'
-        };
-        
-        const icon = Object.keys(iconMap).find(key => 
-            categoryName.toLowerCase().includes(key)
-        ) || 'category';
-        
-        const sectionHTML = `
-            <div class="scroll-section" data-category="${sectionId}">
-                <div class="section-header">
-                    <div class="section-title">
-                        <div class="section-icon">
-                            <span class="material-symbols-outlined">${iconMap[icon] || 'category'}</span>
-                        </div>
-                        <h2>${categoryName}</h2>
+function getCategoryDisplayName(filter) {
+    const names = {
+        'all': 'Tous les cours',
+        'development': 'Développement',
+        'design': 'Design',
+        'business': 'Business',
+        'data': 'Data Science',
+        'marketing': 'Marketing',
+        'Autres': 'Autres'
+    };
+    return names[filter] || filter;
+}
+function createCategorySection(filterCategory, categoryData) {
+    const sectionId = filterCategory.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    const iconMap = {
+        'development': 'code',
+        'design': 'design_services',
+        'data': 'data_array',
+        'business': 'business_center',
+        'marketing': 'campaign',
+        'autre': 'category'
+    };
+    
+    const icon = iconMap[filterCategory] || 'category';
+    
+    const sectionHTML = `
+        <div class="scroll-section" data-filter="${filterCategory}" data-category="${sectionId}">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <span class="material-symbols-outlined">${icon}</span>
                     </div>
-                    <div class="course-count-badge" style="background: var(--light-blue); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
-                        ${courses.length} cours
-                    </div>
+                    <h2>${categoryData.name}</h2>
                 </div>
-                <div class="courses-grid">
-                    ${courses.map(course => createCourseCard(course)).join('')}
+                <div class="course-count-badge" style="background: var(--light-blue); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+                    ${categoryData.courses.length} cours
                 </div>
             </div>
-        `;
-        
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = sectionHTML;
-        return tempDiv.firstElementChild;
-    }
+            <div class="courses-grid">
+                ${categoryData.courses.map(course => createCourseCard(course)).join('')}
+            </div>
+        </div>
+    `;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = sectionHTML;
+    return tempDiv.firstElementChild;
+}
 
     function createCourseCard(course) {
         // Formater le prix
@@ -1621,75 +1729,70 @@
         });
     }
 
-    function applyFilter(filter) {
-        const allCards = document.querySelectorAll('.course-card');
-        const allSections = document.querySelectorAll('.scroll-section');
+function applyFilter(filter) {
+    const allSections = document.querySelectorAll('.scroll-section[data-filter]');
+    
+    console.log(`🔍 Application du filtre: ${filter}`);
+    console.log(`📁 Nombre de sections: ${allSections.length}`);
+    
+    if (filter === 'all') {
+        // Afficher toutes les sections
+        allSections.forEach(section => {
+            section.style.display = 'block';
+        });
+        console.log('✅ Affichage de TOUTES les sections');
+    } else {
+        // Cacher toutes les sections d'abord
+        allSections.forEach(section => {
+            section.style.display = 'none';
+        });
         
-        if (filter === 'all') {
-            // Afficher tous les cours
-            allCards.forEach(card => {
-                card.style.display = 'flex';
-            });
-            
-            // Afficher toutes les sections
-            allSections.forEach(section => {
-                section.style.display = 'block';
-                
-                // Mettre à jour le compteur
-                updateSectionCount(section);
-            });
-            
+        // Afficher uniquement la section correspondante
+        const targetSection = document.querySelector(`.scroll-section[data-filter="${filter}"]`);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+            console.log(`✅ Affichage de la section: ${filter}`);
         } else {
-            let hasVisibleCourses = false;
-            
-            // Afficher seulement les cours correspondants au filtre
-            allCards.forEach(card => {
-                const cardCategory = card.getAttribute('data-category').toLowerCase();
-                const shouldShow = cardCategory.includes(filter);
-                
-                card.style.display = shouldShow ? 'flex' : 'none';
-                if (shouldShow) hasVisibleCourses = true;
-            });
-            
-            // Gérer les sections
-            allSections.forEach(section => {
-                const cardsInSection = section.querySelectorAll('.course-card');
-                const visibleCards = Array.from(cardsInSection).filter(card => 
-                    card.style.display !== 'none'
-                );
-                
-                if (visibleCards.length === 0) {
-                    section.style.display = 'none';
-                } else {
-                    section.style.display = 'block';
-                    updateSectionCount(section);
-                }
-            });
-            
-            // Si aucun cours visible, afficher message
-            if (!hasVisibleCourses) {
-                const container = document.getElementById('dynamicCoursesContainer');
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'empty-state';
-                emptyMessage.innerHTML = `
-                    <div class="empty-state-icon">
-                        <span class="material-symbols-outlined">search_off</span>
-                    </div>
-                    <h3>Aucun cours trouvé</h3>
-                    <p class="text-muted">Aucun cours disponible dans la catégorie "${filter}".</p>
-                    <button class="btn btn-primary" onclick="resetFilter()">
-                        <span class="material-symbols-outlined">refresh</span>
-                        Afficher tous les cours
-                    </button>
-                `;
-                container.innerHTML = '';
-                container.appendChild(emptyMessage);
-            }
+            console.log(`❌ Section ${filter} non trouvée`);
+            showNoCoursesMessage(filter);
+            return;
         }
-        
-        // Animer l'apparition
-        animateCards();
     }
+    
+    // Animer les cartes visibles
+    animateCards();
+}
+
+function showNoCoursesMessage(filter) {
+    const container = document.getElementById('dynamicCoursesContainer');
+    
+    // Déterminer le nom d'affichage du filtre
+    const filterNames = {
+        'development': 'Développement',
+        'design': 'Design',
+        'business': 'Business',
+        'data': 'Data Science',
+        'marketing': 'Marketing'
+    };
+    
+    const displayName = filterNames[filter] || filter;
+    
+    const messageHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <span class="material-symbols-outlined">category</span>
+            </div>
+            <h3>Aucun cours dans la catégorie "${displayName}"</h3>
+            <p class="text-muted">Il n'y a pas de cours disponibles dans cette catégorie pour le moment.</p>
+            <button class="btn btn-primary" onclick="resetFilter()">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Afficher tous les cours
+            </button>
+        </div>
+    `;
+    
+    container.innerHTML = messageHTML;
+}
 
     function updateSectionCount(section) {
         const cardsInSection = section.querySelectorAll('.course-card');
@@ -1707,59 +1810,41 @@
         document.querySelector('.filter-btn[data-filter="all"]').click();
     }
 
-    function updateFilterCounts(courses) {
-        // Compter les cours par catégorie
-        const counts = {
-            'all': courses.length,
-            'development': courses.filter(c => {
-                const category = (c.category?.name || '').toLowerCase();
-                return category.includes('développement') || 
-                       category.includes('programmation') ||
-                       category.includes('web') ||
-                       category.includes('mobile');
-            }).length,
-            'data': courses.filter(c => {
-                const category = (c.category?.name || '').toLowerCase();
-                return category.includes('data') || 
-                       category.includes('science') ||
-                       category.includes('analyse') ||
-                       category.includes('machine');
-            }).length,
-            'design': courses.filter(c => {
-                const category = (c.category?.name || '').toLowerCase();
-                return category.includes('design') || 
-                       category.includes('ui') ||
-                       category.includes('ux');
-            }).length,
-            'business': courses.filter(c => {
-                const category = (c.category?.name || '').toLowerCase();
-                return category.includes('business') || 
-                       category.includes('gestion') ||
-                       category.includes('management');
-            }).length,
-            'marketing': courses.filter(c => {
-                const category = (c.category?.name || '').toLowerCase();
-                return category.includes('marketing') || 
-                       category.includes('publicité');
-            }).length
-        };
+function updateFilterCounts(coursesByFilter) {
+    // Compter les cours par filtre
+    const counts = {
+        'all': coursesByFilter['all'] ? coursesByFilter['all'].courses.length : 0,
+        'development': coursesByFilter['development'] ? coursesByFilter['development'].courses.length : 0,
+        'design': coursesByFilter['design'] ? coursesByFilter['design'].courses.length : 0,
+        'business': coursesByFilter['business'] ? coursesByFilter['business'].courses.length : 0,
+        'data': coursesByFilter['data'] ? coursesByFilter['data'].courses.length : 0,
+        'marketing': coursesByFilter['marketing'] ? coursesByFilter['marketing'].courses.length : 0
+    };
+    
+    console.log('📊 Compteurs:', counts);
+    
+    // Mettre à jour les badges
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        const filter = btn.getAttribute('data-filter');
+        const count = counts[filter] || 0;
         
-        // Mettre à jour les badges
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            const filter = btn.getAttribute('data-filter');
-            const count = counts[filter] || 0;
-            
-            // Créer ou mettre à jour le badge de comptage
-            let countBadge = btn.querySelector('.filter-count');
-            if (!countBadge) {
-                countBadge = document.createElement('span');
-                countBadge.className = 'filter-count';
-                btn.appendChild(countBadge);
-            }
-            
-            countBadge.textContent = count;
-        });
-    }
+        let countBadge = btn.querySelector('.filter-count');
+        if (!countBadge) {
+            countBadge = document.createElement('span');
+            countBadge.className = 'filter-count';
+            btn.appendChild(countBadge);
+        }
+        
+        countBadge.textContent = count;
+        
+        // Masquer les filtres sans cours
+        if (count === 0 && filter !== 'all') {
+            btn.style.display = 'none';
+        } else {
+            btn.style.display = 'inline-block';
+        }
+    });
+}
 
     // ========== ANIMATIONS ==========
     function animateCards() {

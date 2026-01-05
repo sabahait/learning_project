@@ -1328,7 +1328,7 @@
             <th>Statut</th>
             <th>Téléphone</th>
             <th>Date d'inscription</th>
-            <th>Actions</th> <!-- AJOUTEZ CETTE COLONNE -->
+         <!-- AJOUTEZ CETTE COLONNE -->
         </tr>
     </thead>
     <tbody id="usersTableBody">
@@ -1374,27 +1374,7 @@
                     -
                 {% endif %}
             </td>
-            <!-- AJOUTEZ LES ACTIONS -->
-            <td>
-                <div class="action-buttons">
-                    <button class="btn btn-warning btn-small edit-btn" 
-                            data-id="{{ user.id }}"
-                            data-username="{{ user.username }}"
-                            data-firstname="{{ user.first_name|default:'' }}"
-                            data-lastname="{{ user.last_name|default:'' }}"
-                            data-email="{{ user.email }}"
-                            data-role="{{ user.user_type|default:'student' }}"
-                            data-status="{{ user.is_active|yesno:'active,inactive' }}"
-                            data-phone="{{ user.telephone|default:'' }}">
-                        <span class="material-symbols-outlined">edit</span>
-                    </button>
-                    <button class="btn btn-danger btn-small delete-btn" 
-                            data-id="{{ user.id }}"
-                            data-name="{{ user.full_name|default:user.username }}">
-                        <span class="material-symbols-outlined">delete</span>
-                    </button>
-                </div>
-            </td>
+   
         </tr>
         {% empty %}
         <tr>

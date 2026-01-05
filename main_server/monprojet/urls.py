@@ -12,7 +12,8 @@ from pages.views import (
     api_upload_file, api_update_course, api_delete_course,
     serve_course_image,proxy_profile_image,
     api_update_profile, api_update_password, api_upload_profile_photo,serve_course_pdf,api_get_my_courses
-    ,api_my_courses,api_enroll_course,api_unenroll_course,api_admin_users,api_admin_stats,api_admin_recent_orders# <-- CES fonctions existent déjà
+    ,api_my_courses,api_enroll_course,api_unenroll_course,api_admin_users,api_admin_stats,api_admin_recent_orders
+    ,api_get_recommended_courses,recent_enrollments# <-- CES fonctions existent déjà
 )
 
 urlpatterns = [
@@ -28,7 +29,8 @@ urlpatterns = [
 
 
     
-    
+     path('api/courses/recommended/', api_get_recommended_courses, name='api_recommended_courses'),
+     path('api/enrollments/recent/', recent_enrollments, name='recent_enrollments'),
     # PAGES ADMINISTRATEUR
     path('administrateur/courses/', admin_courses, name='administrateur_courses'),
     path('administrateur/users/', admin_users, name='administrateur_users'),
